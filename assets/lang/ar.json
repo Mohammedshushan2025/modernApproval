@@ -232,5 +232,22 @@
   "profile": "الملف الشخصي",
   "approvals": "الموافقات",
   "serverError": "حدث خطأ فني، جاري العمل على إصلاحه",
-  "noData": "لا توجد بيانات لعرضها"
+  "noData": "لا توجد بيانات لعرضها",
+  "purchaseRequestApproval": "اعتماد طلب شراء",
+  "storeCode": "كود المخزن",
+  "noPasswordGroups": "لم يتم العثور على صلاحيات وصول لك",
+  "takeAction": "اتخاذ قرار",
+  "requestDetails": "تفاصيل الطلب",
+  "print": "طباعة",
+  "masterInfo": "البيانات الأساسية",
+  "itemDetails": "تفاصيل الأصناف",
+  "selectedBranch": "الفرع المحدد",
+  "store_name": "اسم المخزن",
+  "req_date": "التاريخ",
+  "group_name": "المجموعة",
+  "item_name": "اسم الصنف",
+  "unit_name": "الوحدة",
+  "quantity": "الكمية",
+  "note": "ملاحظات",
+  "store_code": "كود المخزن"
 }

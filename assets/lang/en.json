@@ -231,5 +231,22 @@
   "loan_start_date": "Loan Start Date",
   "approvals": "Approvals",
   "serverError": "A technical error occurred, we are working on it",
-  "noData": "No data to display"
+  "noData": "No data to display",
+  "purchaseRequestApproval": "Purchase Request Approval",
+  "storeCode": "Store Code",
+  "noPasswordGroups": "No access permissions found for you",
+  "takeAction": "Take Action",
+  "requestDetails": "Request Details",
+  "print": "Print",
+  "masterInfo": "Master Info",
+  "itemDetails": "Item Details",
+  "selectedBranch": "Selected Branch",
+  "store_name": "Store Name",
+  "req_date": "Date",
+  "group_name": "Group",
+  "item_name": "Item Name",
+  "unit_name": "Unit",
+  "quantity": "Quantity",
+  "note": "Notes",
+  "store_code": "Store Code"
 }

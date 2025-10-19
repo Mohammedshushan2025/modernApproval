@@ -5,20 +5,22 @@ class UserModel {
   final String password;
   final String empName;
   final String? empNameE; // قد تكون القيمة null
-  final String? jobDesc;
-  final String? jobDescE;
+  final String? role_name_a;
+  final String? role_name_e;
   final String gender;
-  final int compEmpCode;
+  final int? compEmpCode;
+  final int? roleCode;
 
   UserModel({
     required this.usersCode,
     required this.password,
     required this.empName,
     this.empNameE,
-    this.jobDesc,
-    this.jobDescE,
+    this.role_name_a,
+    this.role_name_e,
     required this.gender,
     required this.compEmpCode,
+    required this.roleCode,
   });
 
   // دالة لإنشاء كائن UserModel من JSON
@@ -28,10 +30,11 @@ class UserModel {
       password: json['password'],
       empName: json['emp_name'],
       empNameE: json['emp_name_e'],
-      jobDesc: json['job_desc'],
-      jobDescE: json['job_desc_e'],
+      role_name_a: json['role_name_a'],
+      role_name_e: json['role_name_e'],
       gender: json['gender'],
       compEmpCode: json['comp_emp_code'],
+      roleCode: json['role_code'],
     );
   }
 
@@ -42,10 +45,11 @@ class UserModel {
       'password': password,
       'emp_name': empName,
       'emp_name_e': empNameE,
-      'job_desc': jobDesc,
-      'job_desc_e': jobDescE,
+      'role_name_a': role_name_a,
+      'role_name_e': role_name_e,
       'gender': gender,
       'comp_emp_code': compEmpCode,
+      'role_code': roleCode,
     };
   }
 }

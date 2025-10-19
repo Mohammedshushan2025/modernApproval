@@ -124,6 +124,8 @@ class AuthService {
 
       UserModel? user;
       try {
+        print("🔍 Searching for userCode: $userCode");
+        print("🔍 Available users: ${allUsers.map((u) => u.usersCode).toList()}");
         user = allUsers.firstWhere(
               (u) => u.usersCode.toString() == userCode,
         );

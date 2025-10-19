@@ -98,7 +98,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
     final themeColor = const Color(0xFF6C63FF);
 
     final String displayName = (isRtl ? widget.user.empName : widget.user.empNameE) ?? widget.user.empName;
-    final String displayJob = (isRtl ? widget.user.jobDesc : widget.user.jobDescE) ?? widget.user.jobDesc ?? '';
+    final String displayJob = (isRtl ? widget.user.role_name_a : widget.user.role_name_e) ?? widget.user.role_name_a ?? '';
 
     return SliverAppBar(
       backgroundColor: Colors.transparent,
