@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modernapproval/models/purchase_request_det_model.dart';
@@ -60,15 +59,17 @@ class _PurchaseRequestDetailScreenState
         ),
       ]);
 
-      _masterData = results[0] as PurchaseRequestMaster;
-      _detailData = results[1] as List<PurchaseRequestDetail>;
+      // تخزين البيانات فوراً - هذا هو الحل لمشكلة الطباعة
+      setState(() {
+        _masterData = results[0] as PurchaseRequestMaster;
+        _detailData = results[1] as List<PurchaseRequestDetail>;
+      });
 
       return {
         'master': _masterData,
         'detail': _detailData,
       };
     } catch (e) {
-      // إرجاع الخطأ ليتم التقاطه بواسطة FutureBuilder
       rethrow;
     }
   }
@@ -92,7 +93,7 @@ class _PurchaseRequestDetailScreenState
         actions: [
           // زر تغيير اللغة
           IconButton(
-            icon: const Icon(Icons.language,color: Colors.white,),
+            icon: const Icon(Icons.language, color: Colors.white),
             onPressed: () {
               final myAppState = MyApp.of(context);
               if (myAppState != null) {
@@ -104,9 +105,9 @@ class _PurchaseRequestDetailScreenState
               }
             },
           ),
-          // زر الطباعة - يتم تفعيله فقط بعد تحميل البيانات
+          // زر الطباعة - الآن يعمل من أول مرة
           IconButton(
-            icon: const Icon(Icons.print_outlined,color: Colors.white,),
+            icon: const Icon(Icons.print_outlined, color: Colors.white),
             onPressed: (_masterData != null && _detailData != null)
                 ? () => _printDocument(l)
                 : null,
@@ -142,14 +143,15 @@ class _PurchaseRequestDetailScreenState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildMasterSection(l, masterData, isArabic),
+                const SizedBox(height: 20),
                 Text(
                   l.translate('itemDetails'),
                   style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87),
                 ),
-                const Divider(height: 16),
+                const SizedBox(height: 12),
                 _buildDetailTable(l, detailData, isArabic),
               ],
             ),
@@ -163,47 +165,68 @@ class _PurchaseRequestDetailScreenState
   Widget _buildMasterSection(
       AppLocalizations l, PurchaseRequestMaster master, bool isArabic) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l.translate('masterInfo'),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColorDark,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6C63FF).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.info_outline,
+                    color: Color(0xFF6C63FF),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  l.translate('masterInfo'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1F36),
+                  ),
+                ),
+              ],
             ),
-            const Divider(height: 20),
+            const Divider(height: 24, thickness: 1),
             _buildInfoRow(l.translate('store_name'), master.storeName ?? 'N/A'),
             _buildInfoRow(
-                l.translate('item_name'), // استخدام نفس المفتاح للوصف
+                l.translate('item_name'),
                 isArabic ? (master.descA ?? '') : (master.descE ?? '')),
             _buildInfoRow(l.translate('req_date'), master.formattedReqDate),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             Center(
-              child: Container(
-                width: 150,
+              child: SizedBox(
+                width: 180,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.task_alt),
-
                   label: Text(l.translate('takeAction')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1A1F36),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 2,
                     textStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Amiri'),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Amiri'),
                   ),
                   onPressed: () => _showActionDialog(context, l),
                 ),
               ),
             ),
-            const SizedBox(height: 0),
           ],
         ),
       ),
@@ -212,17 +235,30 @@ class _PurchaseRequestDetailScreenState
 
   Widget _buildInfoRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$title: ',
-            style: TextStyle(
-                fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-          ),
           Expanded(
-            child: Text(value, style: const TextStyle(color: Colors.black87)),
+            flex: 2,
+            child: Text(
+              '$title:',
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF4A5568),
+                  fontSize: 15),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
@@ -235,35 +271,50 @@ class _PurchaseRequestDetailScreenState
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text(l.translate('takeAction')),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            l.translate('takeAction'),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.check_circle, color: Colors.green),
-                title: Text(l.translate('approve')),
+                leading: const Icon(Icons.check_circle, color: Colors.green, size: 28),
+                title: Text(
+                  l.translate('approve'),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
                 onTap: () {
                   Navigator.pop(dialogContext);
-                  // TODO: Add Approve Logic
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Approve action pending...')),
                   );
                 },
               ),
+              const Divider(),
               ListTile(
-                leading: const Icon(Icons.cancel, color: Colors.red),
-                title: Text(l.translate('reject')),
+                leading: const Icon(Icons.cancel, color: Colors.red, size: 28),
+                title: Text(
+                  l.translate('reject'),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
                 onTap: () {
                   Navigator.pop(dialogContext);
-                  // TODO: Add Reject Logic
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Reject action pending...')),
                   );
                 },
               ),
+              const Divider(),
               ListTile(
-                leading: const Icon(Icons.remove_circle_outline),
-                title: Text(l.translate('cancel')),
+                leading: const Icon(Icons.remove_circle_outline, size: 28),
+                title: Text(
+                  l.translate('cancel'),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
                 onTap: () {
                   Navigator.pop(dialogContext);
                 },
@@ -275,52 +326,111 @@ class _PurchaseRequestDetailScreenState
     );
   }
 
-  // ==== الجزء 3: جدول الأصناف ====
+  // ==== الجزء 3: جدول الأصناف المحسّن ====
   Widget _buildDetailTable(
       AppLocalizations l, List<PurchaseRequestDetail> details, bool isArabic) {
-    final columns = [
-      l.translate('store_code'),
-      l.translate('store_name'),
-      l.translate('req_date'),
-      l.translate('group_name'),
-      l.translate('item_name'),
-      l.translate('unit_name'),
-      l.translate('quantity'),
-      l.translate('note'),
-    ];
-
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          headingRowColor: MaterialStateProperty.all(Colors.grey.shade100),
-          dataRowMinHeight: 60,
-          dataRowMaxHeight: 80,
-          columns: columns
-              .map((title) => DataColumn(
-              label: Text(title,
-                  style: const TextStyle(fontWeight: FontWeight.bold))))
-              .toList(),
+          headingRowColor: MaterialStateProperty.all(
+            const Color(0xFF6C63FF).withOpacity(0.1),
+          ),
+          headingRowHeight: 56,
+          dataRowMinHeight: 48,
+          dataRowMaxHeight: 72,
+          columnSpacing: 16,
+          horizontalMargin: 16,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          columns: [
+            DataColumn(
+              label: _buildHeaderCell(l.translate('store_code')),
+            ),
+            DataColumn(
+              label: _buildHeaderCell(l.translate('group_name')),
+            ),
+            DataColumn(
+              label: _buildHeaderCell(l.translate('item_name')),
+            ),
+            DataColumn(
+              label: _buildHeaderCell(l.translate('unit_name')),
+            ),
+            DataColumn(
+              label: _buildHeaderCell(l.translate('quantity')),
+            ),
+            DataColumn(
+              label: _buildHeaderCell(l.translate('note')),
+            ),
+          ],
           rows: details.map((item) {
             return DataRow(
               cells: [
-                DataCell(Text(item.storeCode?.toString() ?? 'N/A')),
-                DataCell(Text(item.storeName ?? 'N/A')),
-                DataCell(Text(item.formattedReqDate)),
-                DataCell(Text(item.groupName ?? 'N/A')),
-                DataCell(SizedBox(
-                  width: 200, // تحديد عرض لاسم الصنف
-                  child: Text(
-                    isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-                    overflow: TextOverflow.visible,
+                DataCell(
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 60),
+                    child: Text(
+                      item.storeCode?.toString() ?? 'N/A',
+                      style: const TextStyle(fontSize: 14),
+                    ),
                   ),
-                )),
-                DataCell(Text(item.unitName ?? 'N/A')),
-                DataCell(Text(item.quantity?.toString() ?? 'N/A')),
-                DataCell(Text(item.note ?? 'N/A')),
+                ),
+                DataCell(
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 80, maxWidth: 150),
+                    child: Text(
+                      item.groupName ?? 'N/A',
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 150, maxWidth: 250),
+                    child: Text(
+                      isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+                      style: const TextStyle(fontSize: 14),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 60),
+                    child: Text(
+                      item.unitName ?? 'N/A',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 50),
+                    child: Text(
+                      item.quantity?.toString() ?? 'N/A',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 80, maxWidth: 150),
+                    child: Text(
+                      item.note ?? 'N/A',
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
               ],
             );
           }).toList(),
@@ -329,19 +439,28 @@ class _PurchaseRequestDetailScreenState
     );
   }
 
+  Widget _buildHeaderCell(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+        color: Color(0xFF1A1F36),
+      ),
+    );
+  }
+
   // ==== الجزء 4: منطق الطباعة ====
   Future<void> _printDocument(AppLocalizations l) async {
     final isArabic = l.locale.languageCode == 'ar';
-    // تحميل الخط العربي
     final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
     final ttf = pw.Font.ttf(fontData);
 
     final pdf = pw.Document();
 
+    // نفس الأعمدة الموجودة في الجدول بالضبط
     final headers = [
       l.translate('store_code'),
-      l.translate('store_name'),
-      l.translate('req_date'),
       l.translate('group_name'),
       l.translate('item_name'),
       l.translate('unit_name'),
@@ -349,10 +468,9 @@ class _PurchaseRequestDetailScreenState
       l.translate('note'),
     ];
 
+    // نفس البيانات الموجودة في الجدول بالضبط
     final data = _detailData!.map((item) => [
       item.storeCode?.toString() ?? 'N/A',
-      item.storeName ?? 'N/A',
-      item.formattedReqDate,
       item.groupName ?? 'N/A',
       isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
       item.unitName ?? 'N/A',
@@ -362,10 +480,9 @@ class _PurchaseRequestDetailScreenState
 
     pdf.addPage(
       pw.MultiPage(
-        // تحديد اتجاه النص للغة العربية
         textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
         theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
-        pageFormat: PdfPageFormat.a4.landscape, // عرضي ليناسب الجدول
+        pageFormat: PdfPageFormat.a4.landscape,
         build: (context) => [
           pw.Header(
             level: 0,
@@ -388,7 +505,7 @@ class _PurchaseRequestDetailScreenState
             ),
           ),
           pw.Divider(),
-          // الجدول
+          // الجدول - نفس البيانات بالضبط
           pw.Table.fromTextArray(
             headers: headers,
             data: data,
@@ -402,14 +519,11 @@ class _PurchaseRequestDetailScreenState
       ),
     );
 
-    // طباعة المستند
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
     );
   }
 }
-
-
 
 
 

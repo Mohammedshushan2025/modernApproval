@@ -12,7 +12,7 @@ import '../models/user_model.dart';
 
 
 class ApiService {
-  final String _baseUrl = "http://195.201.241.253:7001/ords/modern/Approval";
+  final String _baseUrl = "http://195.201.241.253:7001/ords/modern_test/Approval";
 
   Future<List<UserModel>> getAllUsers() async {
     final response = await http.get(Uri.parse('$_baseUrl/all_emp'));
