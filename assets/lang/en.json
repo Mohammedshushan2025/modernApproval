@@ -248,5 +248,11 @@
   "unit_name": "Unit",
   "quantity": "Quantity",
   "note": "Notes",
-  "store_code": "Store Code"
+  "store_code": "Store Code",
+  "notesHint": "Enter your notes here (optional)",
+  "submissionLoading": "Executing action...",
+  "submissionSuccess": "Action executed successfully",
+  "submissionError": "An Error Occurred",
+  "submissionErrorBody": "Failed to execute action. Please contact admin or try again later.",
+  "submitting": "Submitting..."
 }

@@ -249,5 +249,11 @@
   "unit_name": "الوحدة",
   "quantity": "الكمية",
   "note": "ملاحظات",
-  "store_code": "كود المخزن"
+  "store_code": "كود المخزن",
+  "notesHint": "اكتب ملاحظاتك هنا (اختياري)",
+  "submissionLoading": "جاري تنفيذ الإجراء...",
+  "submissionSuccess": "تم تنفيذ الإجراء بنجاح",
+  "submissionError": "حدث خطأ",
+  "submissionErrorBody": "فشل تنفيذ الإجراء. يرجى مراجعة الإدارة أو المحاولة لاحقاً.",
+  "submitting": "جاري الإرسال..."
 }
