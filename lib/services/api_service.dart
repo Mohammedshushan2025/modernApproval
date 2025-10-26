@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
 import 'package:modernapproval/models/password_group_model.dart';
 import 'package:modernapproval/models/purchase_request_model.dart';
@@ -342,4 +343,37 @@ class ApiService {
     await _handleApiCall(
             () => http.post(url, headers: headers, body: body), "Stage 6 (POST)", body);
   }
+
+
+  // ==== ✅ دالة جديدة لجلب إحصائيات الداشبورد ====
+  Future<DashboardStats> getDashboardStats(int userId) async {
+    final url = Uri.parse('$_baseUrl/get_dashboard_variable/$userId');
+    print('Fetching dashboard stats from: $url');
+
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          // رجع قيم صفرية لو مفيش بيانات
+          return DashboardStats(countAuth: 0, countReject: 0);
+        }
+        return DashboardStats.fromJson(items.first);
+      } else {
+        print('Server Error fetching stats: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error fetching stats: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error fetching stats: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred fetching stats: $e');
+      throw Exception('serverError');
+    }
+  }
+
 }

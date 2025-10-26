@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http; // ✅ إضافة هذا Import
+import 'package:modernapproval/screens/notifications_screen.dart';
 
 import '../models/user_model.dart';
 import '../app_localizations.dart';
@@ -154,6 +155,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                       _buildCompactUserAvatar(),
                       const SizedBox(width: 16),
                       _buildUserInfo(context, name, job),
+                      Expanded(child: _buildCompactUserAvatarpart2()),
                     ],
                   ),
                 ],
@@ -204,6 +206,27 @@ class _HomeAppBarState extends State<HomeAppBar> {
               return Image.asset(fallbackImageAsset, fit: BoxFit.cover);
             },
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactUserAvatarpart2() {
+    final String profileImageUrl = 'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user.usersCode}';
+    final String fallbackImageAsset = (widget.user.gender == 'M') ? "assets/images/photo.jpg" : "assets/images/photo.jpg";
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+
+      ),
+      child: ClipOval(
+        child: SizedBox(
+          width: 56, // 28 radius * 2
+          height: 56,
+          child: Image.asset("assets/images/lo.png")
         ),
       ),
     );
@@ -303,10 +326,19 @@ class _HomeAppBarState extends State<HomeAppBar> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildCompactActionButton(icon: Icons.notifications_outlined, onTap: () {
-          HapticFeedback.lightImpact();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('الإشعارات قريباً'), behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
-        }, badgeCount: 3),
+        _buildCompactActionButton(
+            icon: Icons.notifications_outlined,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen(),
+                ),
+              );
+            },
+            badgeCount: 3
+        ),
         const SizedBox(width: 8),
         _buildCompactActionButton(icon: Icons.language_outlined, onTap: () {
           HapticFeedback.lightImpact();

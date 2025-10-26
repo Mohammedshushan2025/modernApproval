@@ -779,23 +779,40 @@ class _PurchaseRequestApprovalScreenState
                       const SizedBox(height: 8),
                       // التاريخ مع الأيقونة
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 13,
-                            color: Colors.grey.shade600,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_outlined,
+                                size: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                request.formattedReqDate,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 5),
-                          Text(
-                            request.formattedReqDate,
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                          Row(
+                            children: [
+                              Text(
+                                request.authPk1+" / "+request.authPk2,
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          )
                         ],
-                      ),
+                      )
                     ],
                   ),
                 ),
