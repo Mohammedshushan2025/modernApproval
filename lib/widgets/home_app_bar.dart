@@ -242,12 +242,14 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // _buildLocationTimeWidget(context),
-                      Row(
-                        children: [
-                          _buildCompactUserAvatar(),
-                          const SizedBox(width: 16),
-                          _buildUserInfo(context, name, job),
-                        ],
+                      Flexible(
+                        child: Row(
+                          children: [
+                            _buildCompactUserAvatar(),
+                            const SizedBox(width: 12),
+                            Flexible(child: _buildUserInfo(context, name, job)),
+                          ],
+                        ),
                       ),
 
                       _buildTopControlButtons(context),
@@ -321,8 +323,8 @@ class _HomeAppBarState extends State<HomeAppBar> {
       ),
       child: ClipOval(
         child: SizedBox(
-          width: 56,
-          height: 56,
+          width: 48,
+          height: 48,
           child: Image.network(
             profileImageUrl,
             fit: BoxFit.cover,
