@@ -334,13 +334,14 @@ class _PurchaseRequestDetailScreenState
   Widget _buildModernDetailTable(
       AppLocalizations l, List<PurchaseRequestDetail> details, bool isArabic) {
     final columns = [
-      l.translate('group_name'),
+      l.translate("serial_number"),
       l.translate('item_name'),
-      l.translate('unit_name'),
+      l.translate("item_number"),
       l.translate('quantity'),
-      l.translate('note'),
+      l.translate('unit_name'),
+      l.translate("last_price")
     ];
-
+     int i=0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -379,16 +380,17 @@ class _PurchaseRequestDetailScreenState
                 return DataRow(
                   color: MaterialStateProperty.all(color),
                   cells: [
-                    DataCell(Text(item.groupName ?? 'N/A')),
+                    DataCell(Text((++i).toString() ?? 'N/A')),
                     DataCell(SizedBox(
                       child: Text(
                         isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
                         overflow: TextOverflow.visible,
                       ),
                     )),
-                    DataCell(Text(item.unitName ?? 'N/A')),
+                    DataCell(Text(item.itemCode?.toString() ?? 'N/A')),
                     DataCell(Text(item.quantity?.toString() ?? 'N/A')),
-                    DataCell(Text(item.note ?? 'N/A')),
+                    DataCell(Text(item.unitName ?? 'N/A')),
+                    DataCell(Text(item.last_pur?.toString() ?? 'N/A')),
                   ],
                 );
               }),

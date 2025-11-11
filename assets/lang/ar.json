@@ -245,7 +245,7 @@
   "store_name": "اسم المخزن",
   "req_date": "التاريخ",
   "group_name": "المجموعة",
-  "item_name": "اسم الصنف",
+  "item_name": "البيان",
   "unit_name": "الوحدة",
   "quantity": "الكمية",
   "note": "ملاحظات",
@@ -255,5 +255,8 @@
   "submissionSuccess": "تم تنفيذ الإجراء بنجاح",
   "submissionError": "حدث خطأ",
   "submissionErrorBody": "فشل تنفيذ الإجراء. يرجى مراجعة الإدارة أو المحاولة لاحقاً.",
-  "submitting": "جاري الإرسال..."
+  "submitting": "جاري الإرسال...",
+  "last_price": "اخر سعر شراء",
+  "item_number": "رقم الصنف",
+  "serial_number": "الرقم"
 }

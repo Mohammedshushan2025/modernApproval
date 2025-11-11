@@ -244,7 +244,7 @@
   "store_name": "Store Name",
   "req_date": "Date",
   "group_name": "Group",
-  "item_name": "Item Name",
+  "item_name": "statement",
   "unit_name": "Unit",
   "quantity": "Quantity",
   "note": "Notes",
@@ -254,5 +254,8 @@
   "submissionSuccess": "Action executed successfully",
   "submissionError": "An Error Occurred",
   "submissionErrorBody": "Failed to execute action. Please contact admin or try again later.",
-  "submitting": "Submitting..."
+  "submitting": "Submitting...",
+  "last_price":"last Purch",
+  "item_number" : "Item Number",
+  "serial_number": "NO"
 }
