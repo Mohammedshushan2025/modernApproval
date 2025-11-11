@@ -178,7 +178,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
     return SliverAppBar(
       backgroundColor: Colors.transparent,
-      pinned: true,
+      pinned: false,
       automaticallyImplyLeading: false,
       expandedHeight: 200.0,
       elevation: 0,
