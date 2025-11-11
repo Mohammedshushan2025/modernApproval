@@ -15,6 +15,7 @@ class PurchaseRequestDetail {
   final num? quantity; // Using num to be safe (int or double)
   final String? note;
   final String? approveFlag;
+  final num? last_pur;
 
   PurchaseRequestDetail({
     required this.trnsTypeCode,
@@ -31,6 +32,7 @@ class PurchaseRequestDetail {
     this.quantity,
     this.note,
     this.approveFlag,
+    this.last_pur
   });
 
   factory PurchaseRequestDetail.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class PurchaseRequestDetail {
       quantity: json['quantity'],
       note: json['note'],
       approveFlag: json['approve_flag'],
+      last_pur: json['last_pur']
     );
   }
 
