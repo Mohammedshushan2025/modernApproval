@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../main.dart'; // تأكد من أن هذا المسار صحيح لملف main.dart
+import '../main.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -20,7 +20,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.language,color: Colors.white,),
           tooltip: 'Change Language',
           onPressed: () {
-            // ✅ الكود الجديد الأكثر أمانًا لتغيير اللغة
+
             final myAppState = MyApp.of(context);
             if (myAppState != null) {
               if (currentLocale.languageCode == 'ar') {
@@ -29,7 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 myAppState.changeLanguage(const Locale('ar', ''));
               }
             } else {
-              // رسالة للمطور في حالة لم يتم العثور على الحالة
+
               print("Error: MyAppState not found in context.");
               ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Could not change language.'))

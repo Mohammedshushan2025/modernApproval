@@ -1,4 +1,4 @@
-// مسار الملف: lib/services/api_service.dart
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -13,7 +13,7 @@ import '../models/purchase_request_mast_model.dart';
 import '../models/user_model.dart';
 
 class ApiService {
-  // --- ✅ تم التعديل للرابط الجديد ---
+
   final String _baseUrl = "http://195.201.241.253:7001/ords/modern_test/Approval";
 
   Future<List<UserModel>> getAllUsers() async {
@@ -345,7 +345,7 @@ class ApiService {
   }
 
 
-  // ==== ✅ دالة جديدة لجلب إحصائيات الداشبورد ====
+
   Future<DashboardStats> getDashboardStats(int userId) async {
     final url = Uri.parse('$_baseUrl/get_dashboard_variable/$userId');
     print('Fetching dashboard stats from: $url');
@@ -356,7 +356,7 @@ class ApiService {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) {
-          // رجع قيم صفرية لو مفيش بيانات
+
           return DashboardStats(countAuth: 0, countReject: 0);
         }
         return DashboardStats.fromJson(items.first);

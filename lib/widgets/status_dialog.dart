@@ -1,4 +1,3 @@
-// lib/widgets/status_dialog.dart
 
 import 'package:flutter/material.dart';
 
@@ -6,7 +5,7 @@ class StatusDialog extends StatelessWidget {
   final String title;
   final String message;
   final bool isSuccess;
-  final String? buttonText; // نص الزر قابل للتخصيص
+  final String? buttonText;
 
   const StatusDialog({
     super.key,

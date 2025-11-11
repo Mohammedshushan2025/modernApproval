@@ -1,7 +1,7 @@
 import 'package:modernapproval/app_localizations.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
- // Assuming your localizations file path
+
 
 class NetworkChecker {
   static Future<bool> isConnected() async {

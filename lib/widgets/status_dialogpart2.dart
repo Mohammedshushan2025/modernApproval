@@ -7,7 +7,7 @@ class StatusDialog {
         required bool isSuccess,
         int duration = 3,
       }) {
-    // إخفاء أي SnackBar قديم قبل إظهار واحد جديد
+
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     final SnackBar snackBar = SnackBar(
@@ -17,7 +17,7 @@ class StatusDialog {
         textAlign: TextAlign.center,
       ),
       backgroundColor: isSuccess ? Colors.green.shade600 : Colors.red.shade600,
-      behavior: SnackBarBehavior.floating, // يجعلها طافية
+      behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.all(16),
       duration: Duration(seconds: duration),

@@ -41,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfileData();
   }
 
-  // تحميل بيانات الملف الشخصي
+
   Future<void> _loadProfileData() async {
     if (!mounted) return;
 
@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // فحص الاتصال بالإنترنت
+
   Future<bool> _checkInternetConnection() async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return false;
       }
 
-      // فحص إضافي للتأكد من الاتصال الفعلي
+
       final result = await http.get(
         Uri.parse('http://195.201.241.253:7001/ords/modern/Approval/emp_info/${widget.user}'),
       ).timeout(const Duration(seconds: 5));
@@ -110,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // اختيار مصدر الصورة
+
   Future<void> _showImageSourceDialog() async {
     final localizations = AppLocalizations.of(context)!;
 
@@ -126,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // إضافة معلومة للمستخدم عن الإمولاتور
+
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -190,12 +190,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // اختيار الصورة
+
   Future<void> _pickImage(ImageSource source) async {
     try {
       print('🔄 Picking image from ${source.toString()}');
 
-      // ✅ تحديد المقاسات والجودة بناءً على المصدر
+
       int maxWidth = source == ImageSource.camera ? 600 : 800;
       int maxHeight = source == ImageSource.camera ? 600 : 800;
       int imageQuality = source == ImageSource.camera ? 70 : 85;
@@ -205,17 +205,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         maxWidth: maxWidth.toDouble(),
         maxHeight: maxHeight.toDouble(),
         imageQuality: imageQuality,
-        preferredCameraDevice: CameraDevice.rear, // ✅ استخدام الكاميرا الخلفية
+        preferredCameraDevice: CameraDevice.rear,
       );
 
       if (image != null) {
         print('✅ Image selected: ${image.path}');
 
-        // ✅ فحص حجم الملف قبل الرفع
+
         final fileSize = await image.length();
         print('📏 Image file size: ${fileSize} bytes');
 
-        if (fileSize > 5 * 1024 * 1024) { // أكثر من 5MB
+        if (fileSize > 5 * 1024 * 1024) {
           _showErrorDialog('image_too_large');
           return;
         }
@@ -227,7 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       print('❌ Error picking image: $e');
 
-      // معالجة أخطاء مختلفة
+
       String errorKey = 'image_pick_error';
       if (e.toString().contains('channel-error')) {
         errorKey = 'image_picker_channel_error';
@@ -237,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         errorKey = 'gallery_permission_denied';
       } else if (e.toString().contains('camera_access_denied') ||
           e.toString().contains('Camera not available')) {
-        // ✅ في حالة عدم توفر الكاميرا، تحويل للمعرض تلقائياً
+
         final localizations = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -255,11 +255,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // رفع الصورة
+
   Future<void> _uploadImage(XFile image) async {
     if (!mounted) return;
 
-    // فحص الاتصال بالإنترنت أولاً
+
     if (!await _checkInternetConnection()) {
       return;
     }
@@ -271,30 +271,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       print('🔄 Starting image upload...');
 
-      // قراءة الصورة وتحويلها إلى Base64
+
       final bytes = await image.readAsBytes();
 
-      // ✅ فحص حجم البيانات بعد القراءة
+
       print('📏 Image bytes length: ${bytes.length}');
 
-      // ✅ ضغط الصورة إذا كانت كبيرة جداً
+
       List<int> finalBytes = bytes;
-      if (bytes.length > 1024 * 1024) { // أكثر من 1MB
+      if (bytes.length > 1024 * 1024) {
         print('🗜️ Compressing large image...');
-        // هنا يمكن إضافة ضغط إضافي إذا لزم الأمر
+
       }
 
       final base64Image = base64Encode(finalBytes);
       print('📤 Image converted to base64, size: ${base64Image.length} characters');
 
-      // ✅ فحص حجم الـ Base64 قبل الإرسال
-      if (base64Image.length > 2 * 1024 * 1024) { // أكثر من 2MB base64
+
+      if (base64Image.length > 2 * 1024 * 1024) {
         print('⚠️ Base64 image too large: ${base64Image.length} characters');
         _showErrorDialog('image_too_large');
         return;
       }
 
-      // ✅ إعداد البيانات للإرسال بشكل محدد
+
       final requestData = {
         'emp_id': widget.user,
         'photo': base64Image,
@@ -310,17 +310,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Cache-Control': 'no-cache', // ✅ منع الـ cache
+          'Cache-Control': 'no-cache',
         },
         body: json.encode(requestData),
-      ).timeout(const Duration(seconds: 45)); // ✅ زيادة المهلة الزمنية
+      ).timeout(const Duration(seconds: 45));
 
       print('📡 Upload Response Request ${requestData}');
       print('📡 Upload Response Status: ${response.statusCode}');
       print('📡 Upload Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // ✅ فحص محتوى الاستجابة
+
         try {
           final responseData = json.decode(response.body);
           if (responseData['status'] == 'error') {
@@ -329,12 +329,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return;
           }
         } catch (e) {
-          // إذا لم تكن الاستجابة JSON صالحة، نعتبرها نجاح
+
         }
 
         print('✅ Image uploaded successfully');
 
-        // إعادة تحميل الصورة الجديدة
+
         await _reloadProfileImage();
 
         final localizations = AppLocalizations.of(context)!;
@@ -361,20 +361,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ✅ الحل الصحيح هنا - إعادة تحميل صورة الملف الشخصي
+
   Future<void> _reloadProfileImage() async {
-    await Future.delayed(const Duration(seconds: 1)); // انتظار قصير للتأكد من التحديث
+    await Future.delayed(const Duration(seconds: 1));
 
     if (mounted) {
       setState(() {
         _currentImageError = null;
-        // ✅ إضافة timestamp لفرض إعادة التحميل وتجنب الـ Cache
+
         _profileImageUrl = 'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}?t=${DateTime.now().millisecondsSinceEpoch}';
       });
     }
   }
 
-  // عرض رسالة خطأ
+
   void _showErrorDialog(String messageKey) {
     if (!mounted) return;
 
@@ -391,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // عرض رسالة نجاح
+
   void _showSuccessDialog(String messageKey) {
     if (!mounted) return;
 
@@ -408,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // تنسيق التاريخ
+
   String _formatDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) return '-';
 
@@ -420,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // تنسيق الحالة الاجتماعية
+
   String _getSocialStatus(int? status) {
     final localizations = AppLocalizations.of(context)!;
     switch (status) {
@@ -437,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // تنسيق النوع
+
   String _getGender(String? gender) {
     final localizations = AppLocalizations.of(context)!;
     if (gender == 'M') return localizations.translate('male')!;
@@ -445,7 +445,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '-';
   }
 
-  // تنسيق نوع الديانة
+
   String _getReligion(int? religionType) {
     final localizations = AppLocalizations.of(context)!;
     switch (religionType) {
@@ -485,7 +485,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.language, color: Colors.white),
             onPressed: () {
-              // هنا يتم تغيير اللغة - يمكنك ربطها بنظام اللغة الخاص بك
+
             },
           ),
         ],
@@ -537,19 +537,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // صورة الملف الشخصي
+
             _buildProfileImageSection(),
             const SizedBox(height: 24),
 
-            // البيانات الشخصية
+
             _buildPersonalInfoCard(),
             const SizedBox(height: 16),
 
-            // معلومات العمل
+
             _buildWorkInfoCard(),
             const SizedBox(height: 16),
 
-            // معلومات الاتصال والعنوان
+
             _buildContactInfoCard(),
           ],
         ),
@@ -557,7 +557,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // بناء قسم صورة الملف الشخصي
+
   Widget _buildProfileImageSection() {
     final localizations = AppLocalizations.of(context)!;
 
@@ -635,7 +635,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              // زر تغيير الصورة
+
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -668,7 +668,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 16),
 
-          // اسم الموظف
+
           Text(
             _profileData!['emp_name'] ?? '-',
             style: const TextStyle(
@@ -704,7 +704,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // بناء بطاقة البيانات الشخصية
+
   Widget _buildPersonalInfoCard() {
     final localizations = AppLocalizations.of(context)!;
 
@@ -751,7 +751,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // بناء بطاقة معلومات العمل
+
   Widget _buildWorkInfoCard() {
     final localizations = AppLocalizations.of(context)!;
 
@@ -778,7 +778,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // بناء بطاقة معلومات الاتصال
+
   Widget _buildContactInfoCard() {
     final localizations = AppLocalizations.of(context)!;
 
@@ -796,7 +796,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // بناء البطاقة الأساسية
+
   Widget _buildInfoCard({
     required String title,
     required IconData icon,
@@ -853,7 +853,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // بناء صف المعلومات
+
   Widget _buildInfoRow(
       String label,
       String value,

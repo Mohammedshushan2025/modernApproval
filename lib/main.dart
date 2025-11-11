@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app_localizations.dart';
 import 'screens/auth/login_screen.dart';
-// لم نعد بحاجة لهذه الاستدعاءات هنا
-// import 'models/user_model.dart';
-// import 'screens/home_screen.dart';
-// import 'services/auth_service.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,15 +23,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('ar', '');
-  // لم نعد بحاجة لهذه المتغيرات هنا
-  // final AuthService _authService = AuthService();
-  // late Future<UserModel?> _userFuture;
+
 
   @override
   void initState() {
     super.initState();
-    // تم حذف السطر الذي يجلب المستخدم المسجل
-    // _userFuture = _authService.getLoggedInUser();
+
   }
 
   void changeLanguage(Locale locale) {
@@ -67,8 +61,7 @@ class _MyAppState extends State<MyApp> {
         }
         return supportedLocales.first;
       },
-      // --- ✅ التعديل الرئيسي هنا ---
-      // تم حذف الـ FutureBuilder وتعيين LoginScreen كشاشة رئيسية دائمة
+
       home: LoginScreen(onLanguageChanged: changeLanguage),
     );
   }
