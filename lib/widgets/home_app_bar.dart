@@ -17,6 +17,7 @@ import '../widgets/profile_avatar.dart';
 
 class HomeAppBar extends StatefulWidget {
   final UserModel user;
+
   const HomeAppBar({super.key, required this.user});
 
   @override
@@ -30,6 +31,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
   bool _isLoadingLocation = true;
   int _notificationCount = 0;
   static final Set<String> _readNotifications = {};
+
   @override
   void initState() {
     super.initState();
@@ -72,8 +74,12 @@ class _HomeAppBarState extends State<HomeAppBar> {
         passwordNumber: passwordNumber,
       );
       return requests
-          .where((r) => !_readNotifications
-          .contains('${r.trnsTypeCode}_${r.trnsSerial}'))
+          .where(
+            (r) =>
+                !_readNotifications.contains(
+                  '${r.trnsTypeCode}_${r.trnsSerial}',
+                ),
+          )
           .length;
     } catch (e) {
       return 0;
@@ -101,22 +107,28 @@ class _HomeAppBarState extends State<HomeAppBar> {
         return;
       }
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high,
+      );
       List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude, position.longitude);
+        position.latitude,
+        position.longitude,
+      );
       if (placemarks.isNotEmpty) {
         final placemark = placemarks.first;
         final isRtl = Localizations.localeOf(context).languageCode == 'ar';
-        String locationText = isRtl
-            ? '${placemark.country ?? ''}, ${placemark.administrativeArea ?? ''}'
-            : '${placemark.administrativeArea ?? ''}, ${placemark.country ?? ''}';
+        String locationText =
+            isRtl
+                ? '${placemark.country ?? ''}, ${placemark.administrativeArea ?? ''}'
+                : '${placemark.administrativeArea ?? ''}, ${placemark.country ?? ''}';
         setState(() {
           currentLocation = locationText.replaceAll(', ', ', ').trim();
           if (currentLocation.startsWith(','))
             currentLocation = currentLocation.substring(2);
           if (currentLocation.endsWith(','))
-            currentLocation =
-                currentLocation.substring(0, currentLocation.length - 2);
+            currentLocation = currentLocation.substring(
+              0,
+              currentLocation.length - 2,
+            );
           _isLoadingLocation = false;
         });
       } else {
@@ -132,8 +144,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
       });
     }
   }
-
-
 
   Future<void> _updateNotificationCount() async {
     try {
@@ -160,11 +170,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
     final String displayName =
         (isRtl ? widget.user.empName : widget.user.empNameE) ??
-            widget.user.empName;
+        widget.user.empName;
     final String displayJob =
         (isRtl ? widget.user.role_name_a : widget.user.role_name_e) ??
-            widget.user.role_name_a ??
-            '';
+        widget.user.role_name_a ??
+        '';
 
     return SliverAppBar(
       backgroundColor: Colors.transparent,
@@ -174,7 +184,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         background: _buildModernBackground(
-            context, displayName, displayJob, themeColor),
+          context,
+          displayName,
+          displayJob,
+          themeColor,
+        ),
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
@@ -183,7 +197,9 @@ class _HomeAppBarState extends State<HomeAppBar> {
           decoration: const BoxDecoration(
             color: Color(0xFFF8F9FA),
             borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
           ),
         ),
       ),
@@ -191,7 +207,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
   }
 
   Widget _buildModernBackground(
-      BuildContext context, String name, String job, Color themeColor) {
+    BuildContext context,
+    String name,
+    String job,
+    Color themeColor,
+  ) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -200,7 +220,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
           colors: [
             themeColor,
             themeColor.withOpacity(0.85),
-            const Color(0xFF8B5CF6)
+            const Color(0xFF8B5CF6),
           ],
           stops: const [0.0, 0.6, 1.0],
         ),
@@ -210,25 +230,64 @@ class _HomeAppBarState extends State<HomeAppBar> {
           _buildMinimalDecorativeBackground(),
           SafeArea(
             child: Padding(
-              padding:
-              const EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 20),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 15,
+                bottom: 20,
+              ),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildLocationTimeWidget(context),
+                      // _buildLocationTimeWidget(context),
+                      Row(
+                        children: [
+                          _buildCompactUserAvatar(),
+                          const SizedBox(width: 16),
+                          _buildUserInfo(context, name, job),
+                        ],
+                      ),
+
                       _buildTopControlButtons(context),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      _buildCompactUserAvatar(),
-                      const SizedBox(width: 16),
-                      _buildUserInfo(context, name, job),
-                      Expanded(child: _buildCompactUserAvatarpart2()),
-                    ],
+                  Expanded(
+                    child: Container(
+                      width: double.maxFinite,
+                      margin: EdgeInsets.symmetric(horizontal: 50),
+
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFAFBFC),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 1.0,
+                            spreadRadius: 0.0,
+                            offset: Offset(
+                              2.0,
+                              2.0,
+                            ), // shadow direction: bottom right
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 1.0,
+                            spreadRadius: 0.0,
+                            offset: Offset(
+                              -2.0,
+                              3,
+                            ), // shadow direction: bottom right
+                          ),
+                        ],
+                      ),
+                      child: _buildCompactUserAvatarpart2(),
+                    ),
                   ),
                 ],
               ),
@@ -242,9 +301,10 @@ class _HomeAppBarState extends State<HomeAppBar> {
   Widget _buildCompactUserAvatar() {
     final String profileImageUrl =
         'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user.usersCode}';
-    final String fallbackImageAsset = (widget.user.gender == 'M')
-        ? "assets/images/photo.jpg"
-        : "assets/images/photo.jpg";
+    final String fallbackImageAsset =
+        (widget.user.gender == 'M')
+            ? "assets/images/photo.jpg"
+            : "assets/images/photo.jpg";
 
     return Container(
       decoration: BoxDecoration(
@@ -287,8 +347,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
       ),
       child: ClipOval(
-        child: SizedBox(
-            width: 56, height: 56, child: Image.asset("assets/images/lo.png")),
+        child: SizedBox(height: 56, child: Image.asset("assets/images/lo.png")),
       ),
     );
   }
@@ -310,11 +369,14 @@ class _HomeAppBarState extends State<HomeAppBar> {
             children: [
               const Icon(Icons.access_time, color: Colors.white, size: 14),
               const SizedBox(width: 4),
-              Text(currentTime,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                currentTime,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -333,22 +395,26 @@ class _HomeAppBarState extends State<HomeAppBar> {
               const SizedBox(width: 4),
               _isLoadingLocation
                   ? const SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(
                       strokeWidth: 1.5,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.white)))
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
                   : ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 100),
-                child: Text(currentLocation,
-                    style: const TextStyle(
+                    constraints: const BoxConstraints(maxWidth: 100),
+                    child: Text(
+                      currentLocation,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
-                        fontWeight: FontWeight.w500),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1),
-              ),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
             ],
           ),
         ),
@@ -363,21 +429,25 @@ class _HomeAppBarState extends State<HomeAppBar> {
           top: -100,
           right: -80,
           child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  shape: BoxShape.circle)),
+            width: 180,
+            height: 180,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              shape: BoxShape.circle,
+            ),
+          ),
         ),
         Positioned(
           bottom: -60,
           left: -60,
           child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
-                  shape: BoxShape.circle)),
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              shape: BoxShape.circle,
+            ),
+          ),
         ),
       ],
     );
@@ -387,30 +457,37 @@ class _HomeAppBarState extends State<HomeAppBar> {
     final isRtl = Localizations.localeOf(context).languageCode == 'ar';
     return Column(
       crossAxisAlignment:
-      isRtl ? CrossAxisAlignment.center : CrossAxisAlignment.center,
+          isRtl ? CrossAxisAlignment.center : CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(name,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                height: 1.2),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1),
+        Text(
+          name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
         const SizedBox(height: 4),
         if (job.isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12)),
-            child: Text(job,
-                style: TextStyle(
-                    color: Colors.white.withOpacity(0.95),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
-                overflow: TextOverflow.ellipsis),
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              job,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.95),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
       ],
     );
@@ -427,10 +504,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
             await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => NotificationsScreen(
-                  user: widget.user,
-                  selectedPasswordNumber: 10327,
-                ),
+                builder:
+                    (context) => NotificationsScreen(
+                      user: widget.user,
+                      selectedPasswordNumber: 10327,
+                    ),
               ),
             );
             _updateNotificationCount();
@@ -439,33 +517,40 @@ class _HomeAppBarState extends State<HomeAppBar> {
         ),
         const SizedBox(width: 8),
         _buildCompactActionButton(
-            icon: Icons.language_outlined,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              final currentLocale = Localizations.localeOf(context);
-              final newLocale = currentLocale.languageCode == 'en'
-                  ? const Locale('ar', '')
-                  : const Locale('en', '');
-              MyApp.of(context)?.changeLanguage(newLocale);
-            }),
+          icon: Icons.language_outlined,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            final currentLocale = Localizations.localeOf(context);
+            final newLocale =
+                currentLocale.languageCode == 'en'
+                    ? const Locale('ar', '')
+                    : const Locale('en', '');
+            MyApp.of(context)?.changeLanguage(newLocale);
+          },
+        ),
         const SizedBox(width: 8),
         _buildCompactActionButton(
-            icon: Icons.logout_outlined,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              _showLogoutDialog(context);
-            }),
+          icon: Icons.logout_outlined,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _showLogoutDialog(context);
+          },
+        ),
       ],
     );
   }
 
-  Widget _buildCompactActionButton(
-      {required IconData icon, required VoidCallback onTap, int? badgeCount}) {
+  Widget _buildCompactActionButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    int? badgeCount,
+  }) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.2))),
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -486,18 +571,25 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     child: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: const BoxDecoration(
-                          color: Color(0xFFFF4757),
-                          shape: BoxShape.circle,
-                          border: Border.fromBorderSide(
-                              BorderSide(color: Colors.white, width: 1.5))),
-                      constraints:
-                      const BoxConstraints(minWidth: 16, minHeight: 16),
-                      child: Text('$badgeCount',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                        color: Color(0xFFFF4757),
+                        shape: BoxShape.circle,
+                        border: Border.fromBorderSide(
+                          BorderSide(color: Colors.white, width: 1.5),
+                        ),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
               ],
@@ -513,49 +605,67 @@ class _HomeAppBarState extends State<HomeAppBar> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: Colors.white,
           title: Row(
             children: [
               Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      color: const Color(0xFF6C63FF).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.logout,
-                      color: Color(0xFF6C63FF), size: 20)),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6C63FF).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.logout,
+                  color: Color(0xFF6C63FF),
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: 12),
-              const Text('تسجيل الخروج',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              const Text(
+                'تسجيل الخروج',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
             ],
           ),
-          content: const Text('هل أنت متأكد من أنك تريد تسجيل الخروج؟',
-              style: TextStyle(fontSize: 16, color: Colors.black87)),
+          content: const Text(
+            'هل أنت متأكد من أنك تريد تسجيل الخروج؟',
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+          ),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12))),
-              child: const Text('إلغاء',
-                  style: TextStyle(color: Colors.grey)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 0),
-              child: const Text('تسجيل الخروج',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w600)),
+                backgroundColor: const Color(0xFF6C63FF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'تسجيل الخروج',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await AuthService().logout();
                 Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const MyApp()),
-                        (route) => false);
+                  MaterialPageRoute(builder: (context) => const MyApp()),
+                  (route) => false,
+                );
               },
             ),
           ],

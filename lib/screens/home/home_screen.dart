@@ -1,4 +1,3 @@
-
 import 'package:hexcolor/hexcolor.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
@@ -14,6 +13,7 @@ import '../../widgets/home_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
+
   const HomeScreen({super.key, required this.user});
 
   @override
@@ -36,13 +36,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _countsLoading = true;
   DashboardStats? _dashboardStats;
   bool _statsLoading = true;
+
   // ------------------------------------
 
   @override
   void initState() {
     super.initState();
     _setupAnimations();
-
 
     _loadData();
   }
@@ -53,38 +53,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
 
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     _animationController.forward();
   }
-
 
   void _loadData() {
     if (!mounted) return;
@@ -93,44 +89,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _statsLoading = true;
     });
 
-
     _formsReportsFuture = _apiService.getFormsAndReports(widget.user.usersCode);
-    _formsReportsFuture.then((items) {
-      if (!mounted) return;
-      setState(() {
-        _approvalsCount = items.where((item) => item.type == 'F').length;
-        _reportsCount = items.where((item) => item.type == 'R').length;
-        _countsLoading = false;
-      });
-    }).catchError((e) {
-      print("Error fetching forms/reports count: $e");
-      if (!mounted) return;
-      setState(() {
-        _countsLoading = false;
+    _formsReportsFuture
+        .then((items) {
+          if (!mounted) return;
+          setState(() {
+            _approvalsCount = items.where((item) => item.type == 'F').length;
+            _reportsCount = items.where((item) => item.type == 'R').length;
+            _countsLoading = false;
+          });
+        })
+        .catchError((e) {
+          print("Error fetching forms/reports count: $e");
+          if (!mounted) return;
+          setState(() {
+            _countsLoading = false;
 
-        _approvalsCount = 0;
-        _reportsCount = 0;
-      });
-    });
-
+            _approvalsCount = 0;
+            _reportsCount = 0;
+          });
+        });
 
     _statsFuture = _apiService.getDashboardStats(widget.user.usersCode);
-    _statsFuture.then((stats) {
-      if (!mounted) return;
-      setState(() {
-        _dashboardStats = stats;
-        _statsLoading = false;
-      });
-    }).catchError((e) {
-      print("Error fetching dashboard stats: $e");
-      if (!mounted) return;
-      setState(() {
-        _statsLoading = false; // نوقف التحميل
-        _dashboardStats = DashboardStats(countAuth: 0, countReject: 0);
-      });
-    });
+    _statsFuture
+        .then((stats) {
+          if (!mounted) return;
+          setState(() {
+            _dashboardStats = stats;
+            _statsLoading = false;
+          });
+        })
+        .catchError((e) {
+          print("Error fetching dashboard stats: $e");
+          if (!mounted) return;
+          setState(() {
+            _statsLoading = false; // نوقف التحميل
+            _dashboardStats = DashboardStats(countAuth: 0, countReject: 0);
+          });
+        });
   }
-
 
   @override
   void dispose() {
@@ -168,31 +165,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isSmallScreen = screenWidth < 360;
     final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
 
-    final horizontalPadding = isSmallScreen ? 12.0 : (isMediumScreen ? 16.0 : 20.0);
-    final verticalSpacing = isSmallScreen ? 14.0 : (isMediumScreen ? 18.0 : 22.0);
+    final horizontalPadding =
+        isSmallScreen ? 12.0 : (isMediumScreen ? 16.0 : 20.0);
+    final verticalSpacing =
+        isSmallScreen ? 14.0 : (isMediumScreen ? 18.0 : 22.0);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-          horizontalPadding,
-          verticalSpacing,
-          horizontalPadding,
-          verticalSpacing + 10
+        horizontalPadding,
+        verticalSpacing,
+        horizontalPadding,
+        verticalSpacing + 10,
       ),
       child: Column(
         children: [
-
-          _buildModernTopCards(isRtl, _approvalsCount, _reportsCount, _countsLoading),
+          _buildModernTopCards(
+            isRtl,
+            _approvalsCount,
+            _reportsCount,
+            _countsLoading,
+          ),
           SizedBox(height: verticalSpacing),
           _buildModernProfileCard(
-            title: localizations.translate('profile') ?? (isRtl ? 'الملف الشخصي' : 'Profile'),
+            title:
+                localizations.translate('profile') ??
+                (isRtl ? 'الملف الشخصي' : 'Profile'),
             subtitle: isRtl ? 'إدارة حسابك الشخصي' : 'Manage your account',
             isRtl: isRtl,
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-
-                  builder: (context) => ProfileScreen(user: widget.user.usersCode),
+                  builder:
+                      (context) => ProfileScreen(user: widget.user.usersCode),
                 ),
               );
             },
@@ -205,8 +210,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-
-  Widget _buildModernTopCards(bool isRtl, int approvalsCount, int reportsCount, bool isLoading) {
+  Widget _buildModernTopCards(
+    bool isRtl,
+    int approvalsCount,
+    int reportsCount,
+    bool isLoading,
+  ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
     final spacing = isSmallScreen ? 10.0 : 14.0;
@@ -274,8 +283,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
     final isShortScreen = screenHeight < 700;
 
-    final cardHeight = isShortScreen ? 100.0 : (isSmallScreen ? 108.0 : (isMediumScreen ? 120.0 : 135.0));
-    final iconSize = isShortScreen ? 20.0 : (isSmallScreen ? 22.0 : (isMediumScreen ? 24.0 : 26.0));
+    final cardHeight =
+        isShortScreen
+            ? 100.0
+            : (isSmallScreen ? 108.0 : (isMediumScreen ? 120.0 : 135.0));
+    final iconSize =
+        isShortScreen
+            ? 20.0
+            : (isSmallScreen ? 22.0 : (isMediumScreen ? 24.0 : 26.0));
     final padding = isShortScreen ? 8.0 : (isSmallScreen ? 10.0 : 14.0);
 
     return GestureDetector(
@@ -292,10 +307,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.5),
-            width: 1.5,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
           boxShadow: [
             BoxShadow(
               color: primaryColor.withOpacity(0.15),
@@ -342,7 +354,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       children: [
                         Container(
                           width: isShortScreen ? 36 : (isSmallScreen ? 38 : 44),
-                          height: isShortScreen ? 36 : (isSmallScreen ? 38 : 44),
+                          height:
+                              isShortScreen ? 36 : (isSmallScreen ? 38 : 44),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [primaryColor, secondaryColor],
@@ -371,8 +384,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               scale: _pulseAnimation.value,
                               child: Container(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: isShortScreen ? 8 : (isSmallScreen ? 10 : 12),
-                                  vertical: isShortScreen ? 4 : (isSmallScreen ? 5 : 6),
+                                  horizontal:
+                                      isShortScreen
+                                          ? 8
+                                          : (isSmallScreen ? 10 : 12),
+                                  vertical:
+                                      isShortScreen
+                                          ? 4
+                                          : (isSmallScreen ? 5 : 6),
                                 ),
                                 decoration: BoxDecoration(
                                   color: primaryColor.withOpacity(0.1),
@@ -407,7 +426,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               title,
                               style: TextStyle(
                                 color: Color(0xFF1A1F36),
-                                fontSize: isShortScreen ? 13 : (isSmallScreen ? 14 : 17),
+                                fontSize:
+                                    isShortScreen
+                                        ? 13
+                                        : (isSmallScreen ? 14 : 17),
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -0.5,
                               ),
@@ -421,7 +443,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               subtitle,
                               style: TextStyle(
                                 color: Color(0xFF8E95B2),
-                                fontSize: isShortScreen ? 8 : (isSmallScreen ? 9 : 11),
+                                fontSize:
+                                    isShortScreen
+                                        ? 8
+                                        : (isSmallScreen ? 9 : 11),
                                 fontWeight: FontWeight.w500,
                               ),
                               maxLines: 1,
@@ -441,8 +466,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-
-
   Widget _buildModernProfileCard({
     required String title,
     required String subtitle,
@@ -455,8 +478,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
     final isShortScreen = screenHeight < 700;
 
-    final cardHeight = isShortScreen ? 100.0 : (isSmallScreen ? 120.0 : (isMediumScreen ? 125.0 : 140.0));
-    final avatarSize = isShortScreen ? 38.0 : (isSmallScreen ? 42.0 : (isMediumScreen ? 42.0 : 48.0));
+    final cardHeight =
+        isShortScreen
+            ? 100.0
+            : (isSmallScreen ? 120.0 : (isMediumScreen ? 125.0 : 140.0));
+    final avatarSize =
+        isShortScreen
+            ? 38.0
+            : (isSmallScreen ? 42.0 : (isMediumScreen ? 42.0 : 48.0));
     final padding = isShortScreen ? 12.0 : (isSmallScreen ? 16.0 : 22.0);
 
     return GestureDetector(
@@ -477,7 +506,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         child: Stack(
           children: [
-
             Padding(
               padding: EdgeInsets.all(padding),
               child: Row(
@@ -514,19 +542,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  SizedBox(width: isShortScreen ? 8 : (isSmallScreen ? 12 : 18)),
+                  SizedBox(
+                    width: isShortScreen ? 8 : (isSmallScreen ? 12 : 18),
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-
                         Text(
                           title,
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: isShortScreen ? 15 : (isSmallScreen ? 17 : 20),
+                            fontSize:
+                                isShortScreen ? 15 : (isSmallScreen ? 17 : 20),
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -539,7 +569,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             subtitle,
                             style: TextStyle(
                               color: Colors.black.withOpacity(0.9),
-                              fontSize: isShortScreen ? 10 : (isSmallScreen ? 11 : 13),
+                              fontSize:
+                                  isShortScreen
+                                      ? 10
+                                      : (isSmallScreen ? 11 : 13),
                               fontWeight: FontWeight.w500,
                               height: 1.2,
                             ),
@@ -589,20 +622,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-
   Widget _buildModernStats(bool isRtl, DashboardStats? stats, bool isLoading) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
     final l = AppLocalizations.of(context)!;
 
+    String approvedValue =
+        isLoading ? '...' : (stats?.countAuth.toString() ?? '0');
+    String rejectedValue =
+        isLoading ? '...' : (stats?.countReject.toString() ?? '0');
 
-    String approvedValue = isLoading ? '...' : (stats?.countAuth.toString() ?? '0');
-    String rejectedValue = isLoading ? '...' : (stats?.countReject.toString() ?? '0');
-
-    double total = ((stats?.countAuth ?? 0) + (stats?.countReject ?? 0)).toDouble();
-    double approvedProgress = (isLoading || total == 0.0) ? 0.0 : (stats!.countAuth / total);
-    double rejectedProgress = (isLoading || total == 0.0) ? 0.0 : (stats!.countReject / total);
-
+    double total =
+        ((stats?.countAuth ?? 0) + (stats?.countReject ?? 0)).toDouble();
+    double approvedProgress =
+        (isLoading || total == 0.0) ? 0.0 : (stats!.countAuth / total);
+    double rejectedProgress =
+        (isLoading || total == 0.0) ? 0.0 : (stats!.countReject / total);
 
     return Container(
       padding: EdgeInsets.all(isSmallScreen ? 18 : 22),
@@ -644,13 +679,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               const Spacer(),
-
             ],
           ),
           const SizedBox(height: 20),
           Row(
             children: [
-
               Expanded(
                 child: _buildStatCard(
                   icon: Icons.check_circle_outline,
@@ -671,14 +704,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   progress: rejectedProgress,
                 ),
               ),
-
             ],
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildStatCard({
     required IconData icon,
@@ -695,25 +726,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: color.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.1), width: 1),
       ),
       child: Column(
         children: [
-
           value == '...'
               ? const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-              : Icon(
-            icon,
-            color: color,
-            size: isSmallScreen ? 20 : 22,
-          ),
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+              : Icon(icon, color: color, size: isSmallScreen ? 20 : 22),
           const SizedBox(height: 8),
           Text(
             value,
@@ -740,22 +763,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(2),
             ),
 
-            child: value == '...'
-                ? const LinearProgressIndicator()
-                : FractionallySizedBox(
-              alignment: AlignmentDirectional.centerStart,
-              widthFactor: progress.isNaN ? 0.0 : progress,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
+            child:
+                value == '...'
+                    ? const LinearProgressIndicator()
+                    : FractionallySizedBox(
+                      alignment: AlignmentDirectional.centerStart,
+                      widthFactor: progress.isNaN ? 0.0 : progress,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
           ),
         ],
       ),
     );
   }
 }
-
