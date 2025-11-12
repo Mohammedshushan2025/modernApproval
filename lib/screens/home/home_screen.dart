@@ -171,6 +171,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SizedBox(height: 16),
 
           // Main Cards - All 4 buttons in single column
+          //with stats card and profile card
           Column(
             children: [
               _buildMinimalCard(
