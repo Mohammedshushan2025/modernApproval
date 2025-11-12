@@ -259,7 +259,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                   Expanded(
                     child: Container(
                       width: double.maxFinite,
-                      margin: EdgeInsets.symmetric(horizontal: 50),
+                      margin: EdgeInsets.symmetric(horizontal: 25),
 
                       decoration: BoxDecoration(
                         color: Color(0xFFFAFBFC),
@@ -344,13 +344,27 @@ class _HomeAppBarState extends State<HomeAppBar> {
   Widget _buildCompactUserAvatarpart2() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+        color: Color(0xFFFAFBFC),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 1.0,
+            spreadRadius: 0.0,
+            offset: Offset(2.0, 2.0), // shadow direction: bottom right
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 1.0,
+            spreadRadius: 0.0,
+            offset: Offset(-2.0, 3), // shadow direction: bottom right
+          ),
+        ],
       ),
-      child: ClipOval(
-        child: SizedBox(height: 56, child: Image.asset("assets/images/lo.png")),
-      ),
+      child: Image.asset("assets/images/lo.png"),
     );
   }
 

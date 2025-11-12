@@ -134,7 +134,7 @@ class _PurchaseRequestApprovalScreenState
 
   Widget _buildFilterSection() {
     if (!_showFilters) return SizedBox.shrink();
-
+    final l = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -147,22 +147,30 @@ class _PurchaseRequestApprovalScreenState
       child: Column(
         children: [
           // Store name filter
-          TextField(
-            decoration: InputDecoration(
-              labelText: 'Filter by Store Name',
-              prefixIcon: Icon(Icons.store),
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+          SizedBox(
+            height: 46,
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: l.translate('filter_by_store_name'),
+                prefixIcon: Icon(Icons.store, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(28)),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _storeNameFilter = value;
+                });
+                _requestsFuture.then((data) => _applyFilters(data));
+              },
             ),
-            onChanged: (value) {
-              setState(() {
-                _storeNameFilter = value;
-              });
-              _requestsFuture.then((data) => _applyFilters(data));
-            },
           ),
 
-          SizedBox(height: 12),
+          SizedBox(height: 8),
 
           // Date filter
           Row(
@@ -171,18 +179,18 @@ class _PurchaseRequestApprovalScreenState
                 child: InkWell(
                   onTap: () => _showDatePicker(),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 20),
+                        Icon(Icons.calendar_today, size: 18),
                         SizedBox(width: 8),
                         Text(
                           _selectedDate == null
-                              ? 'Filter by Date'
+                              ? l.translate('filter_by_date')
                               : DateFormat('yyyy-MM-dd').format(_selectedDate!),
                           style: TextStyle(fontSize: 16),
                         ),
@@ -352,7 +360,12 @@ class _PurchaseRequestApprovalScreenState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '${displayRequests.length} results found',
+                              l.translate(
+                                'resultsFound',
+                                params: {
+                                  "resultLength": "${displayRequests.length}",
+                                },
+                              ),
                               style: TextStyle(
                                 color: Colors.blue.shade800,
                                 fontWeight: FontWeight.w500,
@@ -360,7 +373,7 @@ class _PurchaseRequestApprovalScreenState
                             ),
                             TextButton(
                               onPressed: _clearFilters,
-                              child: Text('Clear Filters'),
+                              child: Text(l.translate('clearFilters')),
                             ),
                           ],
                         ),
