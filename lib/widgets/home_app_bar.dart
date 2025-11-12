@@ -216,12 +216,12 @@ class _HomeAppBarState extends State<HomeAppBar> {
     return Stack(
       children: [
         // Logo background with opacity
-        Positioned.fill(
-          child: Opacity(
-            opacity: 0.6,
-            child: Image.asset("assets/images/lo.png", fit: BoxFit.cover),
-          ),
-        ),
+        // Positioned.fill(
+        //   child: Opacity(
+        //     opacity: 0.6,
+        //     child: Image.asset("assets/images/lo.png", fit: BoxFit.contain),
+        //   ),
+        // ),
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

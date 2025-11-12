@@ -137,21 +137,99 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFBFC),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: CustomScrollView(
-          slivers: [
-            HomeAppBar(user: widget.user),
-            SliverToBoxAdapter(
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: _buildBody(isRtl),
+      body: Stack(
+        children: [
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: CustomScrollView(
+              slivers: [
+                HomeAppBar(user: widget.user),
+                SliverToBoxAdapter(
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: _buildBody(isRtl),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Floating logo card positioned between appbar and content
+          Positioned(
+            top: 160, // Adjust this to position between appbar and content
+            left: 20,
+            right: 20,
+            child: _buildFloatingLogoCard(isRtl),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //new body with floating card ->
+
+  Widget _buildFloatingLogoCard(bool isRtl) {
+    return Transform.translate(
+      offset: Offset(0, -25), // Adjust to fine-tune position
+      child: Container(
+        height: 90,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.90),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 25,
+              offset: Offset(0, 10),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: AssetImage("assets/images/lo.png"),
+                  fit: BoxFit.contain,
+                ),
               ),
+            ),
+            SizedBox(width: 12),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment:
+                  isRtl ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isRtl ? 'مرحباً بعودتك!' : 'Welcome Back!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF6C63FF),
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  isRtl
+                      ? 'استمر في إدارة طلباتك'
+                      : 'Continue managing your requests',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
