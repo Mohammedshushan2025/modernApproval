@@ -260,5 +260,11 @@
   "serial_number": "NO",
   "filter_by_store_name": "Filter by Store Name",
   "clearFilters": "Clear Filters",
-  "resultsFound": "{{resultLength}} results found"
+  "resultsFound": "{{resultLength}} results found",
+  "confirmApproval": "Confirm Approval",
+  "approveConfirmationMessage": "Are you sure you want to approve this purchase request?",
+  "confirmApprove": "Confirm Approval",
+  "confirmRejection": "Confirm Rejection",
+  "rejectConfirmationMessage": "Are you sure you want to reject this purchase request?",
+  "confirmReject": "Confirm Rejection"
 }

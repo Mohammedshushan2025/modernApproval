@@ -261,5 +261,11 @@
   "serial_number": "الرقم",
   "filter_by_store_name": "التصفية حسب اسم المخزن",
   "clearFilters": "مسح التصفية",
-  "resultsFound": "يوجد {{resultLength}} نتائج متاحة"
+  "resultsFound": "يوجد {{resultLength}} نتائج متاحة",
+  "confirmApproval": "تأكيد الموافقة",
+  "approveConfirmationMessage": "هل أنت متأكد من أنك تريد الموافقة على طلب الشراء هذا؟",
+  "confirmApprove": "تأكيد الموافقة",
+  "confirmRejection": "تأكيد الرفض",
+  "rejectConfirmationMessage": "هل أنت متأكد من أنك تريد رفض طلب الشراء هذا؟",
+  "confirmReject": "تأكيد الرفض"
 }
