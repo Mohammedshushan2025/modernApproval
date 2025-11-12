@@ -218,7 +218,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Logo background with opacity
         Positioned.fill(
           child: Opacity(
-            opacity: 0.1,
+            opacity: 0.6,
             child: Image.asset("assets/images/lo.png", fit: BoxFit.cover),
           ),
         ),
