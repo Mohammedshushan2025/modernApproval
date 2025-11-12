@@ -206,97 +206,75 @@ class _HomeAppBarState extends State<HomeAppBar> {
     );
   }
 
+  // In _buildModernBackground method, replace the Expanded section:
   Widget _buildModernBackground(
     BuildContext context,
     String name,
     String job,
     Color themeColor,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            themeColor,
-            themeColor.withOpacity(0.85),
-            const Color(0xFF8B5CF6),
-          ],
-          stops: const [0.0, 0.6, 1.0],
+    return Stack(
+      children: [
+        // Logo background with opacity
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0.1,
+            child: Image.asset("assets/images/lo.png", fit: BoxFit.cover),
+          ),
         ),
-      ),
-      child: Stack(
-        children: [
-          _buildMinimalDecorativeBackground(),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 15,
-                bottom: 20,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // _buildLocationTimeWidget(context),
-                      Flexible(
-                        child: Row(
-                          children: [
-                            _buildCompactUserAvatar(),
-                            const SizedBox(width: 12),
-                            Flexible(child: _buildUserInfo(context, name, job)),
-                          ],
-                        ),
-                      ),
-
-                      _buildTopControlButtons(context),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: Container(
-                      width: double.maxFinite,
-                      margin: EdgeInsets.symmetric(horizontal: 25),
-
-                      decoration: BoxDecoration(
-                        color: Color(0xFFFAFBFC),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 1.0,
-                            spreadRadius: 0.0,
-                            offset: Offset(
-                              2.0,
-                              2.0,
-                            ), // shadow direction: bottom right
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 1.0,
-                            spreadRadius: 0.0,
-                            offset: Offset(
-                              -2.0,
-                              3,
-                            ), // shadow direction: bottom right
-                          ),
-                        ],
-                      ),
-                      child: _buildCompactUserAvatarpart2(),
-                    ),
-                  ),
-                ],
-              ),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                themeColor.withOpacity(0.9),
+                themeColor.withOpacity(0.7),
+                const Color(0xFF8B5CF6).withOpacity(0.8),
+              ],
+              stops: const [0.0, 0.6, 1.0],
             ),
           ),
-        ],
-      ),
+          child: Stack(
+            children: [
+              _buildMinimalDecorativeBackground(),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    top: 15,
+                    bottom: 20,
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Row(
+                              children: [
+                                _buildCompactUserAvatar(),
+                                const SizedBox(width: 12),
+                                Flexible(
+                                  child: _buildUserInfo(context, name, job),
+                                ),
+                              ],
+                            ),
+                          ),
+                          _buildTopControlButtons(context),
+                        ],
+                      ),
+                      // Removed the second avatar section
+                      const Spacer(), // This will push content down
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -350,18 +328,18 @@ class _HomeAppBarState extends State<HomeAppBar> {
           topRight: Radius.circular(20),
         ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 1.0,
-            spreadRadius: 0.0,
-            offset: Offset(2.0, 2.0), // shadow direction: bottom right
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 1.0,
-            spreadRadius: 0.0,
-            offset: Offset(-2.0, 3), // shadow direction: bottom right
-          ),
+          // BoxShadow(
+          //   color: Colors.black.withOpacity(0.3),
+          //   blurRadius: 1.0,
+          //   spreadRadius: 0.0,
+          //   offset: Offset(2.0, 2.0), // shadow direction: bottom right
+          // ),
+          // BoxShadow(
+          //   color: Colors.black.withOpacity(0.3),
+          //   blurRadius: 1.0,
+          //   spreadRadius: 0.0,
+          //   offset: Offset(-2.0, 3), // shadow direction: bottom right
+          // ),
         ],
       ),
       child: Image.asset("assets/images/lo.png"),
