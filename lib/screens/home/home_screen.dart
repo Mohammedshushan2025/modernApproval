@@ -2,7 +2,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
 import 'package:modernapproval/screens/approvals/approvals_screen.dart';
-import 'package:modernapproval/screens/approved/approved_screen.dart';
+import 'package:modernapproval/screens/approved/approved_requests_screen.dart';
 import 'package:modernapproval/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -314,7 +314,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ApprovedScreen(user: widget.user),
+                        builder:
+                            (context) =>
+                                ApprovedRequestsScreen(user: widget.user),
                       ),
                     );
                   },

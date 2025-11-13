@@ -9,16 +9,16 @@ import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/error_display.dart';
 
-class ApprovedScreen extends StatefulWidget {
+class ApprovedRequestsScreen extends StatefulWidget {
   final UserModel user;
 
-  const ApprovedScreen({super.key, required this.user});
+  const ApprovedRequestsScreen({super.key, required this.user});
 
   @override
-  State<ApprovedScreen> createState() => _ApprovedScreenState();
+  State<ApprovedRequestsScreen> createState() => _ApprovedRequestsScreenState();
 }
 
-class _ApprovedScreenState extends State<ApprovedScreen> {
+class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<ApprovedRequest>> _requestsFuture;
 
