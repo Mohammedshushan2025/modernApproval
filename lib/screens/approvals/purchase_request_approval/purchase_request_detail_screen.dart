@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import 'package:modernapproval/models/approval_status_response_model.dart';
 import 'package:modernapproval/models/purchase_request_det_model.dart';
 import 'package:modernapproval/models/purchase_request_mast_model.dart';
@@ -106,7 +105,30 @@ class _PurchaseRequestDetailScreenState
             icon: const Icon(Icons.print_outlined, color: Colors.white),
             onPressed:
                 _masterData != null && _detailData != null
-                    ? () => _printDocument(l)
+                    ? () async {
+                      try {
+                        await _printDocument(l, isArabic);
+                      } catch (e) {
+                        print("--- ❌ PDF PRINTING FAILED ---");
+                        print(e.toString());
+                        if (mounted) {
+                          String errorMessage =
+                              "حدث خطأ أثناء تجهيز ملف الطباعة.";
+                          if (e.toString().toLowerCase().contains(
+                            "unable to load asset",
+                          )) {
+                            errorMessage =
+                                "خطأ: ملفات الخطوط أو الصور غير موجودة.";
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMessage),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    }
                     : null,
           ),
         ],
@@ -401,7 +423,7 @@ class _PurchaseRequestDetailScreenState
                 return DataRow(
                   color: MaterialStateProperty.all(color),
                   cells: [
-                    DataCell(Text((++i).toString() ?? 'N/A')),
+                    DataCell(Text((++i).toString())),
                     DataCell(
                       SizedBox(
                         child: Text(
@@ -995,61 +1017,62 @@ class _PurchaseRequestDetailScreenState
     );
   }
 
-  Future<void> _printDocument(AppLocalizations l) async {
-    if (_masterData == null || _detailData == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('البيانات غير متوفرة للطباعة'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
+  // ========================================================
+  // 🎯 دالة الطباعة - بيانات ثابتة زي الصورة الثانية
+  // ========================================================
+  Future<void> _printDocument(AppLocalizations l, bool isArabic) async {
     try {
-      final isArabic = l.locale.languageCode == 'ar';
       final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
       final ttf = pw.Font.ttf(fontData);
 
-      final logoData = await rootBundle.load("assets/images/lo.png");
-      final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
-
-      final pdf = pw.Document();
+      pw.MemoryImage? logoImage;
+      try {
+        final logoData = await rootBundle.load("assets/images/lo.png");
+        logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+      } catch (e) {
+        print("⚠️ Logo not found");
+      }
 
       final headers = [
-        l.translate('group_name'),
-        l.translate('item_name'),
-        l.translate('unit_name'),
-        l.translate('quantity'),
-        l.translate('note'),
+        "م\nNO",
+        "البيان\nDescription",
+        "رقم الصنف\nPart No",
+        "الكمية\nQty",
+        "الوحدة\nUnit",
+        "رصيد\nالصنف",
+        "اخر سعر شراء\nLast Purch",
       ];
 
+      ///table items data
+      int rowNumber = 0;
       final data =
-          _detailData!
-              .map(
-                (item) => [
-                  item.groupName ?? 'N/A',
-                  isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-                  item.unitName ?? 'N/A',
-                  item.quantity?.toString() ?? 'N/A',
-                  item.note ?? 'N/A',
-                ],
-              )
-              .toList();
+          _detailData!.map((item) {
+            rowNumber++;
+            return [
+              rowNumber.toString(),
+              isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+              item.itemCode?.toString() ?? '',
+              item.quantity?.toString() ?? '0',
+              item.unitName ?? '',
+              '0',
+              item.last_pur?.toString() ?? '0',
+            ];
+          }).toList();
 
+      final pdf = pw.Document();
       pdf.addPage(
         pw.MultiPage(
-          textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
-          theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
-          pageFormat: PdfPageFormat.a4.landscape,
+          pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(20),
-          header: (context) => _buildPdfHeader(l, ttf, logoImage, isArabic),
-          footer: (context) => _buildPdfFooter(l, context, ttf),
+          textDirection: pw.TextDirection.rtl,
+          theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
           build:
               (context) => [
-                _buildPdfMasterInfo(l, ttf, isArabic),
-                pw.SizedBox(height: 20),
-                _buildPdfTable(l, headers, data, ttf, isArabic),
+                _buildFixedPdfHeader(ttf, logoImage),
+                pw.SizedBox(height: 10),
+                _buildPdfTable(headers, data, ttf),
+                pw.SizedBox(height: 10),
+                _buildFixedPdfFooter(ttf),
               ],
         ),
       );
@@ -1059,226 +1082,340 @@ class _PurchaseRequestDetailScreenState
       );
     } catch (e) {
       print("❌ Print Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('خطأ في الطباعة: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      rethrow;
     }
   }
 
-  pw.Widget _buildPdfHeader(
-    AppLocalizations l,
-    pw.Font ttf,
-    pw.MemoryImage logo,
-    bool isArabic,
-  ) {
-    final companyName =
-        isArabic
-            ? 'شركة المنشأت والمعدات الحديثة'
-            : 'Modern Structure & Equipment';
-
-    final reportTitle =
-        isArabic
-            ? 'تقرير اعتماد طلبات الشراء'
-            : 'Purchase Request Approval Report';
-
-    return pw.Container(
-      padding: const pw.EdgeInsets.only(bottom: 15),
-      margin: const pw.EdgeInsets.only(bottom: 15),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(color: PdfColor.fromInt(0xFF6C63FF), width: 2),
+  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo) {
+    return pw.Column(
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text(
+                  "وقت الإدخال: 12:27",
+                  style: pw.TextStyle(font: ttf, fontSize: 9),
+                ),
+                pw.Text(
+                  "تاريخ الإدخال: 15-04-2025",
+                  style: pw.TextStyle(font: ttf, fontSize: 9),
+                ),
+                pw.Text(
+                  "مدخل الحركة: ${widget.user.empName ?? 'اسم المستخدم'}",
+                  style: pw.TextStyle(font: ttf, fontSize: 9),
+                ),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "Requisition طلب شراء",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            if (logo != null)
+              pw.Image(logo, width: 60, height: 60)
+            else
+              pw.SizedBox(width: 60, height: 60),
+          ],
         ),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Column(
-            crossAxisAlignment:
-                isArabic
-                    ? pw.CrossAxisAlignment.end
-                    : pw.CrossAxisAlignment.start,
+        pw.SizedBox(height: 5),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(
+              "S / N NO :",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+              textDirection: pw.TextDirection.ltr,
+            ),
+            pw.Row(
+              children: [
+                pw.Text(
+                  "7",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(width: 5),
+                pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
+                pw.SizedBox(width: 5),
+                pw.Text(
+                  "1011004",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(width: 5),
+                pw.Text(
+                  ": رقم طلب الشراء",
+                  style: pw.TextStyle(font: ttf, fontSize: 10),
+                ),
+              ],
+            ),
+            pw.Text(
+              "تاريخه: 2025/04/15",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 8),
+        pw.Container(
+          padding: const pw.EdgeInsets.all(6),
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: PdfColors.black, width: 0.5),
+          ),
+          child: pw.Column(
             children: [
               pw.Text(
-                companyName,
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  font: ttf,
-                  fontSize: 20,
-                ),
+                "This form is to be used as requisition, but if signed and a P O number assigned, it may be used in Lieu of formal purchase order for filling confirmation of verbal orders for minor material items and general supplies.",
+                style: pw.TextStyle(font: ttf, fontSize: 7),
+                textDirection: pw.TextDirection.ltr,
+                textAlign: pw.TextAlign.center,
               ),
+              pw.SizedBox(height: 3),
               pw.Text(
-                reportTitle,
-                style: pw.TextStyle(
-                  font: ttf,
-                  fontSize: 16,
-                  color: PdfColors.grey700,
-                ),
+                "يمكن استخدام هذا النموذج كطلب شراء ولكن إذا تم التوقيع وتعيين رقم أمر توريد فيمكن استخدامه بدلاً من أمر الشراء الرسمي لملء تأكيد الطلبات اللفظية لبنود المواد الثانوية واللوازم العامة.",
+                style: pw.TextStyle(font: ttf, fontSize: 8),
+                textAlign: pw.TextAlign.center,
               ),
             ],
           ),
-          pw.Image(logo, width: 60, height: 60),
-        ],
-      ),
-    );
-  }
-
-  pw.Widget _buildPdfFooter(
-    AppLocalizations l,
-    pw.Context context,
-    pw.Font ttf,
-  ) {
-    return pw.Container(
-      alignment: pw.Alignment.center,
-      margin: const pw.EdgeInsets.only(top: 15),
-      padding: const pw.EdgeInsets.only(top: 10),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          top: pw.BorderSide(color: PdfColors.grey, width: 0.5),
         ),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(
-            '${l.translate('Printed by')}: ${widget.user.empName} | ${DateFormat('yyyy-MM-dd hh:mm a').format(DateTime.now())}',
-            style: pw.TextStyle(font: ttf, color: PdfColors.grey, fontSize: 9),
-          ),
-          pw.Text(
-            '${l.translate('Page')} ${context.pageNumber} ${l.translate('of')} ${context.pagesCount}',
-            style: pw.TextStyle(font: ttf, color: PdfColors.grey, fontSize: 9),
-          ),
-        ],
-      ),
-    );
-  }
 
-  pw.Widget _buildPdfMasterInfo(
-    AppLocalizations l,
-    pw.Font ttf,
-    bool isArabic,
-  ) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(12),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey200),
-        borderRadius: pw.BorderRadius.circular(8),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            l.translate('masterInfo'),
-            style: pw.TextStyle(
-              font: ttf,
-              fontSize: 16,
-              fontWeight: pw.FontWeight.bold,
+        pw.SizedBox(height: 3),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(""),
+
+            pw.Text(
+              "MSE-FO-PD-001",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
             ),
-          ),
-          pw.Divider(height: 10),
-          _pdfInfoText(
-            l.translate('store_name'),
-            _masterData?.storeName ?? 'N/A',
-            ttf,
-          ),
-          _pdfInfoText(
-            l.translate('req_date'),
-            _masterData?.formattedReqDate ?? 'N/A',
-            ttf,
-          ),
-          _pdfInfoText(
-            l.translate('item_name'),
-            isArabic ? (_masterData?.descA ?? '') : (_masterData?.descE ?? ''),
-            ttf,
-          ),
-        ],
-      ),
-    );
-  }
+            pw.Text("DOC NO :", style: pw.TextStyle(font: ttf, fontSize: 9)),
+          ],
+        ),
 
-  pw.Widget _buildPdfTable(
-    AppLocalizations l,
-    List<String> headers,
-    List<List<String>> data,
-    pw.Font ttf,
-    bool isArabic,
-  ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          l.translate('itemDetails'),
-          textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
-          style: pw.TextStyle(
-            font: ttf,
-            fontSize: 16,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-        pw.Divider(color: PdfColors.grey, height: 10),
-        pw.Table.fromTextArray(
-          headers: headers,
-          data: data,
-          border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-          headerStyle: pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.white,
-            font: ttf,
-            fontSize: 12,
-          ),
-          headerDecoration: const pw.BoxDecoration(
-            color: PdfColor.fromInt(0xFF6C63FF),
-          ),
-          cellHeight: 40,
-          cellStyle: pw.TextStyle(font: ttf, fontSize: 11),
-          headerAlignment:
-              isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
-          cellAlignment:
-              isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
-          cellAlignments: {
-            0: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
-            1: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
-            2: pw.Alignment.center,
-            3: pw.Alignment.center,
-            4: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
-          },
-          cellPadding: const pw.EdgeInsets.all(8),
-          columnWidths: {
-            0: const pw.FlexColumnWidth(2),
-            1: const pw.FlexColumnWidth(4),
-            2: const pw.FlexColumnWidth(1.5),
-            3: const pw.FlexColumnWidth(1),
-            4: const pw.FlexColumnWidth(2.5),
-          },
-          rowDecoration: const pw.BoxDecoration(
-            border: pw.Border(
-              bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+        pw.SizedBox(height: 1),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(""),
+            pw.Text(
+              "من طلب شراء آلي من طلب نواقص رقم 1011001/5 مكتب التوكيلات م/ حسين",
+              style: pw.TextStyle(font: ttf, fontSize: 8),
             ),
-          ),
-          oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
+            pw.Text(
+              "Required By Date :  15-04-2025",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
+          ],
         ),
+        pw.SizedBox(height: 3),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.end,
+          children: [
+            pw.Text(
+              ":تاريخ الطلب",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
+          ],
+        ),
+
+        pw.SizedBox(height: 3),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text(
+              ": المستودع / القطاع الطالب   1010101011001 مخزن مشتريات محلي - توكيلات - مخزن الشركة",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
+          ],
+        ),
+
+        pw.SizedBox(height: 3),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.end,
+          children: [
+            pw.Text(
+              "تاريخ الوصول المتوقع:",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 3),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.end,
+          children: [
+            pw.Text(
+              "طلب نواقص: 1011001\\5",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 3),
       ],
     );
   }
 
-  pw.Widget _pdfInfoText(String title, String value, pw.Font ttf) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 4),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.SizedBox(
-            width: 100,
-            child: pw.Text(
-              '$title: ',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: ttf),
-            ),
-          ),
-          pw.Expanded(child: pw.Text(value, style: pw.TextStyle(font: ttf))),
-        ],
+  pw.Widget _buildPdfTable(
+    List<String> headers,
+    List<List<String>> data,
+    pw.Font ttf,
+  ) {
+    return pw.Table.fromTextArray(
+      headers: headers,
+      data: data,
+      border: pw.TableBorder.all(color: PdfColors.black, width: 1),
+      headerStyle: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold,
+        font: ttf,
+        fontSize: 9,
       ),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+      cellStyle: pw.TextStyle(font: ttf, fontSize: 9),
+      cellHeight: 25,
+      headerAlignment: pw.Alignment.center,
+      cellAlignment: pw.Alignment.center,
+      cellAlignments: {
+        0: pw.Alignment.center,
+        1: pw.Alignment.centerRight,
+        2: pw.Alignment.center,
+        3: pw.Alignment.center,
+        4: pw.Alignment.center,
+        5: pw.Alignment.center,
+        6: pw.Alignment.center,
+      },
+      cellPadding: const pw.EdgeInsets.all(4),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(0.6),
+        1: const pw.FlexColumnWidth(2.5),
+        2: const pw.FlexColumnWidth(1.5),
+        3: const pw.FlexColumnWidth(0.8),
+        4: const pw.FlexColumnWidth(0.8),
+        5: const pw.FlexColumnWidth(0.8),
+        6: const pw.FlexColumnWidth(1),
+      },
+      oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
+    );
+  }
+
+  pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
+    return pw.Column(
+      children: [
+        pw.SizedBox(height: 10),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text(
+              "P O No. :",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+              textDirection: pw.TextDirection.ltr,
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 15),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Column(
+              children: [
+                pw.Text(
+                  "Dept. manager",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                  textDirection: pw.TextDirection.ltr,
+                ),
+                pw.SizedBox(height: 3),
+                pw.Text(
+                  "مدير الجهة الطالبة أو من ينوب عنة",
+                  style: pw.TextStyle(font: ttf, fontSize: 8),
+                ),
+                pw.SizedBox(height: 3),
+                pw.Text(
+                  widget.user.empName ?? '',
+                  style: pw.TextStyle(font: ttf, fontSize: 8),
+                ),
+                pw.SizedBox(height: 20),
+                pw.Container(width: 120, height: 1, color: PdfColors.black),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "Store keeper",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                  textDirection: pw.TextDirection.ltr,
+                ),
+                pw.SizedBox(height: 3),
+                pw.Text(
+                  "من المخزن:",
+                  style: pw.TextStyle(font: ttf, fontSize: 8),
+                ),
+                pw.SizedBox(height: 25),
+                pw.Container(width: 120, height: 1, color: PdfColors.black),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "المعتمد الأول",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 28),
+                pw.Container(width: 120, height: 1, color: PdfColors.black),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "المعتمد الثاني",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 28),
+                pw.Container(width: 120, height: 1, color: PdfColors.black),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
