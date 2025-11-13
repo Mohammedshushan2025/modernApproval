@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFC),
+      backgroundColor: Color(0xFF6C63FF).withOpacity(1),
       body: Stack(
         children: [
           FadeTransition(
@@ -160,12 +160,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           // Floating logo card positioned between appbar and content
-          Positioned(
-            top: 160, // Adjust this to position between appbar and content
-            left: 20,
-            right: 20,
-            child: _buildFloatingLogoCard(isRtl),
-          ),
+          // Positioned(
+          //   top: 160, // Adjust this to position between appbar and content
+          //   left: 20,
+          //   right: 20,
+          //   child: _buildFloatingLogoCard(isRtl),
+          // ),
         ],
       ),
     );
@@ -242,79 +242,103 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth < 360 ? 16.0 : 20.0;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      child: Column(
-        children: [
-          SizedBox(height: 16),
-
-          // Main Cards - All 4 buttons in single column
-          //with stats card and profile card
-          Column(
-            children: [
-              _buildMinimalCard(
-                title: isRtl ? 'الموافقات' : 'Approvals',
-                icon: Icons.approval_outlined,
-                count: _countsLoading ? '...' : _approvalsCount.toString(),
-                color: Color(0xFF00BFA6),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ApprovalsScreen(user: widget.user),
-                    ),
-                  );
-                },
-              ),
-              SizedBox(height: 12),
-              _buildMinimalCard(
-                title: isRtl ? 'التقارير' : 'Reports',
-                icon: Icons.analytics_outlined,
-                count: _countsLoading ? '...' : _reportsCount.toString(),
-                color: Color(0xFFFF6B6B),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ReportsScreen(user: widget.user),
-                    ),
-                  );
-                },
-              ),
-              SizedBox(height: 12),
-              _buildMinimalCard(
-                title: isRtl ? 'المعتمدة' : 'Approved',
-                icon: Icons.check_circle_outline,
-                count:
-                    _statsLoading
-                        ? '...'
-                        : (_dashboardStats?.countAuth.toString() ?? '0'),
-                color: Color(0xFF10B981),
-                onTap: () {
-                  // You can add navigation or action for approved stats if needed
-                },
-              ),
-              SizedBox(height: 12),
-              _buildMinimalCard(
-                title: isRtl ? 'المرفوضة' : 'Rejected',
-                icon: Icons.highlight_off,
-                count:
-                    _statsLoading
-                        ? '...'
-                        : (_dashboardStats?.countReject.toString() ?? '0'),
-                color: Color(0xFFFF6B6B),
-                onTap: () {
-                  // You can add navigation or action for rejected stats if needed
-                },
-              ),
-              SizedBox(height: 12),
-              _buildStatsCard(isRtl),
-              SizedBox(height: 12),
-              _buildProfileMinimalCard(isRtl, localizations),
-              SizedBox(height: 16), // Add bottom padding
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFF8B5CF6).withOpacity(0.8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.topRight,
+          colors: [
+            Colors.white.withOpacity(0.06),
+            Color(0xFF6C63FF).withOpacity(0.7),
+            const Color(0xFF8B5CF6).withOpacity(0.8),
+          ],
+          stops: const [0.0, 0.6, 1.0],
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          // color: Colors.red,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(25),
+            topLeft: Radius.circular(25),
           ),
-        ],
+        ),
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: Column(
+          children: [
+            SizedBox(height: 16),
+
+            // Main Cards - All 4 buttons in single column
+            //with stats card and profile card
+            Column(
+              children: [
+                _buildMinimalCard(
+                  title: isRtl ? 'الموافقات' : 'Approvals',
+                  icon: Icons.approval_outlined,
+                  count: _countsLoading ? '...' : _approvalsCount.toString(),
+                  color: Color(0xFF00BFA6),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ApprovalsScreen(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildMinimalCard(
+                  title: isRtl ? 'التقارير' : 'Reports',
+                  icon: Icons.analytics_outlined,
+                  count: _countsLoading ? '...' : _reportsCount.toString(),
+                  color: Color(0xFFFF6B6B),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReportsScreen(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildMinimalCard(
+                  title: isRtl ? 'المعتمدة' : 'Approved',
+                  icon: Icons.check_circle_outline,
+                  count:
+                      _statsLoading
+                          ? '...'
+                          : (_dashboardStats?.countAuth.toString() ?? '0'),
+                  color: Color(0xFF10B981),
+                  onTap: () {
+                    // You can add navigation or action for approved stats if needed
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildMinimalCard(
+                  title: isRtl ? 'المرفوضة' : 'Rejected',
+                  icon: Icons.highlight_off,
+                  count:
+                      _statsLoading
+                          ? '...'
+                          : (_dashboardStats?.countReject.toString() ?? '0'),
+                  color: Color(0xFFFF6B6B),
+                  onTap: () {
+                    // You can add navigation or action for rejected stats if needed
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildStatsCard(isRtl),
+                SizedBox(height: 12),
+                _buildProfileMinimalCard(isRtl, localizations),
+                SizedBox(height: 16), // Add bottom padding
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
