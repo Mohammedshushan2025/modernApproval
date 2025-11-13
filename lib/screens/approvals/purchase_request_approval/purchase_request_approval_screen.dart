@@ -32,6 +32,7 @@ class _PurchaseRequestApprovalScreenState
   DateTime? _selectedDate;
   List<PurchaseRequest> _filteredRequests = [];
   bool _showFilters = false;
+  List<String> _availableStoreNames = [];
 
   // ألوان واضحة وقوية
   final List<Color> _cardColors = [
@@ -59,6 +60,18 @@ class _PurchaseRequestApprovalScreenState
     });
   }
 
+  void _extractStoreNames(List<PurchaseRequest> requests) {
+    final storeNames =
+        requests
+            .map((request) => request.store_name ?? '')
+            .where((storeName) => storeName.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+    _availableStoreNames = [''] + storeNames;
+  }
+
   void _applyFilters(List<PurchaseRequest> allRequests) {
     setState(() {
       _filteredRequests =
@@ -73,9 +86,7 @@ class _PurchaseRequestApprovalScreenState
 
             // Apply store name filter only if it's not empty
             if (_storeNameFilter.isNotEmpty) {
-              matchesStoreName = (request.store_name ?? '')
-                  .toLowerCase()
-                  .contains(_storeNameFilter.toLowerCase());
+              matchesStoreName = (request.store_name ?? '') == _storeNameFilter;
             }
 
             // Apply date filter only if a date is selected
@@ -146,10 +157,10 @@ class _PurchaseRequestApprovalScreenState
       ),
       child: Column(
         children: [
-          // Store name filter
+          // Store name filter - DropdownMenu
           SizedBox(
             height: 46,
-            child: TextField(
+            child: InputDecorator(
               decoration: InputDecoration(
                 labelText: l.translate('filter_by_store_name'),
                 prefixIcon: Icon(Icons.store, size: 20),
@@ -161,12 +172,43 @@ class _PurchaseRequestApprovalScreenState
                   vertical: 8,
                 ),
               ),
-              onChanged: (value) {
-                setState(() {
-                  _storeNameFilter = value;
-                });
-                _requestsFuture.then((data) => _applyFilters(data));
-              },
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _storeNameFilter.isEmpty ? null : _storeNameFilter,
+                  isExpanded: true,
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.grey.shade600,
+                  ),
+                  hint: Text(
+                    l.translate('select_store'),
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  items:
+                      _availableStoreNames.map((String storeName) {
+                        return DropdownMenuItem<String>(
+                          value: storeName.isEmpty ? null : storeName,
+                          child: Text(
+                            storeName.isEmpty
+                                ? l.translate('all_stores')
+                                : storeName,
+                            style: TextStyle(
+                              color:
+                                  storeName.isEmpty
+                                      ? Colors.grey.shade500
+                                      : Colors.black87,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _storeNameFilter = newValue ?? '';
+                    });
+                    _requestsFuture.then((data) => _applyFilters(data));
+                  },
+                ),
+              ),
             ),
           ),
 
@@ -334,13 +376,21 @@ class _PurchaseRequestApprovalScreenState
 
                 final allRequests = snapshot.data!;
 
+                // Extract store names when data loads
+                if (_availableStoreNames.isEmpty) {
+                  _extractStoreNames(allRequests);
+                }
+
                 // Apply filters when data loads or when filtered list is empty
                 if (_filteredRequests.isEmpty &&
                     _storeNameFilter.isEmpty &&
                     _selectedDate == null) {
-                  _filteredRequests = allRequests;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    setState(() {
+                      _filteredRequests = allRequests;
+                    });
+                  });
                 }
-
                 final displayRequests =
                     _showFilters &&
                             (_storeNameFilter.isNotEmpty ||

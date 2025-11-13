@@ -267,5 +267,7 @@
   "confirmRejection": "Confirm Rejection",
   "rejectConfirmationMessage": "Are you sure you want to reject this purchase request?",
   "confirmReject": "Confirm Rejection",
-  "approvedRequests": "Approved Requests"
+  "approvedRequests": "Approved Requests",
+  "all_stores": "All Stores",
+  "select_store": "Select Store"
 }
