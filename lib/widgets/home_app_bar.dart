@@ -190,19 +190,19 @@ class _HomeAppBarState extends State<HomeAppBar> {
           themeColor,
         ),
       ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(0),
-        child: Container(
-          height: 25,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(25),
-              topRight: Radius.circular(25),
-            ),
-          ),
-        ),
-      ),
+      // bottom: PreferredSize(
+      //   preferredSize: const Size.fromHeight(0),
+      //   child: Container(
+      //     height: 25,
+      //     decoration: const BoxDecoration(
+      //       color: Color(0xFFF8F9FA),
+      //       borderRadius: BorderRadius.only(
+      //         topLeft: Radius.circular(25),
+      //         topRight: Radius.circular(25),
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 
@@ -216,12 +216,12 @@ class _HomeAppBarState extends State<HomeAppBar> {
     return Stack(
       children: [
         // Logo background with opacity
-        // Positioned.fill(
-        //   child: Opacity(
-        //     opacity: 0.6,
-        //     child: Image.asset("assets/images/lo.png", fit: BoxFit.contain),
-        //   ),
-        // ),
+        Positioned.fill(
+          child: Opacity(
+            opacity: 1,
+            child: Image.asset("assets/images/lo.png", fit: BoxFit.contain),
+          ),
+        ),
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
