@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       ///uncomment this to make the logo fit more with the design
-      backgroundColor: Color(0xFF6C63FF).withOpacity(1),
+      // backgroundColor: Color(0xFF6C63FF).withOpacity(1),
       body: Stack(
         children: [
           FadeTransition(
@@ -248,12 +248,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.topRight,
-          colors: [
-            Colors.white.withOpacity(0.06),
-            Color(0xFF6C63FF).withOpacity(0.7),
-            const Color(0xFF8B5CF6).withOpacity(0.8),
-          ],
-          stops: const [0.0, 0.6, 1.0],
+          colors: [Color(0xFF6C63FF), const Color(0xFF8B5CF6)],
+          stops: const [0.0, 1.0],
         ),
       ),
       child: Container(
