@@ -269,6 +269,7 @@
   "rejectConfirmationMessage": "هل أنت متأكد من أنك تريد رفض طلب الشراء هذا؟",
   "confirmReject": "تأكيد الرفض",
   "approvedRequests": "الطلبات المعتمدة",
+  "rejectedRequests": "الطلبات المرفوضة",
   "all_stores": "جميع المخازن",
   "select_store": "اختر المخزن"
 }

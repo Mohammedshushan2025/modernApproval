@@ -7,16 +7,16 @@ import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/error_display.dart';
 
-class ApprovedRequestsScreen extends StatefulWidget {
+class RejectedRequestsScreen extends StatefulWidget {
   final UserModel user;
 
-  const ApprovedRequestsScreen({super.key, required this.user});
+  const RejectedRequestsScreen({super.key, required this.user});
 
   @override
-  State<ApprovedRequestsScreen> createState() => _ApprovedRequestsScreenState();
+  State<RejectedRequestsScreen> createState() => _RejectedRequestsScreenState();
 }
 
-class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
+class _RejectedRequestsScreenState extends State<RejectedRequestsScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<RequestItem>> _requestsFuture;
 
@@ -46,7 +46,7 @@ class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
     setState(() {
       _requestsFuture = _apiService.getApprovedOrRejectedRequests(
         userId: widget.user.usersCode,
-        isApprove: true,
+        isApprove: false,
       );
     });
   }
@@ -272,7 +272,7 @@ class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        title: l.translate('approvedRequests'),
+        title: l.translate('rejectedRequests'),
         filterWidget: _buildFilterWidget(),
       ),
       backgroundColor: const Color(0xFFF5F7FA),
@@ -428,7 +428,7 @@ class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
                           ),
                           itemCount: displayRequests.length,
                           itemBuilder: (context, index) {
-                            return _buildApprovedRequestCard(
+                            return _buildRejectedRequestCard(
                               context,
                               displayRequests[index],
                               index,
@@ -447,7 +447,7 @@ class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
                   ),
                   itemCount: displayRequests.length,
                   itemBuilder: (context, index) {
-                    return _buildApprovedRequestCard(
+                    return _buildRejectedRequestCard(
                       context,
                       displayRequests[index],
                       index,
@@ -462,7 +462,8 @@ class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
     );
   }
 
-  Widget _buildApprovedRequestCard(
+  //todo refactor this card because it's used in multiple screens , so make it unique to avoid redundant code
+  Widget _buildRejectedRequestCard(
     BuildContext context,
     RequestItem request,
     int index,

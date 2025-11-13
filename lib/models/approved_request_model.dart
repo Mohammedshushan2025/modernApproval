@@ -1,6 +1,7 @@
 import '../utils/package_utility.dart';
 
-class ApprovedRequest {
+///this class is for either Approval requests or Rejected requests
+class RequestItem {
   int? systemNumber;
   int? fileSerial;
   int? usersCode;
@@ -11,7 +12,7 @@ class ApprovedRequest {
   int? storeCode;
   String? storeName;
 
-  ApprovedRequest({
+  RequestItem({
     this.systemNumber,
     this.fileSerial,
     this.usersCode,
@@ -23,8 +24,8 @@ class ApprovedRequest {
     this.storeName,
   });
 
-  factory ApprovedRequest.fromJson(Map<String, dynamic> json) {
-    return ApprovedRequest(
+  factory RequestItem.fromJson(Map<String, dynamic> json) {
+    return RequestItem(
       systemNumber: json['system_number'],
       fileSerial: json['file_serial'],
       usersCode: json['users_code'],

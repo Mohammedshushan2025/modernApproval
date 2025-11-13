@@ -6,6 +6,7 @@ import 'package:modernapproval/screens/approved/approved_requests_screen.dart';
 import 'package:modernapproval/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:modernapproval/screens/rejected/rejected_requests_screen.dart';
 import 'package:modernapproval/screens/reports/reports_screen.dart';
 import 'package:modernapproval/services/api_service.dart';
 import '../../models/user_model.dart';
@@ -331,7 +332,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           : (_dashboardStats?.countReject.toString() ?? '0'),
                   color: Color(0xFFFF6B6B),
                   onTap: () {
-                    // You can add navigation or action for rejected stats if needed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                RejectedRequestsScreen(user: widget.user),
+                      ),
+                    );
                   },
                 ),
                 SizedBox(height: 12),

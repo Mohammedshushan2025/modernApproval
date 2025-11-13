@@ -150,22 +150,27 @@ class ApiService {
     }
   }
 
-  Future<List<ApprovedRequest>> getApprovedRequests({
+  Future<List<RequestItem>> getApprovedOrRejectedRequests({
     required int userId,
+    required bool isApprove,
   }) async {
-    // final queryParams = {'user_id': userId.toString()};
-
-    final url = Uri.parse(
-      '$_baseUrl/get_last_approve_by_user/${userId.toString()}',
-    );
-    print('Fetching Approved requests from: $url');
+    late final url;
+    if (isApprove) {
+      url = Uri.parse(
+        '$_baseUrl/get_last_approve_by_user/${userId.toString()}',
+      );
+      print('Fetching Approved requests from: $url');
+    } else {
+      url = Uri.parse('$_baseUrl/get_last_reject_by_user/${userId.toString()}');
+      print('Fetching Rejected requests from: $url');
+    }
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) return [];
-        return items.map((item) => ApprovedRequest.fromJson(item)).toList();
+        return items.map((item) => RequestItem.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
