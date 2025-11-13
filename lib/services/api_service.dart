@@ -1,9 +1,10 @@
-
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/approved_request_model.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
 import 'package:modernapproval/models/password_group_model.dart';
@@ -13,8 +14,8 @@ import '../models/purchase_request_mast_model.dart';
 import '../models/user_model.dart';
 
 class ApiService {
-
-  final String _baseUrl = "http://195.201.241.253:7001/ords/modern_test/Approval";
+  final String _baseUrl =
+      "http://195.201.241.253:7001/ords/modern_test/Approval";
 
   Future<List<UserModel>> getAllUsers() async {
     final response = await http.get(Uri.parse('$_baseUrl/all_emp'));
@@ -122,8 +123,9 @@ class ApiService {
       'password_number': passwordNumber.toString(),
       'role_id': roleId.toString(),
     };
-    final url = Uri.parse('$_baseUrl/GET_PUR_REQUEST_AUTH')
-        .replace(queryParameters: queryParams);
+    final url = Uri.parse(
+      '$_baseUrl/GET_PUR_REQUEST_AUTH',
+    ).replace(queryParameters: queryParams);
     print('Fetching purchase requests from: $url');
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
@@ -148,6 +150,38 @@ class ApiService {
     }
   }
 
+  Future<List<ApprovedRequest>> getApprovedRequests({
+    required int userId,
+  }) async {
+    // final queryParams = {'user_id': userId.toString()};
+
+    final url = Uri.parse(
+      '$_baseUrl/get_last_approve_by_user/${userId.toString()}',
+    );
+    print('Fetching Approved requests from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) return [];
+        return items.map((item) => ApprovedRequest.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred: $e');
+      throw Exception('serverError');
+    }
+  }
+
   Future<PurchaseRequestMaster> getPurchaseRequestMaster({
     required int trnsTypeCode,
     required int trnsSerial,
@@ -156,8 +190,9 @@ class ApiService {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
     };
-    final url = Uri.parse('$_baseUrl/get_pur_request_mast')
-        .replace(queryParameters: queryParams);
+    final url = Uri.parse(
+      '$_baseUrl/get_pur_request_mast',
+    ).replace(queryParameters: queryParams);
     print('Fetching purchase request master from: $url');
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 20));
@@ -192,8 +227,9 @@ class ApiService {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
     };
-    final url = Uri.parse('$_baseUrl/get_pur_request_det')
-        .replace(queryParameters: queryParams);
+    final url = Uri.parse(
+      '$_baseUrl/get_pur_request_det',
+    ).replace(queryParameters: queryParams);
     print('Fetching purchase request details from: $url');
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
@@ -201,7 +237,9 @@ class ApiService {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) return [];
-        return items.map((item) => PurchaseRequestDetail.fromJson(item)).toList();
+        return items
+            .map((item) => PurchaseRequestDetail.fromJson(item))
+            .toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
@@ -222,20 +260,24 @@ class ApiService {
 
   // دالة مجمعة للتعامل مع الأخطاء
   Future<http.Response> _handleApiCall(
-      Future<http.Response> Function() apiCall, String stageName, String? body) async {
+    Future<http.Response> Function() apiCall,
+    String stageName,
+    String? body,
+  ) async {
     try {
       final response = await apiCall().timeout(const Duration(seconds: 30));
       print("✅ $stageName - Success - Status Code: ${response.statusCode}");
       // طباعة الجسم فقط لو مش GET
-      if(body != null) {
+      if (body != null) {
         print("✅ $stageName - Sent Body: $body");
       }
       print("✅ $stageName - Response Body: ${response.body}");
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw http.ClientException(
-            "$stageName Error: Invalid response status code ${response.statusCode} | Body: ${response.body}",
-            response.request?.url);
+          "$stageName Error: Invalid response status code ${response.statusCode} | Body: ${response.body}",
+          response.request?.url,
+        );
       }
       return response;
     } on SocketException {
@@ -266,14 +308,18 @@ class ApiService {
       'auth_pk2': authPk2,
       'actual_status': actualStatus.toString(),
     };
-    final url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS')
-        .replace(queryParameters: queryParams);
+    final url = Uri.parse(
+      '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+    ).replace(queryParameters: queryParams);
 
     print("--- 🚀 Stage 1 (GET) ---");
     print("🚀 Calling: $url");
 
     final response = await _handleApiCall(
-            () => http.get(url), "Stage 1 (GET)", null);
+      () => http.get(url),
+      "Stage 1 (GET)",
+      null,
+    );
 
     final data = json.decode(response.body);
     if (data['items'] == null || (data['items'] as List).isEmpty) {
@@ -302,7 +348,10 @@ class ApiService {
     print("🚀 Calling: $url");
 
     await _handleApiCall(
-            () => http.put(url, headers: headers, body: body), "Stage 3 (PUT)", body);
+      () => http.put(url, headers: headers, body: body),
+      "Stage 3 (PUT)",
+      body,
+    );
   }
 
   // --- المرحلة الرابعة: PUT ---
@@ -315,7 +364,10 @@ class ApiService {
     print("🚀 Calling: $url");
 
     await _handleApiCall(
-            () => http.put(url, headers: headers, body: body), "Stage 4 (PUT)", body);
+      () => http.put(url, headers: headers, body: body),
+      "Stage 4 (PUT)",
+      body,
+    );
   }
 
   // --- المرحلة الخامسة: DELETE ---
@@ -328,7 +380,10 @@ class ApiService {
     print("🚀 Calling: $url");
 
     await _handleApiCall(
-            () => http.delete(url, headers: headers, body: body), "Stage 5 (DELETE)", body);
+      () => http.delete(url, headers: headers, body: body),
+      "Stage 5 (DELETE)",
+      body,
+    );
   }
 
   // --- المرحلة السادسة: POST (Conditional) ---
@@ -341,10 +396,11 @@ class ApiService {
     print("🚀 Calling: $url");
 
     await _handleApiCall(
-            () => http.post(url, headers: headers, body: body), "Stage 6 (POST)", body);
+      () => http.post(url, headers: headers, body: body),
+      "Stage 6 (POST)",
+      body,
+    );
   }
-
-
 
   Future<DashboardStats> getDashboardStats(int userId) async {
     final url = Uri.parse('$_baseUrl/get_dashboard_variable/$userId');
@@ -356,12 +412,13 @@ class ApiService {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) {
-
           return DashboardStats(countAuth: 0, countReject: 0);
         }
         return DashboardStats.fromJson(items.first);
       } else {
-        print('Server Error fetching stats: ${response.statusCode}, Body: ${response.body}');
+        print(
+          'Server Error fetching stats: ${response.statusCode}, Body: ${response.body}',
+        );
         throw Exception('serverError');
       }
     } on SocketException {
@@ -375,5 +432,4 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-
 }

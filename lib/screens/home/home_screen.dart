@@ -2,6 +2,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
 import 'package:modernapproval/screens/approvals/approvals_screen.dart';
+import 'package:modernapproval/screens/approved/approved_screen.dart';
 import 'package:modernapproval/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -310,7 +311,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           : (_dashboardStats?.countAuth.toString() ?? '0'),
                   color: Color(0xFF10B981),
                   onTap: () {
-                    // You can add navigation or action for approved stats if needed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ApprovedScreen(user: widget.user),
+                      ),
+                    );
                   },
                 ),
                 SizedBox(height: 12),

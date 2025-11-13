@@ -267,5 +267,6 @@
   "confirmApprove": "تأكيد الموافقة",
   "confirmRejection": "تأكيد الرفض",
   "rejectConfirmationMessage": "هل أنت متأكد من أنك تريد رفض طلب الشراء هذا؟",
-  "confirmReject": "تأكيد الرفض"
+  "confirmReject": "تأكيد الرفض",
+  "approvedRequests": "الطلبات المعتمدة"
 }
