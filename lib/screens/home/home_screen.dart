@@ -142,6 +142,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
+      ///uncomment this to make the logo fit more with the design
       backgroundColor: Color(0xFF6C63FF).withOpacity(1),
       body: Stack(
         children: [
@@ -241,7 +242,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final localizations = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth < 360 ? 16.0 : 20.0;
-
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF8B5CF6).withOpacity(0.8),
@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onTap: onTap,
       child: Container(
         width: double.infinity, // Ensure full width
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
