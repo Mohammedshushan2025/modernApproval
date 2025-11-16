@@ -306,6 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 _buildMinimalCard(
                   title: isRtl ? 'المعتمدة' : 'Approved',
                   icon: Icons.check_circle_outline,
+                  showNotification: false,
                   count:
                       _statsLoading
                           ? '...'
@@ -326,6 +327,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 _buildMinimalCard(
                   title: isRtl ? 'المرفوضة' : 'Rejected',
                   icon: Icons.highlight_off,
+                  showNotification: false,
                   count:
                       _statsLoading
                           ? '...'
@@ -361,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     required String count,
     required Color color,
     required VoidCallback onTap,
+    bool showNotification = true,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -396,28 +399,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 // Notification badge
                 if (count != '0' && count != '...')
-                  Positioned(
-                    top: -6,
-                    right: -6,
-                    child: Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      constraints: BoxConstraints(minWidth: 20, minHeight: 20),
-                      child: Text(
-                        count,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                  showNotification
+                      ? Positioned(
+                        top: -6,
+                        right: -6,
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF6C63FF).withOpacity(0.6),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Color(0xFF6C63FF).withOpacity(0.6),
+                              width: 2,
+                            ),
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 20,
+                            minHeight: 20,
+                          ),
+                          child: Text(
+                            count,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+                      )
+                      : SizedBox(),
               ],
             ),
             SizedBox(width: 12),
