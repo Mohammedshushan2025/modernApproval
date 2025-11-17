@@ -406,12 +406,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Container(
                           padding: EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Color(0xFF6C63FF).withOpacity(0.6),
+                            color: Colors.red.withOpacity(1),
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Color(0xFF6C63FF).withOpacity(0.6),
-                              width: 2,
-                            ),
+                            // border: Border.all(
+                            //   color: Colors.white.withOpacity(0.6),
+                            //   width: 2,
+                            // ),
                           ),
                           constraints: BoxConstraints(
                             minWidth: 20,
