@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_model.dart';
+import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_detail_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_detail_screen.dart';
 import '../../../app_localizations.dart';
 import '../../../models/purchase_request_model.dart';
@@ -494,12 +495,11 @@ class _PurchaseOrderApprovalScreenState extends State<PurchaseOrderApprovalScree
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            //todo create request detail screen for purchase order
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder:
-                    (context) => PurchaseRequestDetailScreen(
+                    (context) => PurchaseOrderDetailScreen(
                   user: widget.user,
                   request: request,
                 ),
