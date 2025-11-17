@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modernapproval/models/approval_status_response_model.dart';
+import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_model.dart';
-import 'package:modernapproval/models/purchase_request_det_model.dart';
-import 'package:modernapproval/models/purchase_request_mast_model.dart';
-import 'package:modernapproval/models/purchase_request_model.dart';
 import 'package:modernapproval/models/user_model.dart';
 import 'package:modernapproval/services/api_service.dart';
 import 'package:modernapproval/widgets/error_display.dart';
@@ -16,6 +14,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/rendering.dart' show TextDirection;
+
+import '../../../models/approvals/purchase_order/purchase_request_det_model.dart';
 
 class PurchaseOrderDetailScreen extends StatefulWidget {
   final UserModel user;
@@ -34,8 +34,8 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
   final ApiService _apiService = ApiService();
   late Future<Map<String, dynamic>> _detailsFuture;
 
-  PurchaseRequestMaster? _masterData;
-  List<PurchaseRequestDetail>? _detailData;
+  PurchaseOrderMaster? _masterData;
+  List<PurchaseOrderDetail>? _detailData;
 
   bool _isSubmitting = false;
 
@@ -48,19 +48,19 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
   Future<Map<String, dynamic>> _loadAllDetails() async {
     try {
       final results = await Future.wait([
-        _apiService.getPurchaseRequestMaster(
+        _apiService.getPurchaseOrderMaster(
           trnsTypeCode: widget.request.trnsTypeCode,
           trnsSerial: widget.request.trnsSerial,
         ),
-        _apiService.getPurchaseRequestDetail(
+        _apiService.getPurchaseOrderDetail(
           trnsTypeCode: widget.request.trnsTypeCode,
           trnsSerial: widget.request.trnsSerial,
         ),
       ]);
 
       setState(() {
-        _masterData = results[0] as PurchaseRequestMaster;
-        _detailData = results[1] as List<PurchaseRequestDetail>;
+        _masterData = results[0] as PurchaseOrderMaster;
+        _detailData = results[1] as List<PurchaseOrderDetail>;
       });
 
       return {'master': _masterData, 'detail': _detailData};
@@ -83,7 +83,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
-        title: Text(l.translate('requestDetails')),
+        title: Text(l.translate('orderDetails')),
         backgroundColor: const Color(0xFF6C63FF),
         actions: [
           IconButton(
@@ -156,9 +156,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               }
 
               final masterData =
-              snapshot.data!['master'] as PurchaseRequestMaster;
+              snapshot.data!['master'] as PurchaseOrderMaster;
               final detailData =
-              snapshot.data!['detail'] as List<PurchaseRequestDetail>;
+              snapshot.data!['detail'] as List<PurchaseOrderDetail>;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -203,7 +203,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
 
   Widget _buildCompactMasterSection(
       AppLocalizations l,
-      PurchaseRequestMaster master,
+      PurchaseOrderMaster master,
       bool isArabic,
       ) {
     return Card(
@@ -358,7 +358,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
 
   Widget _buildModernDetailTable(
       AppLocalizations l,
-      List<PurchaseRequestDetail> details,
+      List<PurchaseOrderDetail> details,
       bool isArabic,
       ) {
     final columns = [
@@ -433,7 +433,8 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                     DataCell(Text(item.itemCode?.toString() ?? 'N/A')),
                     DataCell(Text(item.quantity?.toString() ?? 'N/A')),
                     DataCell(Text(item.unitName ?? 'N/A')),
-                    DataCell(Text(item.last_pur?.toString() ?? 'N/A')),
+                    //todo removeing last pur till it come back from endpoint
+                    // DataCell(Text(item.last_pur?.toString() ?? 'N/A')),
                   ],
                 );
               }),
@@ -893,6 +894,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
 
     try {
       print("--- 🚀 Starting Approval Process (Status: $actualStatus) ---");
+      //todo update stage 1 here for order
       final ApprovalStatusResponse s1 = await _apiService.stage1_getStatus(
         userId: userId,
         roleCode: roleCode,
@@ -915,6 +917,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       );
       if (lastLevel == 1 && trnsStatus == 1) {
         print("--- 🚀 Condition Met (Stage 3) ---");
+        //todo update this stage for order
         await _apiService.stage3_checkLastLevel(
           userId: userId,
           authPk1: authPk1,
@@ -934,6 +937,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         "auth_pk2": authPk2,
         "trns_status": trnsStatus,
       };
+      //todo update stage 4 for order
       await _apiService.stage4_updateStatus(stage4Body);
 
       final Map<String, dynamic> stage5Body = {
@@ -942,6 +946,8 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         "prev_ser": prevSerOriginal,
         "prev_level": prevLevelS1,
       };
+
+      //todo update stage 5 for order
       await _apiService.stage5_deleteStatus(stage5Body);
 
       print(
@@ -960,6 +966,8 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           "auth_pk4": s1.authPk4,
           "auth_pk5": s1.authPk5,
         };
+
+        //todo update stage 6 for order
         await _apiService.stage6_postFinalStatus(stage6Body);
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
@@ -1051,7 +1059,8 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           item.quantity?.toString() ?? '0',
           item.unitName ?? '',
           '0',
-          item.last_pur?.toString() ?? '0',
+          //todo removing last pur for now till it come back from end point
+          // item.last_pur?.toString() ?? '0',
         ];
       }).toList();
 

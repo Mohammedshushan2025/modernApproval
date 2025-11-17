@@ -271,5 +271,6 @@
   "rejectedRequests": "Rejected Requests",
   "all_stores": "All Stores",
   "select_store": "Select Store",
-  "purchaseOrderApproval":"Purchase Order Approval"
+  "purchaseOrderApproval":"Purchase Order Approval",
+  "orderDetails": "Order Details"
 }
