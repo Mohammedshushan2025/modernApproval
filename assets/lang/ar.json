@@ -271,5 +271,7 @@
   "approvedRequests": "الطلبات المعتمدة",
   "rejectedRequests": "الطلبات المرفوضة",
   "all_stores": "جميع المخازن",
-  "select_store": "اختر المخزن"
+  "select_store": "اختر المخزن",
+  "purchaseOrderApproval":"اعتماد امر التوريد"
+
 }

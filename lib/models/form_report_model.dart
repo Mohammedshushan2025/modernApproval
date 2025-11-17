@@ -25,4 +25,14 @@ class FormReportItem {
       type: json['type'],
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'page_id': pageId,
+      'page_name': pageName,
+      'page_name_e': pageNameE,
+      'ord': ord,
+      'type': type,
+    };
+  }
 }

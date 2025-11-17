@@ -9,6 +9,7 @@ import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
 import 'package:modernapproval/models/password_group_model.dart';
 import 'package:modernapproval/models/purchase_request_model.dart';
+import '../models/approvals/purchase_order/purchase_order_model.dart';
 import '../models/purchase_request_det_model.dart';
 import '../models/purchase_request_mast_model.dart';
 import '../models/user_model.dart';
@@ -24,7 +25,6 @@ class ApiService {
       final data = json.decode(response.body);
       final List<dynamic> items = data['items'];
       print("Data is $items");
-
       List<UserModel> users = [];
       for (var item in items) {
         try {
@@ -117,7 +117,8 @@ class ApiService {
     required int userId,
     required int roleId,
     required int passwordNumber,
-  }) async {
+  }) async
+  {
     final queryParams = {
       'user_id': userId.toString(),
       'password_number': passwordNumber.toString(),
@@ -153,7 +154,8 @@ class ApiService {
   Future<List<RequestItem>> getApprovedOrRejectedRequests({
     required int userId,
     required bool isApprove,
-  }) async {
+  }) async
+  {
     late final url;
     if (isApprove) {
       url = Uri.parse(
@@ -437,4 +439,49 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+//todo change this void to Future<List<"class_purchase_order">>
+  Future<List<PurchaseOrder>> getPurchaseOrders({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async
+  {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/get_pur_po_order_auth',
+    ).replace(queryParameters: queryParams);
+    print('Fetching purchase Orders from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        log("data");
+        log(data.toString());
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        // log(items.toString(),name: "Purchase order Raw");
+        return items.map((item) => PurchaseOrder.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred: $e');
+      throw Exception('serverError');
+    }
+  }
+
 }
