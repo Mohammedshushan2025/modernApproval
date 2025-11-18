@@ -2,7 +2,7 @@
 class UserModel {
   final int usersCode;
   final String password;
-  final String empName;
+  final String? empName;
   final String? empNameE;
   final String? role_name_a;
   final String? role_name_e;

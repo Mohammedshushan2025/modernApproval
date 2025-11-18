@@ -170,7 +170,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
     final String displayName =
         (isRtl ? widget.user.empName : widget.user.empNameE) ??
-        widget.user.empName;
+        widget.user.empName??'';
     final String displayJob =
         (isRtl ? widget.user.role_name_a : widget.user.role_name_e) ??
         widget.user.role_name_a ??
