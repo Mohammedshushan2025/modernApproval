@@ -497,7 +497,7 @@ class ApiService {
     final url = Uri.parse(
       '$_baseUrl/get_pur_po_order_mast',
     ).replace(queryParameters: queryParams);
-    print('Fetching purchase request master from: $url');
+    print('Fetching purchase order master from: $url');
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
@@ -535,7 +535,7 @@ class ApiService {
     final url = Uri.parse(
       '$_baseUrl/get_pur_po_order_det',
     ).replace(queryParameters: queryParams);
-    print('Fetching purchase request details from: $url');
+    print('Fetching purchase order details from: $url');
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
