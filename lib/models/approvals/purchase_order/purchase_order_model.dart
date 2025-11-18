@@ -17,7 +17,7 @@ class PurchaseOrder {
   final String authPk2;
   final int? lastLevel;
   final String? trnsFlag;
-  final String? trnsStatus;
+  final int? trnsStatus;
 
   PurchaseOrder({
     required this.trnsTypeCode,

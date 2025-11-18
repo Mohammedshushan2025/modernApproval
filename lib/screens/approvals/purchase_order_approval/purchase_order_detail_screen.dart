@@ -367,7 +367,6 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       l.translate("item_number"),
       l.translate('quantity'),
       l.translate('unit_name'),
-      l.translate("last_price"),
     ];
     int i = 0;
     return Column(
@@ -433,8 +432,6 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                     DataCell(Text(item.itemCode?.toString() ?? 'N/A')),
                     DataCell(Text(item.quantity?.toString() ?? 'N/A')),
                     DataCell(Text(item.unitName ?? 'N/A')),
-                    //todo removeing last pur till it come back from endpoint
-                    // DataCell(Text(item.last_pur?.toString() ?? 'N/A')),
                   ],
                 );
               }),
@@ -901,6 +898,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         authPk1: authPk1,
         authPk2: authPk2,
         actualStatus: actualStatus,
+        approvalType: "pur_order"
       );
 
       final int trnsStatus = s1.trnsStatus;
@@ -922,6 +920,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           userId: userId,
           authPk1: authPk1,
           authPk2: authPk2,
+            approvalType: "pur_order"
         );
       } else {
         print("--- ⏩ Skipping Stage 3 (Condition Not Met) ---");
@@ -938,7 +937,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         "trns_status": trnsStatus,
       };
       //todo update stage 4 for order
-      await _apiService.stage4_updateStatus(stage4Body);
+      await _apiService.stage4_updateStatus(stage4Body, "pur_order");
 
       final Map<String, dynamic> stage5Body = {
         "auth_pk1": authPk1,
@@ -948,7 +947,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       };
 
       //todo update stage 5 for order
-      await _apiService.stage5_deleteStatus(stage5Body);
+      await _apiService.stage5_deleteStatus(stage5Body, "pur_order");
 
       print(
         "--- ℹ️ Checking Stage 6 Condition: trnsStatus ($trnsStatus) == 0 || trnsStatus ($trnsStatus) == -1",
@@ -968,7 +967,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         };
 
         //todo update stage 6 for order
-        await _apiService.stage6_postFinalStatus(stage6Body);
+        await _apiService.stage6_postFinalStatus(stage6Body, "pur_order");
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
       }

@@ -30,8 +30,10 @@ class ApiService {
       List<UserModel> users = [];
       for (var item in items) {
         try {
+          log(item.toString());
           users.add(UserModel.fromJson(item));
         } catch (e) {
+          log("item at error:${item.toString()}");
           print("❌ Error parsing item: $item");
           print("❌ Error details: $e");
         }
@@ -309,6 +311,7 @@ class ApiService {
     required String authPk1,
     required String authPk2,
     required int actualStatus,
+    required String approvalType,
   }) async {
     final queryParams = {
       'user_id': userId.toString(),
@@ -317,9 +320,22 @@ class ApiService {
       'auth_pk2': authPk2,
       'actual_status': actualStatus.toString(),
     };
-    final url = Uri.parse(
-      '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-    ).replace(queryParameters: queryParams);
+    Uri url;
+    switch(approvalType){
+      case "pur_request":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        ).replace(queryParameters: queryParams);
+      case "pur_order":
+         url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
+        ).replace(queryParameters: queryParams);
+      default:
+        //todo update this later on
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        ).replace(queryParameters: queryParams);
+    }
 
     print("--- 🚀 Stage 1 (GET) ---");
     print("🚀 Calling: $url");
@@ -343,8 +359,24 @@ class ApiService {
     required int userId,
     required String authPk1,
     required String authPk2,
+    required String approvalType
   }) async {
-    final url = Uri.parse('$_baseUrl/check_last_level_update');
+    Uri url;
+    switch(approvalType){
+      case "pur_request":
+        url = Uri.parse(
+          '$_baseUrl/check_last_level_update',
+        );
+      case "pur_order":
+        url = Uri.parse(
+          '$_baseUrl/check_last_level_update_PO_ORDER',
+        );
+      default:
+      //todo update this later on
+        url = Uri.parse(
+          '$_baseUrl/check_last_level_update',
+        );
+    }
     final bodyMap = {
       "user_id": userId,
       "auth_pk1": authPk1,
@@ -364,8 +396,23 @@ class ApiService {
   }
 
   // --- المرحلة الرابعة: PUT ---
-  Future<void> stage4_updateStatus(Map<String, dynamic> bodyMap) async {
-    final url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
+  Future<void> stage4_updateStatus(Map<String, dynamic> bodyMap, String approvalType) async {
+    Uri url;
+    switch(approvalType){
+      case "pur_request":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        );
+      case "pur_order":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
+        );
+      default:
+      //todo update this later on
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        );
+    }
     final body = json.encode(bodyMap);
     final headers = {'Content-Type': 'application/json'};
 
@@ -380,8 +427,23 @@ class ApiService {
   }
 
   // --- المرحلة الخامسة: DELETE ---
-  Future<void> stage5_deleteStatus(Map<String, dynamic> bodyMap) async {
-    final url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
+  Future<void> stage5_deleteStatus(Map<String, dynamic> bodyMap,String approvalType) async {
+    Uri url;
+    switch(approvalType){
+      case "pur_request":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        );
+      case "pur_order":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
+        );
+      default:
+      //todo update this later on
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        );
+    }
     final body = json.encode(bodyMap);
     final headers = {'Content-Type': 'application/json'};
 
@@ -396,8 +458,23 @@ class ApiService {
   }
 
   // --- المرحلة السادسة: POST (Conditional) ---
-  Future<void> stage6_postFinalStatus(Map<String, dynamic> bodyMap) async {
-    final url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
+  Future<void> stage6_postFinalStatus(Map<String, dynamic> bodyMap,String approvalType) async {
+    Uri url;
+    switch(approvalType){
+      case "pur_request":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        );
+      case "pur_order":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
+        );
+      default:
+      //todo update this later on
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
+        );
+    }
     final body = json.encode(bodyMap);
     final headers = {'Content-Type': 'application/json'};
 
@@ -461,8 +538,8 @@ class ApiService {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        log("data");
-        log(data.toString());
+        log("data['items']");
+        log(data['items'].toString());
         final List<dynamic> items = data['items'];
         if (items.isEmpty) {
           log("list is empty");
