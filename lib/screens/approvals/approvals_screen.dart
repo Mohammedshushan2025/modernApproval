@@ -226,6 +226,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             itemBuilder: (context, index) {
               final item = approvals[index];
               final colors = _getColorsForItem(item.pageId);
+              ///this map each feature the use have , the key is pageID given from backend
+              ///the value is the number of available items"approvals" inside that feature
               log("_approvalCounts");
               log(_approvalCounts.toString());
               log(_approvalCounts[item.pageId].toString());

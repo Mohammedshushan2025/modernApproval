@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:modernapproval/models/approval_status_response_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_model.dart';
@@ -103,7 +104,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
             _masterData != null && _detailData != null
                 ? () async {
               try {
-                await _printDocument(l, isArabic);
+                await _printDocument(l, isArabic,_masterData!);
               } catch (e) {
                 print("--- ❌ PDF PRINTING FAILED ---");
                 print(e.toString());
@@ -1023,7 +1024,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
   // ========================================================
   // 🎯 دالة الطباعة - بيانات ثابتة زي الصورة الثانية
   // ========================================================
-  Future<void> _printDocument(AppLocalizations l, bool isArabic) async {
+  Future<void> _printDocument(AppLocalizations l, bool isArabic,PurchaseOrderMaster purchaseOrderMaster ) async {
     try {
       final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
       final ttf = pw.Font.ttf(fontData);
@@ -1037,14 +1038,40 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       }
 
       final headers = [
-        "م\nNO",
-        "البيان\nDescription",
-        "رقم الصنف\nPart No",
-        "الكمية\nQty",
-        "الوحدة\nUnit",
-        "رصيد\nالصنف",
-        "اخر سعر شراء\nLast Purch",
+        "مسلسل",
+        "كود الصنف",
+        "اسم الصنف",
+        "الوحدة",
+        "الكمية",
+        "سعر الوحدة",
+        "الاجمالي",
+        "طلب شراء",
+        "م",
+        "ملاحظات",
+        "ملاحظات الاصناف",
+
       ];
+      ///Master items data
+      int rowNumberMaster = 0;
+      final dataTopTable = _detailData!.map((item) {
+        rowNumberMaster++;
+        return [
+          rowNumberMaster.toString(),
+          item.itemCode?.toString() ?? '',
+          isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+          item.unitName??'',
+          item.quantity?.toString() ?? '0',
+          item.vnPriceCurr?.toString() ?? '',
+          item.total?.toString() ?? '',
+          item.reqTrnsTypeCode?.toString() ?? '',
+          item.reqTrnsSerial?.toString() ?? '',
+          item.servicesDesc ?? '',
+          item.notes ?? '',
+
+          //todo removing last pur for now till it come back from end point
+          // item.last_pur?.toString() ?? '0',
+        ];
+      }).toList();
 
       ///table items data
       int rowNumber = 0;
@@ -1072,9 +1099,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
           build:
               (context) => [
-            _buildFixedPdfHeader(ttf, logoImage),
+            _buildFixedPdfHeader(ttf, logoImage,purchaseOrderMaster,_detailData!.first),
             pw.SizedBox(height: 10),
-            _buildPdfTable(headers, data, ttf),
+            _buildPdfTable(headers, dataTopTable, ttf),
             pw.SizedBox(height: 10),
             _buildFixedPdfFooter(ttf),
           ],
@@ -1090,61 +1117,74 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
     }
   }
 
-  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo) {
+  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,PurchaseOrderMaster purchaseOrderMaster,PurchaseOrderDetail purchaseOrderDetail) {
+    ///current date time
+    DateTime now = DateTime.now();
+    String formattedTime = DateFormat('hh:mm:a').format(now);
+    formattedTime = formattedTime.replaceAll('AM', 'ص').replaceAll('PM', 'م');
+    String formattedDate = DateFormat('dd-MM-yyyy').format(now);
+
     return pw.Column(
       children: [
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                pw.Text(
-                  "وقت الإدخال: 12:27",
-                  style: pw.TextStyle(font: ttf, fontSize: 9),
-                ),
-                pw.Text(
-                  "تاريخ الإدخال: 15-04-2025",
-                  style: pw.TextStyle(font: ttf, fontSize: 9),
-                ),
-                pw.Text(
-                  "مدخل الحركة: ${widget.user.empName ?? 'اسم المستخدم'}",
-                  style: pw.TextStyle(font: ttf, fontSize: 9),
-                ),
-              ],
-            ),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "Requisition طلب شراء",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+
             if (logo != null)
-              pw.Image(logo, width: 60, height: 60)
+              pw.Column(children: [
+                pw.Image(logo, width: 60, height: 60)
+                ,
+              ])
             else
               pw.SizedBox(width: 60, height: 60),
+            pw.Text(
+                  "امر توريد\n مسلسل",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 16,
+                    lineSpacing: 0,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue900
+                  ),
+                ),
+
+
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  "الوقت: $formattedTime",
+                  style: pw.TextStyle(font: ttf, fontSize: 9),
+                ),
+                pw.Text(
+                  "تاريخ: $formattedDate",
+                  style: pw.TextStyle(font: ttf, fontSize: 9),
+                ),
+                pw.Text(
+                  "المستخدم: ${widget.user.empName ?? 'اسم المستخدم'}",
+                  style: pw.TextStyle(font: ttf, fontSize: 9),
+                ),
+              ],
+            ),
+
           ],
         ),
         pw.SizedBox(height: 5),
-        pw.Row(
+        pw.Row
+          (
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text(
-              "S / N NO :",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
+              "Modern Structures &\n Equipment",
+              style: pw.TextStyle(font: ttf, fontSize: 12),
               textDirection: pw.TextDirection.ltr,
             ),
-            pw.Row(
+            pw.Column(children: [pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
               children: [
                 pw.Text(
-                  "7",
+                  "${purchaseOrderMaster.trnsSerial}",
                   style: pw.TextStyle(
                     font: ttf,
                     fontSize: 10,
@@ -1155,126 +1195,122 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                 pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
                 pw.SizedBox(width: 5),
                 pw.Text(
-                  "1011004",
+                  "${purchaseOrderMaster.trnsTypeCode}",
                   style: pw.TextStyle(
                     font: ttf,
                     fontSize: 10,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
-                pw.SizedBox(width: 5),
-                pw.Text(
-                  ": رقم طلب الشراء",
-                  style: pw.TextStyle(font: ttf, fontSize: 10),
-                ),
               ],
             ),
-            pw.Text(
-              "تاريخه: 2025/04/15",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
+            pw.Text("${purchaseOrderMaster.descA}",style: pw.TextStyle(font: ttf,fontSize: 10))])
+            ,
+            pw.Text(""),
+            pw.SizedBox(width: 15),
+
+
           ],
         ),
-        pw.SizedBox(height: 8),
-        pw.Container(
-          padding: const pw.EdgeInsets.all(6),
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.black, width: 0.5),
-          ),
-          child: pw.Column(
-            children: [
-              pw.Text(
-                "This form is to be used as requisition, but if signed and a P O number assigned, it may be used in Lieu of formal purchase order for filling confirmation of verbal orders for minor material items and general supplies.",
-                style: pw.TextStyle(font: ttf, fontSize: 7),
-                textDirection: pw.TextDirection.ltr,
-                textAlign: pw.TextAlign.center,
-              ),
-              pw.SizedBox(height: 3),
-              pw.Text(
-                "يمكن استخدام هذا النموذج كطلب شراء ولكن إذا تم التوقيع وتعيين رقم أمر توريد فيمكن استخدامه بدلاً من أمر الشراء الرسمي لملء تأكيد الطلبات اللفظية لبنود المواد الثانوية واللوازم العامة.",
-                style: pw.TextStyle(font: ttf, fontSize: 8),
-                textAlign: pw.TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-
-        pw.SizedBox(height: 3),
+        pw.SizedBox(height: 5),
+        ///Date
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: pw.MainAxisAlignment.start,
           children: [
-            pw.Text(""),
-
+            pw.Text("التاريخ : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 10),
             pw.Text(
-              "MSE-FO-PD-001",
+              "${purchaseOrderMaster.formattedReqDate}",
               style: pw.TextStyle(
                 font: ttf,
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
               ),
             ),
-            pw.Text("DOC NO :", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.Text(""),
+
+          ],
+        ),
+
+        pw.SizedBox(height: 1),
+        ///supplier name and code
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text("الاسم : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 10),
+            pw.Text(
+              "${purchaseOrderMaster.supplierName}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(width: 60),
+            pw.Text(
+              "${purchaseOrderMaster.supplierCode}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+
+          ],
+        ),
+
+        pw.SizedBox(height: 1),
+        ///company name  , currency , closed or not
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text("اسم الشركة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 20),
+            pw.Text(
+              "${purchaseOrderMaster.respName}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(width: 50),
+            pw.Text("العملة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 20),
+            pw.Text(
+              "${purchaseOrderMaster.currencyDesc}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(width: 50),
+            pw.Text("الحالة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 20),
+            pw.Text(
+              "${purchaseOrderMaster.closed==1?"مغلق":"مفتوح"}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+
+
           ],
         ),
 
         pw.SizedBox(height: 1),
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(""),
-            pw.Text(
-              "من طلب شراء آلي من طلب نواقص رقم 1011001/5 مكتب التوكيلات م/ حسين",
-              style: pw.TextStyle(font: ttf, fontSize: 8),
-            ),
-            pw.Text(
-              "Required By Date :  15-04-2025",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Text(
-              ":تاريخ الطلب",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-
-        pw.SizedBox(height: 3),
-        pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.start,
           children: [
-            pw.Text(
-              ": المستودع / القطاع الطالب   1010101011001 مخزن مشتريات محلي - توكيلات - مخزن الشركة",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
+            pw.Text("البيان : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+
           ],
         ),
 
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Text(
-              "تاريخ الوصول المتوقع:",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Text(
-              "طلب نواقص: 1011001\\5",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 3),
       ],
     );
   }
@@ -1284,9 +1320,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       List<List<String>> data,
       pw.Font ttf,
       ) {
-    return pw.Table.fromTextArray(
-      headers: headers,
-      data: data,
+    return pw.TableHelper.fromTextArray(
+      headers: headers.reversed.toList(),
+      data: data.map((row)=>row.reversed.toList()).toList(),
       border: pw.TableBorder.all(color: PdfColors.black, width: 1),
       headerStyle: pw.TextStyle(
         fontWeight: pw.FontWeight.bold,
@@ -1318,6 +1354,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         6: const pw.FlexColumnWidth(1),
       },
       oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
+
     );
   }
 
