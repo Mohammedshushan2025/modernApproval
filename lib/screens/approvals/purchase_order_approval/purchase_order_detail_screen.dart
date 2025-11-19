@@ -19,7 +19,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/rendering.dart' show TextDirection;
 
-import '../../../models/approvals/purchase_order/purchase_request_det_model.dart';
+import '../../../models/approvals/purchase_order/purchase_order_det_model.dart';
 
 class PurchaseOrderDetailScreen extends StatefulWidget {
   final UserModel user;
