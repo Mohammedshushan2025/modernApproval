@@ -84,61 +84,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _animationController.forward();
   }
 
-  void _loadData() {
+  Future<void> _loadData() async {
     if (!mounted) return;
     setState(() {
       _countsLoading = true;
       _statsLoading = true;
     });
 
-    _formsReportsFuture = _apiService.getFormsAndReports(widget.user.usersCode);
-    _formsReportsFuture
-        .then((items) {
-          if (!mounted) return;
-          setState(() {
-            _approvalsCount = items.where((item) => item.type == 'F').length;
-            _reportsCount = items.where((item) => item.type == 'R').length;
-            _countsLoading = false;
-          });
-        })
-        .catchError((e) {
-          print("Error fetching forms/reports count: $e");
-          if (!mounted) return;
-          setState(() {
-            _countsLoading = false;
+    try {
+      // Wait for both API calls to complete
+      final items = await _apiService.getFormsAndReports(widget.user.usersCode);
+      final stats = await _apiService.getDashboardStats(widget.user.usersCode);
 
-            _approvalsCount = 0;
-            _reportsCount = 0;
-          });
-        });
-
-    _statsFuture = _apiService.getDashboardStats(widget.user.usersCode);
-    _statsFuture
-        .then((stats) {
-          if (!mounted) return;
-          setState(() {
-            _dashboardStats = stats;
-            _statsLoading = false;
-          });
-        })
-        .catchError((e) {
-          print("Error fetching dashboard stats: $e");
-          if (!mounted) return;
-          setState(() {
-            _statsLoading = false; // نوقف التحميل
-            _dashboardStats = DashboardStats(countAuth: 0, countReject: 0);
-          });
-        });
+      if (!mounted) return;
+      setState(() {
+        _approvalsCount = items.where((item) => item.type == 'F').length;
+        _reportsCount = items.where((item) => item.type == 'R').length;
+        _dashboardStats = stats;
+        _countsLoading = false;
+        _statsLoading = false;
+      });
+    } catch (e) {
+      print("Error refreshing data: $e");
+      if (!mounted) return;
+      setState(() {
+        _countsLoading = false;
+        _statsLoading = false;
+        _approvalsCount = 0;
+        _reportsCount = 0;
+        _dashboardStats = DashboardStats(countAuth: 0, countReject: 0);
+      });
+    }
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     _pulseController.dispose();
     super.dispose();
   }
+  Future<void> _refreshData() async {
+    setState(() {
+      _countsLoading = true;
+      _statsLoading = true;
+    });
 
-  @override
+    // Use Future.wait to wait for both API calls
+    await Future.wait([
+      _formsReportsFuture,
+      _statsFuture,
+    ]);
+
+    // The existing .then() callbacks in _loadData will handle the state updates
+  }
   @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
@@ -146,30 +143,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       ///uncomment this to make the logo fit more with the design
       // backgroundColor: Color(0xFF6C63FF).withOpacity(1),
-      body: Stack(
-        children: [
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: CustomScrollView(
-              slivers: [
-                HomeAppBar(user: widget.user),
-                SliverToBoxAdapter(
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: _buildBody(isRtl),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: Stack(
+          children: [
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: CustomScrollView(
+                slivers: [
+                  HomeAppBar(user: widget.user),
+                  SliverToBoxAdapter(
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _buildBody(isRtl),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Floating logo card positioned between appbar and content
-          // Positioned(
-          //   top: 160, // Adjust this to position between appbar and content
-          //   left: 20,
-          //   right: 20,
-          //   child: _buildFloatingLogoCard(isRtl),
-          // ),
-        ],
+            // Floating logo card positioned between appbar and content
+            // Positioned(
+            //   top: 160, // Adjust this to position between appbar and content
+            //   left: 20,
+            //   right: 20,
+            //   child: _buildFloatingLogoCard(isRtl),
+            // ),
+          ],
+        ),
       ),
     );
   }
