@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -17,7 +15,6 @@ import '../../../main.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:flutter/rendering.dart' show TextDirection;
 
 import '../../../models/approvals/purchase_order/purchase_order_det_model.dart';
 
