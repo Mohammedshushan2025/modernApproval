@@ -659,14 +659,11 @@ class ApiService {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        log("data['items']");
-        log(data['items'].toString());
         final List<dynamic> items = data['items'];
         if (items.isEmpty) {
           log("list is empty");
           return [];
         }
-        log(items.toString(),name: "Sales order Raw");
         return items.map((item) => SalesOrder.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
@@ -679,7 +676,7 @@ class ApiService {
       print('Network Error: Request timed out.');
       throw Exception('noInternet');
     } catch (e) {
-      print('An unexpected error occurred: $e');
+      print('An unexpected error occurred at Sales order: $e');
       throw Exception('serverError');
     }
   }

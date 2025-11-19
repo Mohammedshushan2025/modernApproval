@@ -273,7 +273,9 @@
   "all_stores": "جميع المخازن",
   "select_store": "اختر المخزن",
   "purchaseOrderApproval":"اعتماد امر التوريد",
-  "orderDetails": "تفاصيل الطلب"
+  "orderDetails": "تفاصيل الطلب",
+  "SalesOrderApproval": "اعتماد امر البيع"
+
 
 
 }

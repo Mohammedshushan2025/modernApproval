@@ -272,5 +272,6 @@
   "all_stores": "All Stores",
   "select_store": "Select Store",
   "purchaseOrderApproval":"Purchase Order Approval",
-  "orderDetails": "Order Details"
+  "orderDetails": "Order Details",
+  "SalesOrderApproval": "Sales Order Approval"
 }
