@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_model.dart';
 import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_detail_screen.dart';
-import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_detail_screen.dart';
 import '../../../app_localizations.dart';
-import '../../../models/purchase_request_model.dart';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
@@ -22,9 +20,9 @@ class PurchaseOrderApprovalScreen extends StatefulWidget {
   State<PurchaseOrderApprovalScreen> createState() => _PurchaseOrderApprovalScreenState();
 }
 
-class _PurchaseOrderApprovalScreenState extends State<PurchaseOrderApprovalScreen> {
+class _PurchaseOrderApprovalScreenState extends State<PurchaseOrderApprovalScreen>
+{
   final ApiService _apiService = ApiService();
-  //todo change the class here to purchase order
   late Future<List<PurchaseOrder>> _requestsFuture;
 
   String _storeNameFilter = '';
