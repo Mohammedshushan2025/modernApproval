@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
-import 'package:modernapproval/models/approvals/purchase_order/purchase_request_det_model.dart';
+import 'package:modernapproval/models/approvals/purchase_order/purchase_order_det_model.dart';
 import 'package:modernapproval/models/approved_request_model.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
