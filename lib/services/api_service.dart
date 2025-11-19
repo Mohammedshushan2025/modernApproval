@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_det_model.dart';
+import 'package:modernapproval/models/approvals/sales_order/sales_order_model.dart';
 import 'package:modernapproval/models/approved_request_model.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
@@ -74,6 +75,8 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
+        log("forms and reports");
+        log(items.toString());
         return items.map((item) => FormReportItem.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
@@ -86,7 +89,7 @@ class ApiService {
       print('Network Error: Request timed out.');
       throw Exception('noInternet');
     } catch (e) {
-      print('An unexpected error occurred: $e');
+      print('An unexpected error occurred at fetching forms and reports: $e');
       throw Exception('serverError');
     }
   }
@@ -150,7 +153,7 @@ class ApiService {
       print('Network Error: Request timed out.');
       throw Exception('noInternet');
     } catch (e) {
-      print('An unexpected error occurred: $e');
+      print('An unexpected error occurred at Pur req: $e');
       throw Exception('serverError');
     }
   }
@@ -538,8 +541,7 @@ class ApiService {
       final response = await http.get(url).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        log("data['items']");
-        log(data['items'].toString());
+
         final List<dynamic> items = data['items'];
         if (items.isEmpty) {
           log("list is empty");
@@ -558,7 +560,7 @@ class ApiService {
       print('Network Error: Request timed out.');
       throw Exception('noInternet');
     } catch (e) {
-      print('An unexpected error occurred: $e');
+      print('An unexpected error occurred at Pur order: $e');
       throw Exception('serverError');
     }
   }
@@ -637,5 +639,123 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-
+/// Sales order calls
+  Future<List<SalesOrder>> getSalesOrders({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async
+  {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/get_sal_sales_order_auth',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Sales Orders from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        log("data['items']");
+        log(data['items'].toString());
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        log(items.toString(),name: "Sales order Raw");
+        return items.map((item) => SalesOrder.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred: $e');
+      throw Exception('serverError');
+    }
+  }
+  // Future<PurchaseOrderMaster> getPurchaseOrderMaster({
+  //   required int trnsTypeCode,
+  //   required int trnsSerial,
+  // }) async
+  // {
+  //   final queryParams = {
+  //     'trns_type_code': trnsTypeCode.toString(),
+  //     'trns_serial': trnsSerial.toString(),
+  //   };
+  //   final url = Uri.parse(
+  //     '$_baseUrl/get_pur_po_order_mast',
+  //   ).replace(queryParameters: queryParams);
+  //   print('Fetching purchase order master from: $url');
+  //   try {
+  //     final response = await http.get(url).timeout(const Duration(seconds: 20));
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       final List<dynamic> items = data['items'];
+  //       if (items.isEmpty) {
+  //         throw Exception('noData');
+  //       }
+  //       return PurchaseOrderMaster.fromJson(items.first);
+  //     } else {
+  //       print('Server Error: ${response.statusCode}, Body: ${response.body}');
+  //       throw Exception('serverError');
+  //     }
+  //   } on SocketException {
+  //     print('Network Error: No internet connection.');
+  //     throw Exception('noInternet');
+  //   } on TimeoutException {
+  //     print('Network Error: Request timed out.');
+  //     throw Exception('noInternet');
+  //   } catch (e) {
+  //     print('An unexpected error occurred: $e');
+  //     throw Exception('serverError');
+  //   }
+  // }
+  //
+  // Future<List<PurchaseOrderDetail>> getPurchaseOrderDetail({
+  //   required int trnsTypeCode,
+  //   required int trnsSerial,
+  // }) async
+  // {
+  //   final queryParams = {
+  //     'trns_type_code': trnsTypeCode.toString(),
+  //     'trns_serial': trnsSerial.toString(),
+  //   };
+  //   final url = Uri.parse(
+  //     '$_baseUrl/get_pur_po_order_det',
+  //   ).replace(queryParameters: queryParams);
+  //   print('Fetching purchase order details from: $url');
+  //   try {
+  //     final response = await http.get(url).timeout(const Duration(seconds: 30));
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       final List<dynamic> items = data['items'];
+  //       if (items.isEmpty) return [];
+  //       return items
+  //           .map((item) => PurchaseOrderDetail.fromJson(item))
+  //           .toList();
+  //     } else {
+  //       print('Server Error: ${response.statusCode}, Body: ${response.body}');
+  //       throw Exception('serverError');
+  //     }
+  //   } on SocketException {
+  //     print('Network Error: No internet connection.');
+  //     throw Exception('noInternet');
+  //   } on TimeoutException {
+  //     print('Network Error: Request timed out.');
+  //     throw Exception('noInternet');
+  //   } catch (e) {
+  //     print('An unexpected error occurred: $e');
+  //     throw Exception('serverError');
+  //   }
+  // }
 }
