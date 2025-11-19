@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_det_model.dart';
+import 'package:modernapproval/models/approvals/sales_order/sales_order_det_model.dart';
+import 'package:modernapproval/models/approvals/sales_order/sales_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/sales_order/sales_order_model.dart';
 import 'package:modernapproval/models/approved_request_model.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
@@ -333,6 +335,11 @@ class ApiService {
          url = Uri.parse(
           '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
         ).replace(queryParameters: queryParams);
+      case "sale_order":
+        log("stage1");
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
+        ).replace(queryParameters: queryParams);
       default:
         //todo update this later on
         url = Uri.parse(
@@ -350,6 +357,12 @@ class ApiService {
     );
 
     final data = json.decode(response.body);
+    log("Stage 1");
+    log("URL : ${url.toString()}");
+    log("response.body: ${response.body.toString()}");
+    log("json decoded.body: ${data.toString()}");
+    log("raw response :${response.toString()}");
+
     if (data['items'] == null || (data['items'] as List).isEmpty) {
       print("❌ Stage 1 (GET) - Error: 'items' array is empty or null.");
       throw Exception('serverError: Empty response from Stage 1');
@@ -374,6 +387,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/check_last_level_update_PO_ORDER',
         );
+      case "sale_order":
+        url = Uri.parse(
+          '$_baseUrl/check_last_level_update_SAL_SALES_ORDER',
+        );
       default:
       //todo update this later on
         url = Uri.parse(
@@ -386,6 +403,9 @@ class ApiService {
       "auth_pk2": authPk2,
     };
     final body = json.encode(bodyMap);
+    log("Stage 3");
+    log("URL : ${url.toString()}");
+
     final headers = {'Content-Type': 'application/json'};
 
     print("--- 🚀 Stage 3 (PUT) ---");
@@ -410,6 +430,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
         );
+      case "sale_order":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
+        );
       default:
       //todo update this later on
         url = Uri.parse(
@@ -417,6 +441,9 @@ class ApiService {
         );
     }
     final body = json.encode(bodyMap);
+    log("Stage 4");
+    log("URL : ${url.toString()}");
+
     final headers = {'Content-Type': 'application/json'};
 
     print("--- 🚀 Stage 4 (PUT) ---");
@@ -441,6 +468,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
         );
+      case "sale_order":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
+        );
       default:
       //todo update this later on
         url = Uri.parse(
@@ -448,6 +479,9 @@ class ApiService {
         );
     }
     final body = json.encode(bodyMap);
+    log("Stage 5");
+    log("URL : ${url.toString()}");
+
     final headers = {'Content-Type': 'application/json'};
 
     print("--- 🚀 Stage 5 (DELETE) ---");
@@ -472,6 +506,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
         );
+      case "sale_order":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
+        );
       default:
       //todo update this later on
         url = Uri.parse(
@@ -479,6 +517,8 @@ class ApiService {
         );
     }
     final body = json.encode(bodyMap);
+    log("Stage 6");
+    log("URL : ${url.toString()}");
     final headers = {'Content-Type': 'application/json'};
 
     print("--- 🚀 Stage 6 (POST) ---");
@@ -680,79 +720,79 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-  // Future<PurchaseOrderMaster> getPurchaseOrderMaster({
-  //   required int trnsTypeCode,
-  //   required int trnsSerial,
-  // }) async
-  // {
-  //   final queryParams = {
-  //     'trns_type_code': trnsTypeCode.toString(),
-  //     'trns_serial': trnsSerial.toString(),
-  //   };
-  //   final url = Uri.parse(
-  //     '$_baseUrl/get_pur_po_order_mast',
-  //   ).replace(queryParameters: queryParams);
-  //   print('Fetching purchase order master from: $url');
-  //   try {
-  //     final response = await http.get(url).timeout(const Duration(seconds: 20));
-  //     if (response.statusCode == 200) {
-  //       final data = json.decode(response.body);
-  //       final List<dynamic> items = data['items'];
-  //       if (items.isEmpty) {
-  //         throw Exception('noData');
-  //       }
-  //       return PurchaseOrderMaster.fromJson(items.first);
-  //     } else {
-  //       print('Server Error: ${response.statusCode}, Body: ${response.body}');
-  //       throw Exception('serverError');
-  //     }
-  //   } on SocketException {
-  //     print('Network Error: No internet connection.');
-  //     throw Exception('noInternet');
-  //   } on TimeoutException {
-  //     print('Network Error: Request timed out.');
-  //     throw Exception('noInternet');
-  //   } catch (e) {
-  //     print('An unexpected error occurred: $e');
-  //     throw Exception('serverError');
-  //   }
-  // }
-  //
-  // Future<List<PurchaseOrderDetail>> getPurchaseOrderDetail({
-  //   required int trnsTypeCode,
-  //   required int trnsSerial,
-  // }) async
-  // {
-  //   final queryParams = {
-  //     'trns_type_code': trnsTypeCode.toString(),
-  //     'trns_serial': trnsSerial.toString(),
-  //   };
-  //   final url = Uri.parse(
-  //     '$_baseUrl/get_pur_po_order_det',
-  //   ).replace(queryParameters: queryParams);
-  //   print('Fetching purchase order details from: $url');
-  //   try {
-  //     final response = await http.get(url).timeout(const Duration(seconds: 30));
-  //     if (response.statusCode == 200) {
-  //       final data = json.decode(response.body);
-  //       final List<dynamic> items = data['items'];
-  //       if (items.isEmpty) return [];
-  //       return items
-  //           .map((item) => PurchaseOrderDetail.fromJson(item))
-  //           .toList();
-  //     } else {
-  //       print('Server Error: ${response.statusCode}, Body: ${response.body}');
-  //       throw Exception('serverError');
-  //     }
-  //   } on SocketException {
-  //     print('Network Error: No internet connection.');
-  //     throw Exception('noInternet');
-  //   } on TimeoutException {
-  //     print('Network Error: Request timed out.');
-  //     throw Exception('noInternet');
-  //   } catch (e) {
-  //     print('An unexpected error occurred: $e');
-  //     throw Exception('serverError');
-  //   }
-  // }
+  Future<SalesOrderMaster> getSalesOrderMaster({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async
+  {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_SAL_SALES_ORDER_MAST',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Sales order master from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          throw Exception('noData');
+        }
+        return SalesOrderMaster.fromJson(items.first);
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred get sales order master: $e');
+      throw Exception('serverError');
+    }
+  }
+
+  Future<List<SalesOrderDetails>> getSalesOrderDetail({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async
+  {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_SAL_SALES_ORDER_DET',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Sales order details from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) return [];
+        return items
+            .map((item) => SalesOrderDetails.fromJson(item))
+            .toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred get sales order details: $e');
+      throw Exception('serverError');
+    }
+  }
 }

@@ -274,7 +274,10 @@
   "select_store": "اختر المخزن",
   "purchaseOrderApproval":"اعتماد امر التوريد",
   "orderDetails": "تفاصيل الطلب",
-  "SalesOrderApproval": "اعتماد امر البيع"
+  "SalesOrderApproval": "اعتماد امر البيع",
+  "salesDetails": "تفاصيل البيع",
+  "order_date": "تاريخ الطلب"
+
 
 
 

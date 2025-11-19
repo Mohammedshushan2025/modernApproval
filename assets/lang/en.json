@@ -273,5 +273,8 @@
   "select_store": "Select Store",
   "purchaseOrderApproval":"Purchase Order Approval",
   "orderDetails": "Order Details",
-  "SalesOrderApproval": "Sales Order Approval"
+  "SalesOrderApproval": "Sale Order Approval",
+  "salesDetails": "Sale Details",
+  "order_date": "Order date"
+
 }
