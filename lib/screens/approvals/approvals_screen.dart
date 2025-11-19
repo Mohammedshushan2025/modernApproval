@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
 import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/sales_order_approval/sales_order_approval_screen.dart';
 import '../../app_localizations.dart';
 import '../../custom_icon/custom_icon_icons.dart';
 import '../../models/form_report_model.dart';
@@ -52,6 +53,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               );
               _fetchAndSetPurchaseRequestCount();
               _fetchAndSetPurchaseOrderCount();
+              _fetchAndSetSalesOrderCount();
             });
           }
         })
@@ -65,6 +67,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
   Future<void> _refreshCounts() async {
     await _fetchAndSetPurchaseRequestCount();
     await _fetchAndSetPurchaseOrderCount();
+    await _fetchAndSetSalesOrderCount();
   }
 
   Future<void> _fetchAndSetPurchaseRequestCount() async {
@@ -111,6 +114,32 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     } catch (e) {
       print("Error fetching purchase request count: $e");
       _approvalCounts[102] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+  Future<void> _fetchAndSetSalesOrderCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getSalesOrders(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[108] = requests.length;
+    } catch (e) {
+      print("Error fetching purchase request count: $e");
+      _approvalCounts[108] = 0;
     } finally {
       if (mounted) {
         setState(() {
@@ -181,6 +210,21 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
         if (mounted) {
           _refreshCounts();
         }
+      case 108:
+        log("entering Sales order approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => SalesOrderApprovalScreen(
+              user: widget.user,
+              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
+            ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
 
       default:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +283,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                 backgroundColor: colors['background']!,
                 onTap: () => _handleNavigation(item),
                 notificationCount: _approvalCounts[item.pageId]??null ,
-                isCountLoading: (item.pageId == 101||item.pageId == 102) && _isCountLoading,
+                isCountLoading: (item.pageId == 101||item.pageId == 102 || item.pageId == 108) && _isCountLoading,
               );
             },
           );
