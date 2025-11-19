@@ -741,6 +741,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
+  number_to_word_arabic:
+    dependency: "direct main"
+    description:
+      name: number_to_word_arabic
+      sha256: "76971eadadf39590e29fc8fd41cbc98d6f92facd0946655eb7dc298114cd51b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.8"
   octo_image:
     dependency: transitive
     description:
