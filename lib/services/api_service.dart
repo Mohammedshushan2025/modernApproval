@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_det_model.dart';
+import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_mast_model.dart';
+import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_model.dart';
 import 'package:modernapproval/models/approvals/sales_order/sales_order_det_model.dart';
 import 'package:modernapproval/models/approvals/sales_order/sales_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/sales_order/sales_order_model.dart';
@@ -336,9 +338,12 @@ class ApiService {
           '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
         ).replace(queryParameters: queryParams);
       case "sale_order":
-        log("stage1");
         url = Uri.parse(
           '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
+        ).replace(queryParameters: queryParams);
+      case "pur_pay":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
         ).replace(queryParameters: queryParams);
       default:
         //todo update this later on
@@ -391,7 +396,11 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/check_last_level_update_SAL_SALES_ORDER',
         );
-      default:
+      case "pur_pay":
+        url = Uri.parse(
+          '$_baseUrl/CHECK_LAST_LEVEL_UPDATE_PAY_REQUEST',
+        );
+        default:
       //todo update this later on
         url = Uri.parse(
           '$_baseUrl/check_last_level_update',
@@ -434,6 +443,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
         );
+      case "pur_pay":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
+        );
       default:
       //todo update this later on
         url = Uri.parse(
@@ -472,6 +485,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
         );
+      case "pur_pay":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
+        );
       default:
       //todo update this later on
         url = Uri.parse(
@@ -509,6 +526,10 @@ class ApiService {
       case "sale_order":
         url = Uri.parse(
           '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
+        );
+      case "pur_pay":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
         );
       default:
       //todo update this later on
@@ -792,6 +813,87 @@ class ApiService {
       throw Exception('noInternet');
     } catch (e) {
       print('An unexpected error occurred get sales order details: $e');
+      throw Exception('serverError');
+    }
+  }
+  /// Purchase Pay
+  Future<List<PurchasePay>> getPurchasePay({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async
+  {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_PUR_PAY_REQUEST_AUTH',
+    ).replace(queryParameters: queryParams);
+    print('Fetching purchase Pay Requests from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        return items.map((item) => PurchasePay.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at Pur Pay: $e');
+      throw Exception('serverError');
+    }
+  }
+  Future<PurchasePayMaster> getPurchasePayMaster({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async
+  {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_PUR_PAY_REQUEST_MAST',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Purchase pay master from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        log("status code = 200");
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          throw Exception('noData');
+        }
+        log(items.toString());
+        return PurchasePayMaster.fromJson(items.first);
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred get purchase pay master: $e');
       throw Exception('serverError');
     }
   }
