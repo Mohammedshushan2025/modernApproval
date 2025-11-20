@@ -275,6 +275,7 @@
   "orderDetails": "Order Details",
   "SalesOrderApproval": "Sale Order Approval",
   "salesDetails": "Sale Details",
-  "order_date": "Order date"
+  "order_date": "Order date",
+  "login_failed_network": "Login Failed, Please Try again "
 
 }

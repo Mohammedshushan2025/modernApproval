@@ -276,7 +276,8 @@
   "orderDetails": "تفاصيل الطلب",
   "SalesOrderApproval": "اعتماد امر البيع",
   "salesDetails": "تفاصيل البيع",
-  "order_date": "تاريخ الطلب"
+  "order_date": "تاريخ الطلب",
+  "login_failed_network": "فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
 
 
 

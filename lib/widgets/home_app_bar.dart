@@ -153,6 +153,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         roleId: widget.user.roleCode!,
         passwordNumber: 10327,
       );
+      //todo update the password number later on
       if (mounted) {
         setState(() {
           _notificationCount = count;
