@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
 import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/purchase_pay_approval/purchase_pay_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/sales_order_approval/sales_order_approval_screen.dart';
 import '../../app_localizations.dart';
@@ -54,6 +55,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetPurchaseRequestCount();
               _fetchAndSetPurchaseOrderCount();
               _fetchAndSetSalesOrderCount();
+              _fetchAndSetPurchasePayCount();
             });
           }
         })
@@ -68,6 +70,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     await _fetchAndSetPurchaseRequestCount();
     await _fetchAndSetPurchaseOrderCount();
     await _fetchAndSetSalesOrderCount();
+    await _fetchAndSetPurchasePayCount();
   }
 
   Future<void> _fetchAndSetPurchaseRequestCount() async {
@@ -140,6 +143,32 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     } catch (e) {
       print("Error fetching purchase request count: $e");
       _approvalCounts[108] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+  Future<void> _fetchAndSetPurchasePayCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getPurchasePay(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[111] = requests.length;
+    } catch (e) {
+      print("Error fetching purchase pay count: $e");
+      _approvalCounts[111] = 0;
     } finally {
       if (mounted) {
         setState(() {
@@ -225,7 +254,21 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
         if (mounted) {
           _refreshCounts();
         }
-
+      case 111:
+        log("entering Purchase pay");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => PurchasePayApprovalScreen(
+              user: widget.user,
+              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
+            ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Work in progress for: ${item.pageNameE}')),
@@ -283,7 +326,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                 backgroundColor: colors['background']!,
                 onTap: () => _handleNavigation(item),
                 notificationCount: _approvalCounts[item.pageId]??null ,
-                isCountLoading: (item.pageId == 101||item.pageId == 102 || item.pageId == 108) && _isCountLoading,
+                isCountLoading: (item.pageId == 101||item.pageId == 102 || item.pageId == 108 || item.pageId == 111) && _isCountLoading,
               );
             },
           );
