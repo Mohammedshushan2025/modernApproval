@@ -276,6 +276,8 @@
   "SalesOrderApproval": "Sale Order Approval",
   "salesDetails": "Sale Details",
   "order_date": "Order date",
-  "login_failed_network": "Login Failed, Please Try again "
+  "login_failed_network": "Login Failed, Please Try again ",
+  "PurchasePayApproval": "Purchase Pay Approval",
+  "purchasePayDetails":"Purchase Pay Details"
 
 }

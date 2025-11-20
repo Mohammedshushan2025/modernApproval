@@ -277,9 +277,7 @@
   "SalesOrderApproval": "اعتماد امر البيع",
   "salesDetails": "تفاصيل البيع",
   "order_date": "تاريخ الطلب",
-  "login_failed_network": "فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
-
-
-
-
+  "login_failed_network": "فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+  "purchasePayDetails":"تفاصيل صرف النقدية",
+  "PurchasePayApproval": "اعتماد صرف النقدية"
 }
