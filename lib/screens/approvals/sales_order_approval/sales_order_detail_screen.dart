@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -63,6 +65,9 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
       setState(() {
         _masterData = results[0] as SalesOrderMaster;
         _detailData = results[1] as List<SalesOrderDetails>;
+        log(_masterData!.repSales!.length.toString());
+        log(_masterData!.repSales!.replaceAll(" ", '').length.toString());
+        log(_masterData!.managerSales!.length.toString());
       });
 
       return {'master': _masterData, 'detail': _detailData};
@@ -1085,7 +1090,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
 
             pw.SizedBox(height: 10),
 
-            _buildFixedPdfFooter(ttf),
+            _buildFixedPdfFooter(ttf,_masterData!,_detailData!),
           ],
         ),
       );
@@ -1147,6 +1152,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                 pw.Text("التاريخ:"),
+                    pw.Text("${master.formattedOrderDate}")
                 // pw.Text("${}"),
               ])
             ],),
@@ -1319,7 +1325,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
         columnWidths: {
           0: const pw.FlexColumnWidth(1.4),
           1: const pw.FlexColumnWidth(1.4),
-          2: const pw.FlexColumnWidth(0.6)
+          2: const pw.FlexColumnWidth(1.0)
 
         },
         children: [
@@ -1340,15 +1346,17 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
                   children: [
                     pw.Text("الاسم:"),
 
-                    pw.FittedBox(child:pw.Text("   ${_masterData!.managerSales??""}"), ),
+                    (_masterData!.managerSales?.replaceAll(" ", "").isNotEmpty ?? false)
+                        ? pw.FittedBox(child:pw.Text("${_masterData!.managerSales}"), )
+                        : pw.Text(" "),
 
-                    pw.Text("")
+                    pw.SizedBox(width: 1),
                   ]),
               pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(":التوقيع"),
-                    pw.Text("   ")
+                    pw.SizedBox(width: 1),
                   ])
             ]),
         pw.Column(
@@ -1358,14 +1366,16 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text("الاسم:"),
-                    pw.FittedBox(child:pw.Text("   ${_masterData!.repSales??""}"), ),
-                    pw.Text("")
+                    (_masterData!.repSales?.replaceAll(" ", "").isNotEmpty ?? false)
+                        ? pw.FittedBox(child:pw.Text("${_masterData!.repSales}"), )
+                        : pw.Text(""),
+                    pw.SizedBox(width: 1),
                   ]),
               pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(":التوقيع"),
-                    pw.Text("   ")
+                    pw.SizedBox(width: 1),
                   ])
             ]),
         pw.Column(
@@ -1375,13 +1385,14 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text("الاسم:"),
-                    pw.Text("")
+                    pw.SizedBox(width: 1),
+
                   ]),
               pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(":التوقيع"),
-                    pw.Text("")
+                    pw.SizedBox(width: 1),
                   ])
             ]),
       ])
@@ -1499,7 +1510,9 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
       ],
     );
   }
-  pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
+  pw.Widget _buildFixedPdfFooter(pw.Font ttf,SalesOrderMaster salesOrderMaster,List<SalesOrderDetails> listSalesOrderDetail) {
+    num total=listSalesOrderDetail.fold(0.0, (sum, item) => sum + item.totPrice!);
+    num tax14= salesOrderMaster.taxSal??0.00;
     String currentDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a', 'ar')
         .format(DateTime.now())
         .replaceAll('AM', 'ص')
@@ -1509,12 +1522,14 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
 
       children: [
         pw.SizedBox(height: 10),
-        pw.Column(
+        pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [pw.Column(
           mainAxisAlignment: pw.MainAxisAlignment.start,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(
-              "مكان التسليم:",
+              "مكان التسليم :",
               style: pw.TextStyle(
                 font: ttf,
                 fontSize: 9,
@@ -1522,23 +1537,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
               ),
             ),
             pw.Text(
-              "ميعاد التسليم:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text(
-              "شروط الدفع:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text(
-              "الشروط المالية:",
+              "وصف مكان التسليم :",
               style: pw.TextStyle(
                 font: ttf,
                 fontSize: 9,
@@ -1553,58 +1552,119 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen>  {
                 fontWeight: pw.FontWeight.bold,
               ),
             ),
+            pw.Text(
+              "شروط الدفع :",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              "تاريخ التسليم :",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              "صلاحية العرض : لا شئ من تاريخه",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            )
+
           ],
         ),
-        pw.SizedBox(height: 15),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.SizedBox(width: 3),
-            pw.Column(
-              children: [
+          pw.Column(
+            mainAxisAlignment: pw.MainAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.start,
+                  children: [
                 pw.Text(
-                  "اسم المعتمد",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+                "الاجمالي :",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
                 ),
-                pw.SizedBox(height: 18),
-                pw.Text(
-                  "${widget.user.empName??'____________'}",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "تاريخ و وقت الاعتماد",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 18),
-                pw.Text(
-                  "${currentDateTime}",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              pw.Container(
+                height: 25,
+                  width: 100,
+                  alignment: pw.Alignment.center,
+                  margin: pw.EdgeInsets.only(right: 5),
+                  decoration: pw.BoxDecoration(color: PdfColors.white.shade(0.6),border: pw.Border.all(color: PdfColors.black)),
+                  child: pw.Text("${total}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                    ),))
+              ]),
+              pw.SizedBox(height: 3),
+
+              pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      ": % 14",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Container(
+                        height: 25,
+                        width: 100,
+                        alignment: pw.Alignment.center,
+                        margin: pw.EdgeInsets.only(right: 5),
+                        decoration: pw.BoxDecoration(color: PdfColors.white.shade(0.6),border: pw.Border.all(color: PdfColors.black)),
+                        child: pw.Text("${tax14}",
+                          style: pw.TextStyle(
+                            font: ttf,
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                          ),))
+                  ])
+              ,
+              pw.SizedBox(height: 3),
+              pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      "الاجمالي بعد 14 % :",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Container(
+                        height: 25,
+                        width: 100,
+                        alignment: pw.Alignment.center,
+                        margin: pw.EdgeInsets.only(right: 5),
+                        decoration: pw.BoxDecoration(color: PdfColors.white.shade(0.6),border: pw.Border.all(color: PdfColors.black)),
+                        child: pw.Text("${total+tax14}",
+                          style: pw.TextStyle(
+                            font: ttf,
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                          ),))
+                  ])
+
+            ],
+          ),
+        ]),
+
+        pw.SizedBox(height: 10),
       ],
     );
   }
