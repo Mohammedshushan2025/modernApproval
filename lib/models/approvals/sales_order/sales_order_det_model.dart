@@ -6,7 +6,7 @@ class SalesOrderDetails {
   String? itemCode;
   String? itemName;
   String? unitName;
-  int? qty;
+  num? qty;
   num? price;
   num? totPrice;
   String? note;

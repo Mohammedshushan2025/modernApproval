@@ -13,11 +13,11 @@ class PurchaseOrderDetail {
   String? itemNameA;
   String? itemNameE;
   String? unitName;
-  int? quantity;
+  num? quantity;
   int? approveFlag;
   num? vnPriceCurr;//the value is double but num cover both
   num? vnPrice;
-  int? total;
+  num? total;
   int? reqTrnsTypeCode;
   int? reqTrnsSerial;
   String? servicesDesc;

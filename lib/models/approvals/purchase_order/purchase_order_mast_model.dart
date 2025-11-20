@@ -16,8 +16,8 @@ class PurchaseOrderMaster {
    String? respName;
    num? taxSal;
    num? taxProft;
-   int? discVal;
-   int? totExp;
+   num? discVal;
+   num? totExp;
    int? closed;
   PurchaseOrderMaster(
       {required this.trnsTypeCode,
