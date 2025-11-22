@@ -1,16 +1,21 @@
-
-
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app_localizations.dart';
 import 'screens/auth/login_screen.dart';
 
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
+//runApp(
+//     DevicePreview(
+//       enabled: !kReleaseMode,
+//       builder: (context) => MyApp(), // Wrap your app
+//     ),
+//   );
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -24,11 +29,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('ar', '');
 
-
   @override
   void initState() {
     super.initState();
-
   }
 
   void changeLanguage(Locale locale) {
@@ -43,10 +46,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Ascon HR',
       debugShowCheckedModeBanner: false,
       locale: _locale,
-      supportedLocales: const [
-        Locale('en', ''),
-        Locale('ar', ''),
-      ],
+      supportedLocales: const [Locale('en', ''), Locale('ar', '')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

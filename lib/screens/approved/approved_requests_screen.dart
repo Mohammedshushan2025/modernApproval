@@ -1,36 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_detail_screen.dart';
+import 'package:modernapproval/models/approved_request_model.dart';
 import '../../../app_localizations.dart';
-import '../../../models/purchase_request_model.dart';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/error_display.dart';
 
-class PurchaseRequestApprovalScreen extends StatefulWidget {
+class ApprovedRequestsScreen extends StatefulWidget {
   final UserModel user;
-  final int selectedPasswordNumber;
 
-  const PurchaseRequestApprovalScreen({
-    super.key,
-    required this.user,
-    required this.selectedPasswordNumber,
-  });
+  const ApprovedRequestsScreen({super.key, required this.user});
 
   @override
-  State<PurchaseRequestApprovalScreen> createState() =>
-      _PurchaseRequestApprovalScreenState();
+  State<ApprovedRequestsScreen> createState() => _ApprovedRequestsScreenState();
 }
 
-class _PurchaseRequestApprovalScreenState
-    extends State<PurchaseRequestApprovalScreen> {
+class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<PurchaseRequest>> _requestsFuture;
+  late Future<List<RequestItem>> _requestsFuture;
 
   String _storeNameFilter = '';
   DateTime? _selectedDate;
-  List<PurchaseRequest> _filteredRequests = [];
+  List<RequestItem> _filteredRequests = [];
   bool _showFilters = false;
   List<String> _availableStoreNames = [];
 
@@ -52,18 +44,17 @@ class _PurchaseRequestApprovalScreenState
 
   void _fetchData() {
     setState(() {
-      _requestsFuture = _apiService.getPurchaseRequests(
+      _requestsFuture = _apiService.getApprovedOrRejectedRequests(
         userId: widget.user.usersCode,
-        roleId: widget.user.roleCode!,
-        passwordNumber: widget.selectedPasswordNumber,
+        isApprove: true,
       );
     });
   }
 
-  void _extractStoreNames(List<PurchaseRequest> requests) {
+  void _extractStoreNames(List<RequestItem> requests) {
     final storeNames =
         requests
-            .map((request) => request.store_name ?? '')
+            .map((request) => request.storeName ?? '')
             .where((storeName) => storeName.isNotEmpty)
             .toSet()
             .toList()
@@ -72,7 +63,7 @@ class _PurchaseRequestApprovalScreenState
     _availableStoreNames = [''] + storeNames;
   }
 
-  void _applyFilters(List<PurchaseRequest> allRequests) {
+  void _applyFilters(List<RequestItem> allRequests) {
     setState(() {
       _filteredRequests =
           allRequests.where((request) {
@@ -86,14 +77,14 @@ class _PurchaseRequestApprovalScreenState
 
             // Apply store name filter only if it's not empty
             if (_storeNameFilter.isNotEmpty) {
-              matchesStoreName = (request.store_name ?? '') == _storeNameFilter;
+              matchesStoreName = (request.storeName ?? '') == _storeNameFilter;
             }
 
             // Apply date filter only if a date is selected
             if (_selectedDate != null) {
               matchesDate =
-                  request.reqDate != null &&
-                  _isSameDate(request.reqDate!, _selectedDate!);
+                  request.trnsDate != null &&
+                  _isSameDate(request.trnsDate!, _selectedDate!);
             }
 
             return matchesStoreName && matchesDate;
@@ -281,7 +272,7 @@ class _PurchaseRequestApprovalScreenState
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        title: l.translate('purchaseRequestApproval'),
+        title: l.translate('approvedRequests'),
         filterWidget: _buildFilterWidget(),
       ),
       backgroundColor: const Color(0xFFF5F7FA),
@@ -292,7 +283,7 @@ class _PurchaseRequestApprovalScreenState
 
           // List content
           Expanded(
-            child: FutureBuilder<List<PurchaseRequest>>(
+            child: FutureBuilder<List<RequestItem>>(
               future: _requestsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -391,6 +382,7 @@ class _PurchaseRequestApprovalScreenState
                     });
                   });
                 }
+
                 final displayRequests =
                     _showFilters &&
                             (_storeNameFilter.isNotEmpty ||
@@ -436,7 +428,7 @@ class _PurchaseRequestApprovalScreenState
                           ),
                           itemCount: displayRequests.length,
                           itemBuilder: (context, index) {
-                            return _buildPurchaseRequestCard(
+                            return _buildApprovedRequestCard(
                               context,
                               displayRequests[index],
                               index,
@@ -455,7 +447,7 @@ class _PurchaseRequestApprovalScreenState
                   ),
                   itemCount: displayRequests.length,
                   itemBuilder: (context, index) {
-                    return _buildPurchaseRequestCard(
+                    return _buildApprovedRequestCard(
                       context,
                       displayRequests[index],
                       index,
@@ -470,9 +462,9 @@ class _PurchaseRequestApprovalScreenState
     );
   }
 
-  Widget _buildPurchaseRequestCard(
+  Widget _buildApprovedRequestCard(
     BuildContext context,
-    PurchaseRequest request,
+    RequestItem request,
     int index,
   ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -496,21 +488,22 @@ class _PurchaseRequestApprovalScreenState
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => PurchaseRequestDetailScreen(
-                      user: widget.user,
-                      request: request,
-                    ),
-              ),
-            );
-
-            if (result == true) {
-              print("✅ Navigated back from Details, refreshing list...");
-              _fetchData();
-            }
+            //todo apply navigation later on
+            // final result = await Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder:
+            //         (context) => PurchaseRequestDetailScreen(
+            //       user: widget.user,
+            //       request: request,
+            //     ),
+            //   ),
+            // );
+            //
+            // if (result == true) {
+            //   print("✅ Navigated back from Details, refreshing list...");
+            //   _fetchData();
+            // }
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -545,7 +538,7 @@ class _PurchaseRequestApprovalScreenState
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              request.store_name ?? 'N/A',
+                              request.storeName ?? 'N/A',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: cardColor,
@@ -560,8 +553,8 @@ class _PurchaseRequestApprovalScreenState
                       const SizedBox(height: 8),
                       Text(
                         isArabic
-                            ? (request.descA ?? '')
-                            : (request.descE ?? ''),
+                            ? (request.trnsDesc ?? '')
+                            : (request.trnsDesc ?? ''),
                         style: TextStyle(
                           fontSize: 13.5,
                           color: Colors.black87,
@@ -584,7 +577,7 @@ class _PurchaseRequestApprovalScreenState
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                request.formattedReqDate,
+                                request.formattedTrnsDate,
                                 style: TextStyle(
                                   color: Colors.grey.shade700,
                                   fontSize: 12.5,
@@ -596,7 +589,7 @@ class _PurchaseRequestApprovalScreenState
                           Row(
                             children: [
                               Text(
-                                request.authPk1 + " / " + request.authPk2,
+                                request.authPk1! + " / " + request.authPk2!,
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 12.5,
