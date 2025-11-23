@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
-import 'package:modernapproval/models/approvals/purchase_order/purchase_order_model.dart';
-import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_detail_screen.dart';
+import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_detail_screen.dart';
 import '../../../app_localizations.dart';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
@@ -493,22 +492,21 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            //todo disabled for now
-            // final result = await Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder:
-            //         (context) => ProductionOutboundDetailScreen(
-            //       user: widget.user,
-            //       request: request,
-            //     ),
-            //   ),
-            // );
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => ProductionOutboundDetailScreen(
+                  user: widget.user,
+                  request: request,
+                ),
+              ),
+            );
 
-            // if (result == true) {
-            //   print("✅ Navigated back from Details, refreshing list...");
-            //   _fetchData();
-            // }
+            if (result == true) {
+              print("✅ Navigated back from Details, refreshing list...");
+              _fetchData();
+            }
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
