@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_det_model.dart';
 import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_model.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   late Future<Map<String, dynamic>> _detailsFuture;
 
   PurchasePayMaster? _masterData;
-  // List<PurchaseOrderDetail>? _detailData;
+  List<PurchasePayDetail>? _detailData;
 
   bool _isSubmitting = false;
 
@@ -51,18 +52,18 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
           trnsSerial: widget.request.trnsSerial,
         ),
         //todo uncomment this later
-        // _apiService.getPurchaseOrderDetail(
-        //   trnsTypeCode: widget.request.trnsTypeCode,
-        //   trnsSerial: widget.request.trnsSerial,
-        // ),
+        _apiService.getPurchasePayDetail(
+          trnsTypeCode: widget.request.trnsTypeCode,
+          trnsSerial: widget.request.trnsSerial,
+        ),
       ]);
       log("message1");
       setState(() {
         _masterData = results[0] as PurchasePayMaster;
-        // _detailData = results[1] as List<PurchaseOrderDetail>;
+        _detailData = results[1] as List<PurchasePayDetail>;
       });
       log("message");
-      return {'master': _masterData};//todo , 'detail': _detailData};
+      return {'master': _masterData , 'detail': _detailData};
     } catch (e) {
       rethrow;
     }
@@ -99,7 +100,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
           IconButton(
             icon: const Icon(Icons.print_outlined, color: Colors.white),
             onPressed:
-            _masterData != null //todo :uncomment this ->:&& _detailData != null
+            _masterData != null && _detailData != null
                 ? () async {
               try {
                 log("should print document but disabled for now");
@@ -157,8 +158,8 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
 
               final masterData =
               snapshot.data!['master'] as PurchasePayMaster;
-              // final detailData =
-              // snapshot.data!['detail'] as List<PurchaseOrderDetail>;
+              final detailData =
+              snapshot.data!['detail'] as List<PurchasePayDetail>;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -589,7 +590,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
 
   // Widget _buildModernDetailTable(
   //     AppLocalizations l,
-  //     List<PurchaseOrderDetail> details,
+  //     List<purchasePayDetail> details,
   //     bool isArabic,
   //     )
   // {
@@ -1130,7 +1131,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
           authPk1: authPk1,
           authPk2: authPk2,
           actualStatus: actualStatus,
-          approvalType: "pur_order"
+          approvalType: "pur_pay"
       );
 
       final int trnsStatus = s1.trnsStatus;
@@ -1152,7 +1153,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             userId: userId,
             authPk1: authPk1,
             authPk2: authPk2,
-            approvalType: "pur_order"
+            approvalType: "pur_pay"
         );
       } else {
         print("--- ⏩ Skipping Stage 3 (Condition Not Met) ---");
@@ -1169,7 +1170,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
         "trns_status": trnsStatus,
       };
       //todo update stage 4 for order
-      await _apiService.stage4_updateStatus(stage4Body, "pur_order");
+      await _apiService.stage4_updateStatus(stage4Body, "pur_pay");
 
       final Map<String, dynamic> stage5Body = {
         "auth_pk1": authPk1,
@@ -1179,7 +1180,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
       };
 
       //todo update stage 5 for order
-      await _apiService.stage5_deleteStatus(stage5Body, "pur_order");
+      await _apiService.stage5_deleteStatus(stage5Body, "pur_pay");
 
       print(
         "--- ℹ️ Checking Stage 6 Condition: trnsStatus ($trnsStatus) == 0 || trnsStatus ($trnsStatus) == -1",
@@ -1199,7 +1200,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
         };
 
         //todo update stage 6 for order
-        await _apiService.stage6_postFinalStatus(stage6Body, "pur_order");
+        await _apiService.stage6_postFinalStatus(stage6Body, "pur_pay");
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
       }
@@ -1255,7 +1256,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   // ========================================================
   // 🎯 دالة الطباعة - بيانات ثابتة زي الصورة الثانية
   // ========================================================
-  // Future<void> _printDocument(AppLocalizations l, bool isArabic,PurchaseOrderMaster purchaseOrderMaster ) async {
+  // Future<void> _printDocument(AppLocalizations l, bool isArabic,purchasePayMaster purchasePayMaster ) async {
   //   try {
   //     final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
   //     final ttf = pw.Font.ttf(fontData);
@@ -1330,7 +1331,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //         theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
   //         build:
   //             (context) => [
-  //           _buildFixedPdfHeader(ttf, logoImage,purchaseOrderMaster,_detailData!.first),
+  //           _buildFixedPdfHeader(ttf, logoImage,purchasePayMaster,_detailData!.first),
   //           pw.SizedBox(height: 10),
   //           _buildPdfTable(headers, dataTopTable, ttf),
   //           pw.SizedBox(height: 10),
@@ -1350,7 +1351,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //   }
   // }
   //
-  // pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,PurchaseOrderMaster purchaseOrderMaster,PurchaseOrderDetail purchaseOrderDetail) {
+  // pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,purchasePayMaster purchasePayMaster,purchasePayDetail purchasePayDetail) {
   //   ///current date time
   //   DateTime now = DateTime.now();
   //   String formattedTime = DateFormat('hh:mm:a').format(now);
@@ -1417,7 +1418,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //             mainAxisAlignment: pw.MainAxisAlignment.end,
   //             children: [
   //               pw.Text(
-  //                 "${purchaseOrderMaster.trnsSerial}",
+  //                 "${purchasePayMaster.trnsSerial}",
   //                 style: pw.TextStyle(
   //                   font: ttf,
   //                   fontSize: 10,
@@ -1428,7 +1429,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //               pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
   //               pw.SizedBox(width: 5),
   //               pw.Text(
-  //                 "${purchaseOrderMaster.trnsTypeCode}",
+  //                 "${purchasePayMaster.trnsTypeCode}",
   //                 style: pw.TextStyle(
   //                   font: ttf,
   //                   fontSize: 10,
@@ -1437,7 +1438,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //               ),
   //             ],
   //           ),
-  //             pw.Text("${purchaseOrderMaster.descA}",style: pw.TextStyle(font: ttf,fontSize: 10))])
+  //             pw.Text("${purchasePayMaster.descA}",style: pw.TextStyle(font: ttf,fontSize: 10))])
   //           ,
   //           pw.Text(""),
   //           pw.SizedBox(width: 15),
@@ -1453,7 +1454,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //           pw.Text("التاريخ : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
   //           pw.SizedBox(width: 10),
   //           pw.Text(
-  //             "${purchaseOrderMaster.formattedReqDate}",
+  //             "${purchasePayMaster.formattedReqDate}",
   //             style: pw.TextStyle(
   //               font: ttf,
   //               fontSize: 9,
@@ -1473,7 +1474,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //           pw.Text("الاسم : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
   //           pw.SizedBox(width: 10),
   //           pw.Text(
-  //             "${purchaseOrderMaster.supplierName}",
+  //             "${purchasePayMaster.supplierName}",
   //             style: pw.TextStyle(
   //               font: ttf,
   //               fontSize: 9,
@@ -1482,7 +1483,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //           ),
   //           pw.SizedBox(width: 60),
   //           pw.Text(
-  //             "${purchaseOrderMaster.supplierCode}",
+  //             "${purchasePayMaster.supplierCode}",
   //             style: pw.TextStyle(
   //               font: ttf,
   //               fontSize: 9,
@@ -1501,7 +1502,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //           pw.Text("اسم الشركة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
   //           pw.SizedBox(width: 20),
   //           pw.Text(
-  //             "${purchaseOrderMaster.respName}",
+  //             "${purchasePayMaster.respName}",
   //             style: pw.TextStyle(
   //               font: ttf,
   //               fontSize: 9,
@@ -1512,7 +1513,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //           pw.Text("العملة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
   //           pw.SizedBox(width: 20),
   //           pw.Text(
-  //             "${purchaseOrderMaster.currencyDesc}",
+  //             "${purchasePayMaster.currencyDesc}",
   //             style: pw.TextStyle(
   //               font: ttf,
   //               fontSize: 9,
@@ -1523,7 +1524,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //           pw.Text("الحالة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
   //           pw.SizedBox(width: 20),
   //           pw.Text(
-  //             "${purchaseOrderMaster.closed==1?"مغلق":"مفتوح"}",
+  //             "${purchasePayMaster.closed==1?"مغلق":"مفتوح"}",
   //             style: pw.TextStyle(
   //               font: ttf,
   //               fontSize: 9,
@@ -1595,12 +1596,12 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   //
   //   );
   // }
-  // pw.Widget _buildPdfTotalTable(PurchaseOrderMaster purchaseOrderMaster,List<PurchaseOrderDetail> listPurchaseOrderDetail){
-  //   double grandTotalBeforeCalc = listPurchaseOrderDetail.fold(0.0, (sum, item) => sum + item.total!); // الاجمالي قبل الحسابات
-  //   num taxSal=purchaseOrderMaster.taxSal??0;
-  //   num taxProf=purchaseOrderMaster.taxProft??0;
-  //   num otherExp=purchaseOrderMaster.totExp??0;
-  //   num discVal=purchaseOrderMaster.discVal??0;
+  // pw.Widget _buildPdfTotalTable(purchasePayMaster purchasePayMaster,List<purchasePayDetail> listpurchasePayDetail){
+  //   double grandTotalBeforeCalc = listpurchasePayDetail.fold(0.0, (sum, item) => sum + item.total!); // الاجمالي قبل الحسابات
+  //   num taxSal=purchasePayMaster.taxSal??0;
+  //   num taxProf=purchasePayMaster.taxProft??0;
+  //   num otherExp=purchasePayMaster.totExp??0;
+  //   num discVal=purchasePayMaster.discVal??0;
   //   num finalTotalCost =( grandTotalBeforeCalc+taxSal)-taxProf-otherExp-discVal;
   //   String finalTotalCostArabic =Tafqeet.convert('${finalTotalCost.toInt()}');
   //

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_det_model.dart';
+import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_det_model.dart';
 import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_model.dart';
 import 'package:modernapproval/models/approvals/sales_order/sales_order_det_model.dart';
@@ -894,6 +895,43 @@ class ApiService {
       throw Exception('noInternet');
     } catch (e) {
       print('An unexpected error occurred get purchase pay master: $e');
+      throw Exception('serverError');
+    }
+  }
+  Future<List<PurchasePayDetail>> getPurchasePayDetail({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async
+  {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_PUR_PAY_REQUEST_DET',
+    ).replace(queryParameters: queryParams);
+    print('Fetching purchase Pay details from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) return [];
+        return items
+            .map((item) => PurchasePayDetail.fromJson(item))
+            .toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at purchase pay: $e');
       throw Exception('serverError');
     }
   }

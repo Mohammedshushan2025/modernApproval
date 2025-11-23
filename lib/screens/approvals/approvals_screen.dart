@@ -203,11 +203,11 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       return;
     }
     log("FormReportItem");
-    log(item.toJson().toString());
-    log(_selectedPasswordGroup!.usersCode.toString());
-    log(_selectedPasswordGroup!.passwordName.toString());
-    log(_selectedPasswordGroup!.passwordNumber.toString());
-    log(_selectedPasswordGroup!.isDefault.toString());
+    log(item.toJson().toString(),name: "FormReportItem");
+    log(_selectedPasswordGroup!.usersCode.toString(),name: "SG:userCode");
+    log(_selectedPasswordGroup!.passwordName.toString(),name: "SG:pwName");
+    log(_selectedPasswordGroup!.passwordNumber.toString(),name: "SG:pwNum");
+    log(_selectedPasswordGroup!.isDefault.toString(),name: "SG:isDefault");
     ///Purchase Request Approval screen - 101
     switch(item.pageId){
       case 101:
@@ -305,8 +305,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             return Center(child: Text(l.translate('noData')));
           }
           final approvals = snapshot.data!;
-          log("approvals length");
-          log(approvals.length.toString());
+          // log("approvals length");
+          // log(approvals.length.toString());
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             itemCount: approvals.length,
@@ -316,8 +316,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               ///this map each feature the use have , the key is pageID given from backend
               ///the value is the number of available items"approvals" inside that feature
               log("_approvalCounts");
-              log(_approvalCounts.toString());
-              log(_approvalCounts[item.pageId].toString());
+              log(_approvalCounts.toString(),name: "approval count");
+              log(_approvalCounts[item.pageId].toString(),name: "fetching if the number of approval user have");
 
               return ActionCard(
                 title: isArabic ? item.pageName : item.pageNameE,
