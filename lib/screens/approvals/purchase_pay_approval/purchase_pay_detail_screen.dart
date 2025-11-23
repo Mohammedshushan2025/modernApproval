@@ -1196,21 +1196,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
         ];
       }).toList();
 
-      ///table items data
-      int rowNumber = 0;
-      final data =
-      _detailData!.map((item) {
-        rowNumber++;
-        return [
-          rowNumber.toString(),
-          isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-          item.itemCode?.toString() ?? '',
-          item.quantity?.toString() ?? '0',
-          item.unitName ?? '',
-          '0',
-        ];
-      }).toList();
-
       final pdf = pw.Document();
       pdf.addPage(
         pw.MultiPage(
