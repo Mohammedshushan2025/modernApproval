@@ -15,6 +15,23 @@ import 'package:modernapproval/widgets/error_display.dart';
 import 'package:number_to_word_arabic/number_to_word_arabic.dart';
 import '../../../app_localizations.dart';
 import '../../../main.dart';
+import 'package:modernapproval/models/approval_status_response_model.dart';
+import 'package:modernapproval/models/purchase_request_det_model.dart';
+import 'package:modernapproval/models/purchase_request_mast_model.dart';
+import 'package:modernapproval/models/purchase_request_model.dart';
+import 'package:modernapproval/models/user_model.dart';
+import 'package:modernapproval/services/api_service.dart';
+import 'package:modernapproval/widgets/error_display.dart';
+import '../../../app_localizations.dart';
+import '../../../main.dart';
+
+// --- مكتبات الطباعة ---
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:flutter/rendering.dart' show TextDirection;
+
+// ---------------------
 
 class PurchasePayDetailScreen extends StatefulWidget {
   final UserModel user;
@@ -51,7 +68,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
           trnsTypeCode: widget.request.trnsTypeCode,
           trnsSerial: widget.request.trnsSerial,
         ),
-        //todo uncomment this later
         _apiService.getPurchasePayDetail(
           trnsTypeCode: widget.request.trnsTypeCode,
           trnsSerial: widget.request.trnsSerial,
@@ -103,8 +119,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             _masterData != null && _detailData != null
                 ? () async {
               try {
-                log("should print document but disabled for now");
-                // await _printDocument(l, isArabic,_masterData!);
+                await _printDocument(l, isArabic,_masterData!);
               } catch (e) {
                 print("--- ❌ PDF PRINTING FAILED ---");
                 print(e.toString());
@@ -1124,7 +1139,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
 
     try {
       print("--- 🚀 Starting Approval Process (Status: $actualStatus) ---");
-      //todo update stage 1 here for order
       final ApprovalStatusResponse s1 = await _apiService.stage1_getStatus(
           userId: userId,
           roleCode: roleCode,
@@ -1148,7 +1162,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
       );
       if (lastLevel == 1 && trnsStatus == 1) {
         print("--- 🚀 Condition Met (Stage 3) ---");
-        //todo update this stage for order
         await _apiService.stage3_checkLastLevel(
             userId: userId,
             authPk1: authPk1,
@@ -1169,7 +1182,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
         "auth_pk2": authPk2,
         "trns_status": trnsStatus,
       };
-      //todo update stage 4 for order
       await _apiService.stage4_updateStatus(stage4Body, "pur_pay");
 
       final Map<String, dynamic> stage5Body = {
@@ -1179,7 +1191,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
         "prev_level": prevLevelS1,
       };
 
-      //todo update stage 5 for order
       await _apiService.stage5_deleteStatus(stage5Body, "pur_pay");
 
       print(
@@ -1199,7 +1210,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
           "auth_pk5": s1.authPk5,
         };
 
-        //todo update stage 6 for order
         await _apiService.stage6_postFinalStatus(stage6Body, "pur_pay");
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
@@ -1256,564 +1266,523 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
   // ========================================================
   // 🎯 دالة الطباعة - بيانات ثابتة زي الصورة الثانية
   // ========================================================
-  // Future<void> _printDocument(AppLocalizations l, bool isArabic,purchasePayMaster purchasePayMaster ) async {
-  //   try {
-  //     final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
-  //     final ttf = pw.Font.ttf(fontData);
-  //
-  //     pw.MemoryImage? logoImage;
-  //     try {
-  //       final logoData = await rootBundle.load("assets/images/lo.png");
-  //       logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
-  //     } catch (e) {
-  //       print("⚠️ Logo not found");
-  //     }
-  //
-  //     final headers = [
-  //       "مسلسل",
-  //       "كود الصنف",
-  //       "اسم الصنف",
-  //       "الوحدة",
-  //       "الكمية",
-  //       "سعر الوحدة",
-  //       "الاجمالي",
-  //       "طلب شراء",
-  //       "م",
-  //       "ملاحظات",
-  //       "ملاحظات الاصناف",
-  //
-  //     ];
-  //     ///Master items data
-  //     int rowNumberMaster = 0;
-  //     final dataTopTable = _detailData!.map((item) {
-  //       rowNumberMaster++;
-  //       return [
-  //         rowNumberMaster.toString(),
-  //         item.itemCode?.toString() ?? '',
-  //         isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-  //         item.unitName??'',
-  //         item.quantity?.toString() ?? '0',
-  //         item.vnPriceCurr?.toString() ?? '',
-  //         item.total?.toString() ?? '',
-  //         item.reqTrnsTypeCode?.toString() ?? '',
-  //         item.reqTrnsSerial?.toString() ?? '',
-  //         item.servicesDesc ?? '',
-  //         item.notes ?? '',
-  //
-  //         //todo removing last pur for now till it come back from end point
-  //         // item.last_pur?.toString() ?? '0',
-  //       ];
-  //     }).toList();
-  //
-  //     ///table items data
-  //     int rowNumber = 0;
-  //     final data =
-  //     _detailData!.map((item) {
-  //       rowNumber++;
-  //       return [
-  //         rowNumber.toString(),
-  //         isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-  //         item.itemCode?.toString() ?? '',
-  //         item.quantity?.toString() ?? '0',
-  //         item.unitName ?? '',
-  //         '0',
-  //         //todo removing last pur for now till it come back from end point
-  //         // item.last_pur?.toString() ?? '0',
-  //       ];
-  //     }).toList();
-  //
-  //     final pdf = pw.Document();
-  //     pdf.addPage(
-  //       pw.MultiPage(
-  //         pageFormat: PdfPageFormat.a4,
-  //         margin: const pw.EdgeInsets.all(20),
-  //         textDirection: pw.TextDirection.rtl,
-  //         theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
-  //         build:
-  //             (context) => [
-  //           _buildFixedPdfHeader(ttf, logoImage,purchasePayMaster,_detailData!.first),
-  //           pw.SizedBox(height: 10),
-  //           _buildPdfTable(headers, dataTopTable, ttf),
-  //           pw.SizedBox(height: 10),
-  //           _buildPdfTotalTable(_masterData!,_detailData!),
-  //           pw.SizedBox(height: 10),
-  //           _buildFixedPdfFooter(ttf),
-  //         ],
-  //       ),
-  //     );
-  //
-  //     await Printing.layoutPdf(
-  //       onLayout: (PdfPageFormat format) async => pdf.save(),
-  //     );
-  //   } catch (e) {
-  //     print("❌ Print Error: $e");
-  //     rethrow;
-  //   }
-  // }
-  //
-  // pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,purchasePayMaster purchasePayMaster,purchasePayDetail purchasePayDetail) {
-  //   ///current date time
-  //   DateTime now = DateTime.now();
-  //   String formattedTime = DateFormat('hh:mm:a').format(now);
-  //   formattedTime = formattedTime.replaceAll('AM', 'ص').replaceAll('PM', 'م');
-  //   String formattedDate = DateFormat('dd-MM-yyyy').format(now);
-  //
-  //   return pw.Column(
-  //     children: [
-  //       pw.Row(
-  //         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //         crossAxisAlignment: pw.CrossAxisAlignment.start,
-  //         children: [
-  //
-  //           if (logo != null)
-  //             pw.Column(children: [
-  //               pw.Image(logo, width: 60, height: 60)
-  //               ,
-  //             ])
-  //           else
-  //             pw.SizedBox(width: 60, height: 60),
-  //           pw.Text(
-  //             "امر توريد\n مسلسل",
-  //             style: pw.TextStyle(
-  //                 font: ttf,
-  //                 fontSize: 16,
-  //                 lineSpacing: 0,
-  //                 fontWeight: pw.FontWeight.bold,
-  //                 color: PdfColors.blue900
-  //             ),
-  //           ),
-  //
-  //
-  //           pw.Column(
-  //             crossAxisAlignment: pw.CrossAxisAlignment.start,
-  //             children: [
-  //               pw.Text(
-  //                 "الوقت: $formattedTime",
-  //                 style: pw.TextStyle(font: ttf, fontSize: 9),
-  //               ),
-  //               pw.Text(
-  //                 "تاريخ: $formattedDate",
-  //                 style: pw.TextStyle(font: ttf, fontSize: 9),
-  //               ),
-  //               pw.Text(
-  //                 "المستخدم: ${widget.user.empName ?? 'اسم المستخدم'}",
-  //                 style: pw.TextStyle(font: ttf, fontSize: 9),
-  //               ),
-  //             ],
-  //           ),
-  //
-  //         ],
-  //       ),
-  //       pw.SizedBox(height: 5),
-  //       pw.Row
-  //         (
-  //         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           pw.Text(
-  //             "Modern Structures &\n Equipment",
-  //             style: pw.TextStyle(font: ttf, fontSize: 12),
-  //             textDirection: pw.TextDirection.ltr,
-  //           ),
-  //           pw.Column(children: [pw.Row(
-  //             mainAxisAlignment: pw.MainAxisAlignment.end,
-  //             children: [
-  //               pw.Text(
-  //                 "${purchasePayMaster.trnsSerial}",
-  //                 style: pw.TextStyle(
-  //                   font: ttf,
-  //                   fontSize: 10,
-  //                   fontWeight: pw.FontWeight.bold,
-  //                 ),
-  //               ),
-  //               pw.SizedBox(width: 5),
-  //               pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
-  //               pw.SizedBox(width: 5),
-  //               pw.Text(
-  //                 "${purchasePayMaster.trnsTypeCode}",
-  //                 style: pw.TextStyle(
-  //                   font: ttf,
-  //                   fontSize: 10,
-  //                   fontWeight: pw.FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //             pw.Text("${purchasePayMaster.descA}",style: pw.TextStyle(font: ttf,fontSize: 10))])
-  //           ,
-  //           pw.Text(""),
-  //           pw.SizedBox(width: 15),
-  //
-  //
-  //         ],
-  //       ),
-  //       pw.SizedBox(height: 5),
-  //       ///Date
-  //       pw.Row(
-  //         mainAxisAlignment: pw.MainAxisAlignment.start,
-  //         children: [
-  //           pw.Text("التاريخ : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-  //           pw.SizedBox(width: 10),
-  //           pw.Text(
-  //             "${purchasePayMaster.formattedReqDate}",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.Text(""),
-  //
-  //         ],
-  //       ),
-  //
-  //       pw.SizedBox(height: 1),
-  //       ///supplier name and code
-  //       pw.Row(
-  //         mainAxisAlignment: pw.MainAxisAlignment.start,
-  //         children: [
-  //           pw.Text("الاسم : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-  //           pw.SizedBox(width: 10),
-  //           pw.Text(
-  //             "${purchasePayMaster.supplierName}",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.SizedBox(width: 60),
-  //           pw.Text(
-  //             "${purchasePayMaster.supplierCode}",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //
-  //         ],
-  //       ),
-  //
-  //       pw.SizedBox(height: 1),
-  //       ///company name  , currency , closed or not
-  //       pw.Row(
-  //         mainAxisAlignment: pw.MainAxisAlignment.start,
-  //         children: [
-  //           pw.Text("اسم الشركة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-  //           pw.SizedBox(width: 20),
-  //           pw.Text(
-  //             "${purchasePayMaster.respName}",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.SizedBox(width: 50),
-  //           pw.Text("العملة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-  //           pw.SizedBox(width: 20),
-  //           pw.Text(
-  //             "${purchasePayMaster.currencyDesc}",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.SizedBox(width: 50),
-  //           pw.Text("الحالة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-  //           pw.SizedBox(width: 20),
-  //           pw.Text(
-  //             "${purchasePayMaster.closed==1?"مغلق":"مفتوح"}",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //
-  //
-  //         ],
-  //       ),
-  //
-  //       pw.SizedBox(height: 1),
-  //       pw.Row(
-  //         mainAxisAlignment: pw.MainAxisAlignment.start,
-  //         children: [
-  //           pw.Text("البيان : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-  //
-  //         ],
-  //       ),
-  //
-  //     ],
-  //   );
-  // }
-  //
-  // pw.Widget _buildPdfTable(
-  //     List<String> headers,
-  //     List<List<String>> data,
-  //     pw.Font ttf,
-  //     )
-  // {
-  //   return pw.TableHelper.fromTextArray(
-  //     headers: headers.reversed.toList(),
-  //     data: data.map((row)=>row.reversed.toList()).toList(),
-  //     border: pw.TableBorder.all(color: PdfColors.black, width: 1),
-  //     headerStyle: pw.TextStyle(
-  //       fontWeight: pw.FontWeight.bold,
-  //       font: ttf,
-  //       fontSize: 9,
-  //     ),
-  //     headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
-  //     cellStyle: pw.TextStyle(font: ttf, fontSize: 9),
-  //     cellHeight: 25,
-  //     headerAlignment: pw.Alignment.center,
-  //     cellAlignment: pw.Alignment.center,
-  //     cellAlignments: {
-  //       0: pw.Alignment.center,
-  //       1: pw.Alignment.centerRight,
-  //       2: pw.Alignment.center,
-  //       3: pw.Alignment.center,
-  //       4: pw.Alignment.center,
-  //       5: pw.Alignment.center,
-  //       6: pw.Alignment.center,
-  //     },
-  //     cellPadding: const pw.EdgeInsets.all(4),
-  //     columnWidths: {
-  //       0: const pw.FlexColumnWidth(1.4),
-  //       1: const pw.FlexColumnWidth(1.4),
-  //       2: const pw.FlexColumnWidth(0.8),
-  //       3: const pw.FlexColumnWidth(1.4),
-  //       4: const pw.FlexColumnWidth(1.4),
-  //       5: const pw.FlexColumnWidth(1.2),
-  //       6: const pw.FlexColumnWidth(1.0),
-  //       7: const pw.FlexColumnWidth(0.8),
-  //       8: const pw.FlexColumnWidth(2.5),
-  //       9: const pw.FlexColumnWidth(2.5),
-  //       10: const pw.FlexColumnWidth(0.8),
-  //     },
-  //     oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
-  //
-  //   );
-  // }
-  // pw.Widget _buildPdfTotalTable(purchasePayMaster purchasePayMaster,List<purchasePayDetail> listpurchasePayDetail){
-  //   double grandTotalBeforeCalc = listpurchasePayDetail.fold(0.0, (sum, item) => sum + item.total!); // الاجمالي قبل الحسابات
-  //   num taxSal=purchasePayMaster.taxSal??0;
-  //   num taxProf=purchasePayMaster.taxProft??0;
-  //   num otherExp=purchasePayMaster.totExp??0;
-  //   num discVal=purchasePayMaster.discVal??0;
-  //   num finalTotalCost =( grandTotalBeforeCalc+taxSal)-taxProf-otherExp-discVal;
-  //   String finalTotalCostArabic =Tafqeet.convert('${finalTotalCost.toInt()}');
-  //
-  //   return pw.Column(
-  //     children: [
-  //       pw.Table(
-  //         border: pw.TableBorder.all(),
-  //         columnWidths: {
-  //           0: const pw.FlexColumnWidth(2),
-  //           1: const pw.FlexColumnWidth(6),
-  //         },
-  //         children: [
-  //           pw.TableRow(
-  //             children: [
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('$grandTotalBeforeCalc'),
-  //               ),
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('الاجمالي'),
-  //               ),
-  //             ],
-  //           ),
-  //           pw.TableRow(
-  //             children: [
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('${taxSal}'),
-  //               ),
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('ضريبة القيمة المضافة'),
-  //               ),
-  //             ],
-  //           ),
-  //           pw.TableRow(
-  //             children: [
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('${taxProf}'),
-  //               ),
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('ضريبة أ ت'),
-  //               ),
-  //             ],
-  //           ),
-  //           pw.TableRow(
-  //             children: [
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('${otherExp}'),
-  //               ),
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('مصاريف اخري'),
-  //               ),
-  //             ],
-  //           ),
-  //           pw.TableRow(
-  //             children: [
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('${discVal}'),
-  //               ),
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('خصم'),
-  //               ),
-  //             ],
-  //           ),
-  //           pw.TableRow(
-  //             children: [
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('${finalTotalCost}'),
-  //               ),
-  //               pw.Container(
-  //                 padding: const pw.EdgeInsets.all(8),
-  //                 child: pw.Text('المجموع'),
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //       // The last cell as the second element in the column
-  //       pw.Container(
-  //         width: double.infinity, // This will make it full width
-  //         padding: const pw.EdgeInsets.all(8),
-  //         decoration: pw.BoxDecoration(
-  //           border: pw.TableBorder.all(),
-  //         ),
-  //         child: pw.Row(
-  //             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               pw.Text(' اجمالي المبلغ      فقط('),
-  //               pw.Text('${finalTotalCostArabic}'),
-  //               pw.Text('('),
-  //               pw.SizedBox(width: 1)
-  //             ]),
-  //       ),
-  //     ],
-  //   );
-  // }
-  // pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
-  //   String currentDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a', 'ar')
-  //       .format(DateTime.now())
-  //       .replaceAll('AM', 'ص')
-  //       .replaceAll('PM', 'م');
-  //   return pw.Column(
-  //     crossAxisAlignment: pw.CrossAxisAlignment.start,
-  //
-  //     children: [
-  //       pw.SizedBox(height: 10),
-  //       pw.Column(
-  //         mainAxisAlignment: pw.MainAxisAlignment.start,
-  //         crossAxisAlignment: pw.CrossAxisAlignment.start,
-  //         children: [
-  //           pw.Text(
-  //             "مكان التسليم:",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.Text(
-  //             "ميعاد التسليم:",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.Text(
-  //             "شروط الدفع:",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.Text(
-  //             "الشروط المالية:",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //           pw.Text(
-  //             "شروط أخري:",
-  //             style: pw.TextStyle(
-  //               font: ttf,
-  //               fontSize: 9,
-  //               fontWeight: pw.FontWeight.bold,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       pw.SizedBox(height: 15),
-  //       pw.Row(
-  //         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //         crossAxisAlignment: pw.CrossAxisAlignment.start,
-  //         children: [
-  //           pw.SizedBox(width: 3),
-  //           pw.Column(
-  //             children: [
-  //               pw.Text(
-  //                 "اسم المعتمد",
-  //                 style: pw.TextStyle(
-  //                   font: ttf,
-  //                   fontSize: 9,
-  //                   fontWeight: pw.FontWeight.bold,
-  //                 ),
-  //               ),
-  //               pw.SizedBox(height: 18),
-  //               pw.Text(
-  //                 "${widget.user.empName??'____________'}",
-  //                 style: pw.TextStyle(
-  //                   font: ttf,
-  //                   fontSize: 9,
-  //                   fontWeight: pw.FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //           pw.Column(
-  //             children: [
-  //               pw.Text(
-  //                 "تاريخ و وقت الاعتماد",
-  //                 style: pw.TextStyle(
-  //                   font: ttf,
-  //                   fontSize: 9,
-  //                   fontWeight: pw.FontWeight.bold,
-  //                 ),
-  //               ),
-  //               pw.SizedBox(height: 18),
-  //               pw.Text(
-  //                 "${currentDateTime}",
-  //                 style: pw.TextStyle(
-  //                   font: ttf,
-  //                   fontSize: 9,
-  //                   fontWeight: pw.FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
+  Future<void> _printDocument(AppLocalizations l, bool isArabic,PurchasePayMaster purchasePayMaster ) async {
+    try {
+      final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
+      final ttf = pw.Font.ttf(fontData);
+
+      pw.MemoryImage? logoImage;
+      try {
+        final logoData = await rootBundle.load("assets/images/lo.png");
+        logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+      } catch (e) {
+        print("⚠️ Logo not found");
+      }
+
+      final headers = [
+        "مسلسل",
+        "كود الصنف",
+        "اسم الصنف",
+        "الوحدة",
+        "الكمية",
+        "سعر الوحدة",
+        "الاجمالي",
+        "طلب شراء",
+        "م",
+        "ملاحظات",
+        "ملاحظات الاصناف",
+
+      ];
+      ///Master items data
+      int rowNumberMaster = 0;
+      final dataTopTable = _detailData!.map((item) {
+        rowNumberMaster++;
+        return [
+          rowNumberMaster.toString(),
+          item.itemCode?.toString() ?? '',
+          isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+          item.unitName??'',
+          item.quantity?.toString() ?? '0',
+          item.vnPriceCurr?.toString() ?? '',
+          item.vnPrice?.toString() ?? '',
+          item.trnsTypeCode.toString() ?? '',
+          item.trnsSerial.toString() ?? '',
+          item.detDisc.toString() ?? '',
+          item.notes.toString() ?? '',
+
+        ];
+      }).toList();
+
+      ///table items data
+      int rowNumber = 0;
+      final data =
+      _detailData!.map((item) {
+        rowNumber++;
+        return [
+          rowNumber.toString(),
+          isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+          item.itemCode?.toString() ?? '',
+          item.quantity?.toString() ?? '0',
+          item.unitName ?? '',
+          '0',
+        ];
+      }).toList();
+
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(20),
+          textDirection: pw.TextDirection.rtl,
+          theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
+          build:
+              (context) => [
+            _buildFixedPdfHeader(ttf, logoImage,purchasePayMaster,_detailData!.first),
+            pw.SizedBox(height: 10),
+            _buildPdfTable(headers, dataTopTable, ttf),
+            pw.SizedBox(height: 10),
+            _buildPdfTotalTable(_masterData!,_detailData!),
+            pw.SizedBox(height: 10),
+            _buildFixedPdfFooter(ttf),
+          ],
+        ),
+      );
+
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+      );
+    } catch (e) {
+      print("❌ Print Error: $e");
+      rethrow;
+    }
+  }
+
+  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,PurchasePayMaster purchasePayMaster,PurchasePayDetail purchasePayDetail) {
+    ///current date time
+    DateTime now = DateTime.now();
+    String formattedTime = DateFormat('hh:mm:a').format(now);
+    formattedTime = formattedTime.replaceAll('AM', 'ص').replaceAll('PM', 'م');
+    String formattedDate = DateFormat('dd-MM-yyyy').format(now);
+
+    return pw.Column(
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+
+            if (logo != null)
+              pw.Column(children: [
+                pw.Image(logo, width: 60, height: 60)
+                ,
+              ])
+            else
+              pw.SizedBox(width: 60, height: 60),
+            pw.Column(children: [
+              pw.Text("نظام المشتريات",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.red
+                ),),
+              pw.Text("نموذج رقم 201003 ش ع 2017/12",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),)
+            ])
+
+          ],
+        ),
+        pw.SizedBox(height: 5),
+        pw.Row
+          (
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(
+              "Modern Structures & Equipment",
+              style: pw.TextStyle(font: ttf, fontSize: 12),
+              textDirection: pw.TextDirection.ltr,
+            ),
+
+          ],
+        ),
+        pw.SizedBox(height: 5),
+        pw.Column(children:
+        [
+          pw.Text("طلب",
+    style: pw.TextStyle(
+    font: ttf,
+    fontSize: 9,
+    fontWeight: pw.FontWeight.bold,
+      decoration: pw.TextDecoration.underline
+    ),),pw.SizedBox(height: 5),pw.Text("    صرف مبالغ نقدية على سبيل الأمانة (عهدة)   ",
+          style: pw.TextStyle(
+            font: ttf,
+            fontSize: 9,
+            fontWeight: pw.FontWeight.bold,
+            decoration: pw.TextDecoration.underline
+
+          ),),]),
+        ///Date
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text("رقم طلب الصرف  : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 10),
+            pw.Text(
+              "${purchasePayMaster.trnsSerial} / ${purchasePayMaster.trnsTypeCode}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(""),
+
+          ],
+        ),
+
+        pw.SizedBox(height: 3),
+        ///supplier name and code
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text("اسم المورد : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 10),
+            pw.Text(
+              "${purchasePayMaster.supplierName} ",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+
+        pw.SizedBox(height: 3),
+        ///company name  , currency , closed or not
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text("البيان : ${_masterData!.descA??'' }", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.SizedBox(width: 20),
+            pw.Text(
+              "${purchasePayMaster.supplierName}",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+
+        pw.SizedBox(height: 3),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+
+          children: [
+            pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text("رقم المخزن : ${_masterData!.storeCode}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+                  pw.Text("تاريخ الطلب : ${_masterData!.formattedReqDate}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+                  pw.Text("طريقة السداد : ${_masterData!.payMethod}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+                  pw.Text("حالة الدفع : ${_masterData!.payFlag}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+
+            ]),
+            pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text("اسم المخزن : ${_masterData!.storeName}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+                  pw.Text("رقم امر التوريد : ${_masterData!.orderTrnsType} / ${_masterData!.orderTrnsSerial}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+                  //todo ask about this approve flag
+                  pw.Text("حالة الاعتماد : ${_masterData!.approveFlag==1?"معتمد":"غير معتمد"}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+                  pw.Text("حالة الاقفال : ${_masterData!.closed==1?"مقفل":"غير مقفل"}", style: pw.TextStyle(font: ttf, fontSize: 9)),
+
+
+            ]),
+
+          ],
+        ),
+
+      ],
+    );
+  }
+
+  pw.Widget _buildPdfTable(
+      List<String> headers,
+      List<List<String>> data,
+      pw.Font ttf,
+      )
+  {
+    return pw.TableHelper.fromTextArray(
+      headers: headers.reversed.toList(),
+      data: data.map((row)=>row.reversed.toList()).toList(),
+      border: pw.TableBorder.all(color: PdfColors.black, width: 1),
+      headerStyle: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold,
+        font: ttf,
+        fontSize: 9,
+      ),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+      cellStyle: pw.TextStyle(font: ttf, fontSize: 9),
+      cellHeight: 25,
+      headerAlignment: pw.Alignment.center,
+      cellAlignment: pw.Alignment.center,
+      cellAlignments: {
+        0: pw.Alignment.center,
+        1: pw.Alignment.centerRight,
+        2: pw.Alignment.center,
+        3: pw.Alignment.center,
+        4: pw.Alignment.center,
+        5: pw.Alignment.center,
+        6: pw.Alignment.center,
+      },
+      cellPadding: const pw.EdgeInsets.all(4),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1.4),
+        1: const pw.FlexColumnWidth(1.4),
+        2: const pw.FlexColumnWidth(0.8),
+        3: const pw.FlexColumnWidth(1.4),
+        4: const pw.FlexColumnWidth(1.4),
+        5: const pw.FlexColumnWidth(1.2),
+        6: const pw.FlexColumnWidth(1.0),
+        7: const pw.FlexColumnWidth(0.8),
+        8: const pw.FlexColumnWidth(2.5),
+        9: const pw.FlexColumnWidth(2.5),
+        10: const pw.FlexColumnWidth(0.8),
+      },
+      oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
+
+    );
+  }
+  pw.Widget _buildPdfTotalTable(PurchasePayMaster purchasePayMaster,List<PurchasePayDetail> listPurchasePayDetail){
+    double grandTotalBeforeCalc = listPurchasePayDetail.fold(0.0, (sum, item) => sum + item.vnPrice!); // الاجمالي قبل الحسابات
+    num taxSal=purchasePayMaster.value??0;
+    num taxProf=purchasePayMaster.value??0;
+    num otherExp=purchasePayMaster.value??0;
+    num discVal=purchasePayMaster.value??0;
+    num finalTotalCost =( grandTotalBeforeCalc+taxSal)-taxProf-otherExp-discVal;
+    if (finalTotalCost<0){
+      finalTotalCost=0;
+    }
+
+    String finalTotalCostArabic =Tafqeet.convert('${finalTotalCost.toInt()}');
+
+    return pw.Column(
+      children: [
+        pw.Table(
+          border: pw.TableBorder.all(),
+          columnWidths: {
+            0: const pw.FlexColumnWidth(2),
+            1: const pw.FlexColumnWidth(6),
+          },
+          children: [
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('$grandTotalBeforeCalc'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('الاجمالي'),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('${taxSal}'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('ضريبة القيمة المضافة'),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('${taxProf}'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('ضريبة أ ت'),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('${otherExp}'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('مصاريف اخري'),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('${discVal}'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('خصم'),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('${finalTotalCost}'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text('المجموع'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        // The last cell as the second element in the column
+        pw.Container(
+          width: double.infinity, // This will make it full width
+          padding: const pw.EdgeInsets.all(8),
+          decoration: pw.BoxDecoration(
+            border: pw.TableBorder.all(),
+          ),
+          child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text(' اجمالي المبلغ      فقط('),
+                pw.Text('${finalTotalCostArabic}'),
+                pw.Text('('),
+                pw.SizedBox(width: 1)
+              ]),
+        ),
+      ],
+    );
+  }
+  pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
+    String currentDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a', 'ar')
+        .format(DateTime.now())
+        .replaceAll('AM', 'ص')
+        .replaceAll('PM', 'م');
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+
+      children: [
+        pw.SizedBox(height: 10),
+        pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              "مكان التسليم:",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              "ميعاد التسليم:",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              "شروط الدفع:",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              "الشروط المالية:",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              "شروط أخري:",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 15),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.SizedBox(width: 3),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "اسم المعتمد",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 18),
+                pw.Text(
+                  "${widget.user.empName??'____________'}",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "تاريخ و وقت الاعتماد",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 18),
+                pw.Text(
+                  "${currentDateTime}",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
