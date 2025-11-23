@@ -282,6 +282,23 @@
   "PurchasePayApproval": "اعتماد صرف النقدية",
   "productionOutboundApproval": "اعتماد صادر انتاج",
   "unit_cost": "سعر الوحدة",
-  "total": "الاجمالي"
+  "total": "الاجمالي",
+  "store": "المخزن",
+  "operation_number": "رقم الحركة",
+  "operation_date": "تاريخ الحركة",
+  "index": "مسلسل",
+  "document_number": "رقم المستند",
+  "transaction": "الحركة",
+  "transaction_code": "كود الحركة",
+  "supplier_name": "اسم المورد",
+  "payment_method": "طريقة السداد",
+  "due_date": "تاريخ الاستحقاق",
+  "currency": "العملة",
+  "payment_state":"حالة الدفع",
+  "supplier_info": "بيانات المورد",
+  "payment_info": "بيانات النقدية",
+  "transaction_info": "بيانات الحركة"
+
+
 
 }

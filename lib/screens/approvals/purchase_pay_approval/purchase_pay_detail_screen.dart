@@ -167,10 +167,10 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildCompactMasterSection1(l, masterData, isArabic,"بيانات الحركة"),
-                    _buildCompactMasterSection2(l, masterData, isArabic,"بيانات المورد"),
+                    _buildCompactMasterSection1(l, masterData, isArabic,"transaction_info"),
+                    _buildCompactMasterSection2(l, masterData, isArabic,"supplier_info"),
 
-                    _buildCompactMasterSection(l, masterData, isArabic,"بيانات النقدية"),
+                    _buildCompactMasterSection(l, masterData, isArabic,"payment_info"),
 
                     const SizedBox(height: 20),
                   ],
@@ -258,33 +258,33 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
               const Divider(height: 16, thickness: 1),
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('المخزن'),
+                l.translate('store'),
                 master.storeName,
               ),
               const SizedBox(height: 8),
 
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('كود المخزن'),
+                l.translate('store_code'),
                 master.storeCode.toString(),
               ),
               const SizedBox(height: 8),
               _buildCompactInfoRow(
                 Icons.description,
-                l.translate('البيان'),
+                l.translate('item_name'),
                 isArabic ? (master.descA ?? '') : (master.descE ?? ''),
               ),
               const SizedBox(height: 8),
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('رقم الحركة'),
+                l.translate('operation_number'),
                 master.trnsTypeCode.toString(),
               ),
               const SizedBox(height: 8),
 
               _buildCompactInfoRow(
           Icons.calendar_today,
-          l.translate('تاريخ الحركة'),
+          l.translate('operation_date'),
           master.formattedReqDate,
         ),
 
@@ -297,7 +297,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                         height: 55,
                         child: _buildCompactInfoRow(
                           Icons.store,
-                          l.translate('مسلسل'),
+                          l.translate('index'),
                           master.trnsSerial.toString() ?? 'N/A',
                         )
 
@@ -310,7 +310,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                       height: 55,
                       child: _buildCompactInfoRow(
                         Icons.calendar_today,
-                        l.translate('رقم المستند'),
+                        l.translate('document_number'),
                         master.orderTrnsSerial.toString(),
                       ),
                     ),
@@ -378,20 +378,20 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
               const Divider(height: 16, thickness: 1),
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('الحركة'),
+                l.translate('transaction'),
                 master.vnTrnsName.toString(),
               ),
               const SizedBox(height: 8),
 
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('كود الحركة'),
+                l.translate('transaction_code'),
                 master.orderTrnsType.toString(),
               ),
               const SizedBox(height: 8),
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('اسم المورد'),
+                l.translate('supplier_name'),
                 master.supplierName.toString(),
               ),
               const SizedBox(height: 8),
@@ -454,13 +454,13 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
               const Divider(height: 16, thickness: 1),
               _buildCompactInfoRow(
                 Icons.store,
-                l.translate('طريقة السداد'),
+                l.translate('payment_method'),
                 master.payMethod.toString() ?? 'N/A',
               ),
               const SizedBox(height: 8),
               _buildCompactInfoRow(
                 Icons.description,
-                l.translate('تاريخ الاستحقاق'),
+                l.translate('due_date'),
                 master.formattedDueDate,
               ),
               const SizedBox(height: 8),
@@ -472,7 +472,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                       height: 55,
                       child: _buildCompactInfoRow(
                         Icons.calendar_today,
-                        l.translate('الاجمالي'),
+                        l.translate('total'),
                         (master.valueCurr??master.value).toString(),
                       ),
                     ),
@@ -485,7 +485,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                       height: 55,
                       child: _buildCompactInfoRow(
                         Icons.calendar_today,
-                        l.translate('العملة'),
+                        l.translate('currency'),
                         master.currencyDesc.toString(),
                       ),
                     ),
@@ -496,7 +496,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
               const SizedBox(height: 8),
               _buildCompactInfoRow(
                 Icons.description,
-                l.translate('حالة الدفع'),
+                l.translate('payment_state'),
                 master.payFlag.toString(),
               ),
               const SizedBox(height: 16),

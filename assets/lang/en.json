@@ -281,6 +281,24 @@
   "purchasePayDetails":"Purchase Pay Details",
   "productionOutboundApproval": "Production Outbound Approval",
   "unit_cost": "Unit Cost",
-  "total": "Total"
+  "store": "Store",
+  "operation_number": "Transaction Number",
+  "operation_date": "Transaction Date",
+  "index": "Index",
+  "document_number": "Document Number",
+  "transaction": "Transaction",
+  "transaction_code": "Transaction Code",
+  "supplier_name": "Supplier Name",
+  "payment_method": "Payment Method",
+  "due_date": "Due Date",
+  "total": "total",
+  "currency": "Currency",
+  "payment_state":"Payment State",
+  "supplier_info": "Supplier Info",
+  "payment_info": "Payment Info",
+  "transaction_info": "Transaction Info"
+
+
+
 
 }
