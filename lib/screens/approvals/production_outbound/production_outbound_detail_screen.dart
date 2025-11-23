@@ -367,6 +367,9 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
       l.translate("item_number"),
       l.translate('quantity'),
       l.translate('unit_name'),
+      l.translate('unit_cost'),
+      l.translate('total'),
+      //todo 2
       // l.translate("last_price"),
     ];
     int i = 0;
@@ -433,7 +436,8 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
                     DataCell(Text(item.itemCode?.toString() ?? 'N/A')),
                     DataCell(Text(item.quantity?.toString() ?? 'N/A')),
                     DataCell(Text(item.unitName ?? 'N/A')),
-                    // DataCell(Text(item.last_pur?.toString() ?? 'N/A')),
+                    DataCell(Text(item.unitCost?.toStringAsFixed(2).toString() ?? 'N/A')),
+                    DataCell(Text(item.total?.toStringAsFixed(2).toString() ?? 'N/A')),
                   ],
                 );
               }),

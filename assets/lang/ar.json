@@ -280,6 +280,8 @@
   "login_failed_network": "فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
   "purchasePayDetails":"تفاصيل صرف النقدية",
   "PurchasePayApproval": "اعتماد صرف النقدية",
-  "productionOutboundApproval": "اعتماد صادر انتاج"
+  "productionOutboundApproval": "اعتماد صادر انتاج",
+  "unit_cost": "سعر الوحدة",
+  "total": "الاجمالي"
 
 }

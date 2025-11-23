@@ -279,6 +279,8 @@
   "login_failed_network": "Login Failed, Please Try again ",
   "PurchasePayApproval": "Purchase Pay Approval",
   "purchasePayDetails":"Purchase Pay Details",
-  "productionOutboundApproval": "Production Outbound Approval"
+  "productionOutboundApproval": "Production Outbound Approval",
+  "unit_cost": "Unit Cost",
+  "total": "Total"
 
 }
