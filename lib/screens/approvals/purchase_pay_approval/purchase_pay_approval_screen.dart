@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_model.dart';
 import 'package:modernapproval/screens/approvals/purchase_pay_approval/purchase_pay_detail_screen.dart';
-import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_detail_screen.dart';
 import '../../../app_localizations.dart';
-import '../../../models/purchase_request_model.dart';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/error_display.dart';
-import '../sales_order_approval/sales_order_detail_screen.dart';
 
 class PurchasePayApprovalScreen extends StatefulWidget {
   final UserModel user;
