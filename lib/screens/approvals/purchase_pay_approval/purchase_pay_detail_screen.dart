@@ -7,21 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:modernapproval/models/approval_status_response_model.dart';
-import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
-import 'package:modernapproval/models/approvals/purchase_order/purchase_order_model.dart';
 import 'package:modernapproval/models/user_model.dart';
 import 'package:modernapproval/services/api_service.dart';
 import 'package:modernapproval/widgets/error_display.dart';
 import 'package:number_to_word_arabic/number_to_word_arabic.dart';
-import '../../../app_localizations.dart';
-import '../../../main.dart';
-import 'package:modernapproval/models/approval_status_response_model.dart';
-import 'package:modernapproval/models/purchase_request_det_model.dart';
-import 'package:modernapproval/models/purchase_request_mast_model.dart';
-import 'package:modernapproval/models/purchase_request_model.dart';
-import 'package:modernapproval/models/user_model.dart';
-import 'package:modernapproval/services/api_service.dart';
-import 'package:modernapproval/widgets/error_display.dart';
 import '../../../app_localizations.dart';
 import '../../../main.dart';
 
@@ -29,7 +18,6 @@ import '../../../main.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:flutter/rendering.dart' show TextDirection;
 
 // ---------------------
 
@@ -173,8 +161,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
 
               final masterData =
               snapshot.data!['master'] as PurchasePayMaster;
-              final detailData =
-              snapshot.data!['detail'] as List<PurchasePayDetail>;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -187,7 +173,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                     _buildCompactMasterSection(l, masterData, isArabic,"بيانات النقدية"),
 
                     const SizedBox(height: 20),
-                    // _buildModernDetailTable(l, detailData, isArabic),
                   ],
                 ),
               );
@@ -603,93 +588,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
     );
   }
 
-  // Widget _buildModernDetailTable(
-  //     AppLocalizations l,
-  //     List<purchasePayDetail> details,
-  //     bool isArabic,
-  //     )
-  // {
-  //   final columns = [
-  //     l.translate("serial_number"),
-  //     l.translate('item_name'),
-  //     l.translate("item_number"),
-  //     l.translate('quantity'),
-  //     l.translate('unit_name'),
-  //   ];
-  //   int i = 0;
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         l.translate('itemDetails'),
-  //         style: const TextStyle(
-  //           fontSize: 18,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.black87,
-  //         ),
-  //       ),
-  //       const Divider(height: 16),
-  //       Card(
-  //         elevation: 2,
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //         ),
-  //         clipBehavior: Clip.antiAlias,
-  //         child: SingleChildScrollView(
-  //           scrollDirection: Axis.horizontal,
-  //           child: DataTable(
-  //             headingRowColor: MaterialStateProperty.all(
-  //               const Color(0xFF6C63FF).withOpacity(0.1),
-  //             ),
-  //             headingTextStyle: const TextStyle(
-  //               fontWeight: FontWeight.bold,
-  //               color: Color(0xFF6C63FF),
-  //               fontSize: 14,
-  //             ),
-  //             dataRowMinHeight: 60,
-  //             dataRowMaxHeight: 80,
-  //             columnSpacing: 30,
-  //             columns:
-  //             columns
-  //                 .map(
-  //                   (title) => DataColumn(
-  //                 label: Text(
-  //                   title,
-  //                   style: const TextStyle(fontWeight: FontWeight.bold),
-  //                 ),
-  //               ),
-  //             )
-  //                 .toList(),
-  //             rows: List<DataRow>.generate(details.length, (index) {
-  //               final item = details[index];
-  //               final color = index.isEven ? Colors.white : Colors.grey.shade50;
-  //               return DataRow(
-  //                 color: MaterialStateProperty.all(color),
-  //                 cells: [
-  //                   DataCell(Text((++i).toString())),
-  //                   DataCell(
-  //                     SizedBox(
-  //                       child: Text(
-  //                         isArabic
-  //                             ? (item.itemNameA ?? '')
-  //                             : (item.itemNameE ?? ''),
-  //                         overflow: TextOverflow.visible,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   DataCell(Text(item.itemCode?.toString() ?? 'N/A')),
-  //                   DataCell(Text(item.quantity?.toString() ?? 'N/A')),
-  //                   DataCell(Text(item.unitName ?? 'N/A')),
-  //                 ],
-  //               );
-  //             }),
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   void _showActionDialog(BuildContext context, AppLocalizations l) {
     final TextEditingController notesController = TextEditingController();
     bool isDialogLoading = false;
@@ -726,19 +624,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                     maxLines: 3,
                   ),
                   const SizedBox(height: 20),
-                  if (isDialogLoading)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(width: 16),
-                          Text(l.translate('submitting')),
-                        ],
-                      ),
-                    )
-                  else
+
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -1280,18 +1166,16 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
       }
 
       final headers = [
-        "مسلسل",
+        "م",
         "كود الصنف",
         "اسم الصنف",
         "الوحدة",
         "الكمية",
+        "المجانية",
         "سعر الوحدة",
         "الاجمالي",
         "طلب شراء",
         "م",
-        "ملاحظات",
-        "ملاحظات الاصناف",
-
       ];
       ///Master items data
       int rowNumberMaster = 0;
@@ -1303,12 +1187,11 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
           isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
           item.unitName??'',
           item.quantity?.toString() ?? '0',
-          item.vnPriceCurr?.toString() ?? '',
-          item.vnPrice?.toString() ?? '',
-          item.trnsTypeCode.toString() ?? '',
-          item.trnsSerial.toString() ?? '',
-          item.detDisc.toString() ?? '',
-          item.notes.toString() ?? '',
+          item.bonus?.toString() ?? '0',
+          item.vnPrice?.toString() ?? '0',
+          ((item.vnPrice??0)*(item.quantity??0)).toString() ?? '',
+          _masterData!.orderTrnsType?.toString() ?? '',
+          _masterData!.orderTrnsSerial?.toString() ?? '',
 
         ];
       }).toList();
@@ -1343,7 +1226,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             pw.SizedBox(height: 10),
             _buildPdfTotalTable(_masterData!,_detailData!),
             pw.SizedBox(height: 10),
-            _buildFixedPdfFooter(ttf),
+            _buildFixedPdfFooter(ttf,purchasePayMaster),
           ],
         ),
       );
@@ -1362,7 +1245,6 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
     DateTime now = DateTime.now();
     String formattedTime = DateFormat('hh:mm:a').format(now);
     formattedTime = formattedTime.replaceAll('AM', 'ص').replaceAll('PM', 'م');
-    String formattedDate = DateFormat('dd-MM-yyyy').format(now);
 
     return pw.Column(
       children: [
@@ -1545,29 +1427,28 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
       },
       cellPadding: const pw.EdgeInsets.all(4),
       columnWidths: {
-        0: const pw.FlexColumnWidth(1.4),
-        1: const pw.FlexColumnWidth(1.4),
-        2: const pw.FlexColumnWidth(0.8),
-        3: const pw.FlexColumnWidth(1.4),
-        4: const pw.FlexColumnWidth(1.4),
+        0: const pw.FlexColumnWidth(0.6),
+        1: const pw.FlexColumnWidth(1.5),
+        2: const pw.FlexColumnWidth(1.2),
+        3: const pw.FlexColumnWidth(1.3),
+        4: const pw.FlexColumnWidth(1.2),
         5: const pw.FlexColumnWidth(1.2),
         6: const pw.FlexColumnWidth(1.0),
-        7: const pw.FlexColumnWidth(0.8),
+        7: const pw.FlexColumnWidth(1.8),
         8: const pw.FlexColumnWidth(2.5),
-        9: const pw.FlexColumnWidth(2.5),
-        10: const pw.FlexColumnWidth(0.8),
+        9: const pw.FlexColumnWidth(0.6),
       },
       oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
 
     );
   }
   pw.Widget _buildPdfTotalTable(PurchasePayMaster purchasePayMaster,List<PurchasePayDetail> listPurchasePayDetail){
-    double grandTotalBeforeCalc = listPurchasePayDetail.fold(0.0, (sum, item) => sum + item.vnPrice!); // الاجمالي قبل الحسابات
-    num taxSal=purchasePayMaster.value??0;
-    num taxProf=purchasePayMaster.value??0;
-    num otherExp=purchasePayMaster.value??0;
-    num discVal=purchasePayMaster.value??0;
-    num finalTotalCost =( grandTotalBeforeCalc+taxSal)-taxProf-otherExp-discVal;
+    double grandTotalBeforeCalc = listPurchasePayDetail.fold(0.0, (sum, item) => sum + ((item.vnPrice!)*(item.quantity??0))); // الاجمالي قبل الحسابات
+    double totalTaxSal =     (listPurchasePayDetail.first.taxSal??0).toDouble(); // اجمالي ضريبة فيمة مضافة
+    double totalTaxProf = (listPurchasePayDetail.first.taxProft??0).toDouble(); // اجمالي ضريبة أ ت
+    double totalOtherExp = (listPurchasePayDetail.first.othersVal??0).toDouble(); // اجمالي مصاريف اخري
+    double totalDiscount = (listPurchasePayDetail.first.discVal??0).toDouble(); // اجمالي خصومات
+    num finalTotalCost =( grandTotalBeforeCalc+totalTaxSal)-totalTaxProf-totalOtherExp-totalDiscount;
     if (finalTotalCost<0){
       finalTotalCost=0;
     }
@@ -1582,15 +1463,16 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             0: const pw.FlexColumnWidth(2),
             1: const pw.FlexColumnWidth(6),
           },
+
           children: [
             pw.TableRow(
               children: [
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
                   child: pw.Text('$grandTotalBeforeCalc'),
                 ),
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
                   child: pw.Text('الاجمالي'),
                 ),
               ],
@@ -1598,11 +1480,11 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             pw.TableRow(
               children: [
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${taxSal}'),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  child: pw.Text('${totalTaxSal}'),
                 ),
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
                   child: pw.Text('ضريبة القيمة المضافة'),
                 ),
               ],
@@ -1610,11 +1492,11 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             pw.TableRow(
               children: [
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${taxProf}'),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  child: pw.Text('${totalTaxProf}'),
                 ),
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
                   child: pw.Text('ضريبة أ ت'),
                 ),
               ],
@@ -1622,11 +1504,11 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             pw.TableRow(
               children: [
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${otherExp}'),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  child: pw.Text('${totalOtherExp}'),
                 ),
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
                   child: pw.Text('مصاريف اخري'),
                 ),
               ],
@@ -1634,24 +1516,12 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
             pw.TableRow(
               children: [
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${discVal}'),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  child: pw.Text('${totalDiscount}'),
                 ),
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
                   child: pw.Text('خصم'),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${finalTotalCost}'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('المجموع'),
                 ),
               ],
             ),
@@ -1660,7 +1530,7 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
         // The last cell as the second element in the column
         pw.Container(
           width: double.infinity, // This will make it full width
-          padding: const pw.EdgeInsets.all(8),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
           decoration: pw.BoxDecoration(
             border: pw.TableBorder.all(),
           ),
@@ -1673,115 +1543,211 @@ class _PurchasePayDetailScreenState extends State<PurchasePayDetailScreen>  {
                 pw.SizedBox(width: 1)
               ]),
         ),
+        pw.SizedBox(height: 3),
+        pw.Table(
+          border: pw.TableBorder.all(),
+          columnWidths: {
+            0: const pw.FlexColumnWidth(2),
+            1: const pw.FlexColumnWidth(2),
+          },
+          children: [
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  alignment: pw.Alignment.center,
+
+                  child: pw.Text('$finalTotalCost'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  child: pw.Text('أجمالي القيمة المعتمدة للصرف :'),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  alignment: pw.Alignment.center,
+                  child: pw.Text('0.00'),
+                ),
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+                  child: pw.Text('أجمالي القيمة المتبقية من أمر التوريد :'),
+                ),
+              ],
+            ),
+          ]
+        )
       ],
     );
   }
-  pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
-    String currentDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a', 'ar')
-        .format(DateTime.now())
-        .replaceAll('AM', 'ص')
-        .replaceAll('PM', 'م');
+  pw.Widget _buildFixedPdfFooter(pw.Font ttf,PurchasePayMaster purchasePayMaster) {
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
 
       children: [
-        pw.SizedBox(height: 10),
+
+        pw.Center(child: pw.Text("يرجي صرف المبلغ المذكور فقط كهعدة ، وأتعهد بإستخدام المبلغ للقيام بالأعمال المحددة بالبيان وأتعهد بتقديم المستندات الدالة علي ذلك وتسوية",
+          style: pw.TextStyle(
+            font: ttf,
+            fontSize: 11,
+            fontWeight: pw.FontWeight.bold,
+          ),),),
+        pw.SizedBox(height: 5),
+
         pw.Column(
-          mainAxisAlignment: pw.MainAxisAlignment.start,
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+          pw.Text("الاسم / ${purchasePayMaster.supplierName}",
+          style: pw.TextStyle(
+            font: ttf,
+            fontSize: 10,
+            fontWeight: pw.FontWeight.bold,
+          ),),
+    pw.Text("التوقيع / ",
+    style: pw.TextStyle(
+    font: ttf,
+    fontSize: 9,
+    fontWeight: pw.FontWeight.bold,
+    ),)
+        ]),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(),
           children: [
-            pw.Text(
-              "مكان التسليم:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
+          pw.TableRow(
+            children: [
+              pw.Container(
+                padding: pw.EdgeInsets.symmetric(vertical: 4,horizontal: 4),
+                child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text("الادارة"),
+                      pw.SizedBox(height: 2),
+                      pw.Text("مدير الإدارة /"),
+                      pw.SizedBox(height: 2),
+                      pw.Text("التوقيع واعتماد الطلب /")
+
+                    ]
+                ),
               ),
-            ),
-            pw.Text(
-              "ميعاد التسليم:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
+              pw.Container(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text("الإدارة المالية"),
+                      pw.SizedBox(height: 2),
+                      pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+
+                          children: [
+                        pw.Text("المراجعة و التدقيق /"),
+                        pw.Text("توقيع /"),
+                            pw.SizedBox()
+                      ]),
+                      pw.SizedBox(height: 2),
+                      pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                        pw.Text("المدير المالي /"),
+                        pw.Text("توقيع /"),
+                            pw.SizedBox()
+
+                      ])
+                    ]
+                ),
               ),
-            ),
-            pw.Text(
-              "شروط الدفع:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text(
-              "الشروط المالية:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text(
-              "شروط أخري:",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-          ],
+
+            ],
+          ),
+        ],
         ),
-        pw.SizedBox(height: 15),
+        pw.SizedBox(height: 3),
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.SizedBox(width: 3),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "اسم المعتمد",
+            mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+            children: [
+          pw.Text("يعتمد الصرف ,",
+            style: pw.TextStyle(
+          font: ttf,
+          fontSize: 11,
+          fontWeight: pw.FontWeight.bold,
+        )),
+        pw.SizedBox()
+        ]),
+        pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+            children: [
+              pw.Text("التوقيع /",
                   style: pw.TextStyle(
                     font: ttf,
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 18),
-                pw.Text(
-                  "${widget.user.empName??'____________'}",
+                  )),
+              pw.SizedBox(),
+              pw.Column(children: [
+                pw.Text("مدخل الحركة / ${purchasePayMaster.insertUser??''}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    )),
+                pw.Text("تاريخ ادخال الحركة / ${purchasePayMaster.formattedInsertDate}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    )),
+              ])
+
+            ]),
+        pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+            children: [
+              pw.Text("*  اعتماد الصرف قاصر علي السادة رئيس وأعضاء مجلس الإدارة فقط ",
                   style: pw.TextStyle(
                     font: ttf,
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "تاريخ و وقت الاعتماد",
+                  )),
+              pw.SizedBox()
+            ]),
+        pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+            children: [
+              pw.Text("الاعتمادات / ",
                   style: pw.TextStyle(
                     font: ttf,
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 18),
-                pw.Text(
-                  "${currentDateTime}",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  )),
+              pw.Column(children: [
+                pw.Text("عضو مجلس الإدارة المنتدب الرئيس التنفيذى",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    )),
+                pw.SizedBox(height: 4),
+                pw.Text(".......................")
+              ]),
+              pw.Column(children: [
+                pw.Text("رئيس مجلس الإدارة",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    )),
+                pw.SizedBox(height: 4),
+                pw.Text(".......................")
+              ]),
+
+
+            ])
+
+
       ],
     );
   }
