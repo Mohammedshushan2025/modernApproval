@@ -278,6 +278,7 @@
   "order_date": "Order date",
   "login_failed_network": "Login Failed, Please Try again ",
   "PurchasePayApproval": "Purchase Pay Approval",
-  "purchasePayDetails":"Purchase Pay Details"
+  "purchasePayDetails":"Purchase Pay Details",
+  "productionOutboundApproval": "Production Outbound Approval"
 
 }

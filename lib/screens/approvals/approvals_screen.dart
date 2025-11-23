@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
+import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_pay_approval/purchase_pay_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_approval_screen.dart';
@@ -56,6 +57,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetPurchaseOrderCount();
               _fetchAndSetSalesOrderCount();
               _fetchAndSetPurchasePayCount();
+              _fetchAndSetProductionOutboundCount();
             });
           }
         })
@@ -71,6 +73,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     await _fetchAndSetPurchaseOrderCount();
     await _fetchAndSetSalesOrderCount();
     await _fetchAndSetPurchasePayCount();
+    await _fetchAndSetProductionOutboundCount();
   }
 
   Future<void> _fetchAndSetPurchaseRequestCount() async {
@@ -177,6 +180,32 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       }
     }
   }
+  Future<void> _fetchAndSetProductionOutboundCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getProductionOutbound(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[105] = requests.length;
+    } catch (e) {
+      print("Error fetching Production outbound count: $e");
+      _approvalCounts[105] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
 
   Future<List<FormReportItem>> _fetchAndProcessApprovals() async {
     final items = await _apiService.getFormsAndReports(widget.user.usersCode);
@@ -239,6 +268,21 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
         if (mounted) {
           _refreshCounts();
         }
+      case 105:
+        log("entering Production outbound approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => ProductionOutboundApprovalScreen(
+              user: widget.user,
+              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
+            ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
       case 108:
         log("entering Sales order approval");
         await Navigator.push(
@@ -255,7 +299,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           _refreshCounts();
         }
       case 111:
-        log("entering Purchase pay");
+        log("entering Purchase pay approval");
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -456,6 +500,10 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             setState(() {
               _selectedPasswordGroup = newValue;
               _fetchAndSetPurchaseRequestCount();
+              _fetchAndSetPurchaseOrderCount();
+              _fetchAndSetSalesOrderCount();
+              _fetchAndSetPurchasePayCount();
+              _fetchAndSetProductionOutboundCount();
             });
           },
           offset: const Offset(0, 48),

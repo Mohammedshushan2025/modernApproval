@@ -19,7 +19,8 @@ class PurchaseOrder {
   final String? trnsFlag;
   final int? trnsStatus;
 
-  PurchaseOrder({
+  PurchaseOrder(
+      {
     required this.trnsTypeCode,
     required this.trnsSerial,
     required this.reqDate,

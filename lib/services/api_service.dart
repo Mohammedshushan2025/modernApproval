@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_mast_model.dart';
 import 'package:modernapproval/models/approvals/purchase_order/purchase_order_det_model.dart';
 import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_det_model.dart';
@@ -935,4 +936,123 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+  /// Production Outbound
+  Future<List<ProductionOutbound>> getProductionOutbound({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async
+  {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_PD_TRNS_OUT_AUTH',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Production outbound Requests from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        return items.map((item) => ProductionOutbound.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at Pro outbound: $e');
+      throw Exception('serverError');
+    }
+  }
+  // Future<PurchasePayMaster> getPurchasePayMaster({
+  //   required int trnsTypeCode,
+  //   required int trnsSerial,
+  // }) async
+  // {
+  //   final queryParams = {
+  //     'trns_type_code': trnsTypeCode.toString(),
+  //     'trns_serial': trnsSerial.toString(),
+  //   };
+  //   final url = Uri.parse(
+  //     '$_baseUrl/GET_PUR_PAY_REQUEST_MAST',
+  //   ).replace(queryParameters: queryParams);
+  //   print('Fetching Purchase pay master from: $url');
+  //   try {
+  //     final response = await http.get(url).timeout(const Duration(seconds: 20));
+  //     if (response.statusCode == 200) {
+  //       log("status code = 200");
+  //       final data = json.decode(response.body);
+  //       final List<dynamic> items = data['items'];
+  //       if (items.isEmpty) {
+  //         throw Exception('noData');
+  //       }
+  //       log(items.toString());
+  //       return PurchasePayMaster.fromJson(items.first);
+  //     } else {
+  //       print('Server Error: ${response.statusCode}, Body: ${response.body}');
+  //       throw Exception('serverError');
+  //     }
+  //   } on SocketException {
+  //     print('Network Error: No internet connection.');
+  //     throw Exception('noInternet');
+  //   } on TimeoutException {
+  //     print('Network Error: Request timed out.');
+  //     throw Exception('noInternet');
+  //   } catch (e) {
+  //     print('An unexpected error occurred get purchase pay master: $e');
+  //     throw Exception('serverError');
+  //   }
+  // }
+  // Future<List<PurchasePayDetail>> getPurchasePayDetail({
+  //   required int trnsTypeCode,
+  //   required int trnsSerial,
+  // }) async
+  // {
+  //   final queryParams = {
+  //     'trns_type_code': trnsTypeCode.toString(),
+  //     'trns_serial': trnsSerial.toString(),
+  //   };
+  //   final url = Uri.parse(
+  //     '$_baseUrl/GET_PUR_PAY_REQUEST_DET',
+  //   ).replace(queryParameters: queryParams);
+  //   print('Fetching purchase Pay details from: $url');
+  //   try {
+  //     final response = await http.get(url).timeout(const Duration(seconds: 30));
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       final List<dynamic> items = data['items'];
+  //       if (items.isEmpty) return [];
+  //       return items
+  //           .map((item) => PurchasePayDetail.fromJson(item))
+  //           .toList();
+  //     } else {
+  //       print('Server Error: ${response.statusCode}, Body: ${response.body}');
+  //       throw Exception('serverError');
+  //     }
+  //   } on SocketException {
+  //     print('Network Error: No internet connection.');
+  //     throw Exception('noInternet');
+  //   } on TimeoutException {
+  //     print('Network Error: Request timed out.');
+  //     throw Exception('noInternet');
+  //   } catch (e) {
+  //     print('An unexpected error occurred at purchase pay: $e');
+  //     throw Exception('serverError');
+  //   }
+  // }
+
 }
