@@ -272,7 +272,6 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     log(_selectedPasswordGroup!.passwordNumber.toString(), name: "SG:pwNum");
     log(_selectedPasswordGroup!.isDefault.toString(), name: "SG:isDefault");
 
-    ///Purchase Request Approval screen - 101
     switch (item.pageId) {
       case 101:
         await Navigator.push(
@@ -433,7 +432,9 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                     (item.pageId == 101 ||
                         item.pageId == 102 ||
                         item.pageId == 108 ||
-                        item.pageId == 111) &&
+                        item.pageId == 111 ||
+                        item.pageId == 105 ||
+                        item.pageId == 106) &&
                     _isCountLoading,
               );
             },
