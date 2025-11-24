@@ -20,27 +20,28 @@ class PurchasePayDetail {
   num? detDisc;
   String? notes;
 
-  PurchasePayDetail(
-      {required this.trnsTypeCode,
-        required this.trnsSerial,
-        this.itemSerial,
-        this.itemGroupCode,
-        this.groupName,
-        this.itemCode,
-        this.itemNameA,
-        this.itemNameE,
-        this.unitName,
-        this.quantity,
-        this.bonus,
-        this.vnPrice,
-        this.vnPriceCurr,
-        this.taxSal,
-        this.currencyRate,
-        this.taxProft,
-        this.othersVal,
-        this.discVal,
-        this.detDisc,
-        this.notes});
+  PurchasePayDetail({
+    required this.trnsTypeCode,
+    required this.trnsSerial,
+    this.itemSerial,
+    this.itemGroupCode,
+    this.groupName,
+    this.itemCode,
+    this.itemNameA,
+    this.itemNameE,
+    this.unitName,
+    this.quantity,
+    this.bonus,
+    this.vnPrice,
+    this.vnPriceCurr,
+    this.taxSal,
+    this.currencyRate,
+    this.taxProft,
+    this.othersVal,
+    this.discVal,
+    this.detDisc,
+    this.notes,
+  });
 
   factory PurchasePayDetail.fromJson(Map<String, dynamic> json) {
     return PurchasePayDetail(

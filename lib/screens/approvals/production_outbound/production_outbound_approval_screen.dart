@@ -12,15 +12,19 @@ class ProductionOutboundApprovalScreen extends StatefulWidget {
   final UserModel user;
   final int selectedPasswordNumber;
 
-  const ProductionOutboundApprovalScreen({super.key,
+  const ProductionOutboundApprovalScreen({
+    super.key,
     required this.user,
-    required this.selectedPasswordNumber,});
+    required this.selectedPasswordNumber,
+  });
 
   @override
-  State<ProductionOutboundApprovalScreen> createState() => _ProductionOutboundApprovalScreenState();
+  State<ProductionOutboundApprovalScreen> createState() =>
+      _ProductionOutboundApprovalScreenState();
 }
 
-class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApprovalScreen> {
+class _ProductionOutboundApprovalScreenState
+    extends State<ProductionOutboundApprovalScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<ProductionOutbound>> _requestsFuture;
 
@@ -58,12 +62,12 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
 
   void _extractStoreNames(List<ProductionOutbound> requests) {
     final storeNames =
-    requests
-        .map((request) => request.storeName ?? '')
-        .where((storeName) => storeName.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+        requests
+            .map((request) => request.storeName ?? '')
+            .where((storeName) => storeName.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
     _availableStoreNames = [''] + storeNames;
   }
@@ -89,7 +93,7 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
             if (_selectedDate != null) {
               matchesDate =
                   request.reqDate != null &&
-                      _isSameDate(request.reqDate!, _selectedDate!);
+                  _isSameDate(request.reqDate!, _selectedDate!);
             }
 
             return matchesStoreName && matchesDate;
@@ -181,22 +185,22 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                   items:
-                  _availableStoreNames.map((String storeName) {
-                    return DropdownMenuItem<String>(
-                      value: storeName.isEmpty ? null : storeName,
-                      child: Text(
-                        storeName.isEmpty
-                            ? l.translate('all_stores')
-                            : storeName,
-                        style: TextStyle(
-                          color:
-                          storeName.isEmpty
-                              ? Colors.grey.shade500
-                              : Colors.black87,
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                      _availableStoreNames.map((String storeName) {
+                        return DropdownMenuItem<String>(
+                          value: storeName.isEmpty ? null : storeName,
+                          child: Text(
+                            storeName.isEmpty
+                                ? l.translate('all_stores')
+                                : storeName,
+                            style: TextStyle(
+                              color:
+                                  storeName.isEmpty
+                                      ? Colors.grey.shade500
+                                      : Colors.black87,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                   onChanged: (String? newValue) {
                     setState(() {
                       _storeNameFilter = newValue ?? '';
@@ -316,9 +320,9 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
                 if (snapshot.hasError) {
                   return ErrorDisplay(
                     errorMessageKey:
-                    snapshot.error.toString().contains('noInternet')
-                        ? 'noInternet'
-                        : 'serverError',
+                        snapshot.error.toString().contains('noInternet')
+                            ? 'noInternet'
+                            : 'serverError',
                     onRetry: _fetchData,
                   );
                 }
@@ -388,11 +392,11 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
                   });
                 }
                 final displayRequests =
-                _showFilters &&
-                    (_storeNameFilter.isNotEmpty ||
-                        _selectedDate != null)
-                    ? _filteredRequests
-                    : allRequests;
+                    _showFilters &&
+                            (_storeNameFilter.isNotEmpty ||
+                                _selectedDate != null)
+                        ? _filteredRequests
+                        : allRequests;
 
                 // Show filter results info
                 if (_showFilters &&
@@ -467,10 +471,10 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
   }
 
   Widget _buildProductionOutboundCard(
-      BuildContext context,
-      ProductionOutbound request,
-      int index,
-      ) {
+    BuildContext context,
+    ProductionOutbound request,
+    int index,
+  ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final cardColor = _cardColors[index % _cardColors.length];
 
@@ -497,9 +501,9 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
               MaterialPageRoute(
                 builder:
                     (context) => ProductionOutboundDetailScreen(
-                  user: widget.user,
-                  request: request,
-                ),
+                      user: widget.user,
+                      request: request,
+                    ),
               ),
             );
 
@@ -592,7 +596,9 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
                           Row(
                             children: [
                               Text(
-                                request.authPk1.toString() + " / " + request.authPk2.toString(),
+                                request.authPk1.toString() +
+                                    " / " +
+                                    request.authPk2.toString(),
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 12.5,
@@ -620,4 +626,3 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
     );
   }
 }
-

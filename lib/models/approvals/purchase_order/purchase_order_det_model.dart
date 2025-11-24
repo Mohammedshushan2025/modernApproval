@@ -2,11 +2,11 @@ import '../../../utils/package_utility.dart';
 
 class PurchaseOrderDetail {
   final int trnsTypeCode;
-   final int trnsSerial;
-   final int storeCode;
-   final String? storeName;
+  final int trnsSerial;
+  final int storeCode;
+  final String? storeName;
   DateTime? reqDate;
-   final int? itemSerial;
+  final int? itemSerial;
   String? groupName;
   String? itemCode;
   int? groupCode;
@@ -15,36 +15,36 @@ class PurchaseOrderDetail {
   String? unitName;
   num? quantity;
   int? approveFlag;
-  num? vnPriceCurr;//the value is double but num cover both
+  num? vnPriceCurr; //the value is double but num cover both
   num? vnPrice;
   num? total;
   int? reqTrnsTypeCode;
   int? reqTrnsSerial;
   String? servicesDesc;
   String? notes;
-  PurchaseOrderDetail(
-      {required this.trnsTypeCode,
-        required this.trnsSerial,
-        required this.storeCode,
-        required this.storeName,
-         this.reqDate,
-        required this.itemSerial,
-        this.groupName,
-        this.itemCode,
-        this.groupCode,
-        this.itemNameA,
-        this.itemNameE,
-        this.unitName,
-        this.quantity,
-        this.approveFlag,
-        this.vnPriceCurr,
-        this.vnPrice,
-        this.total,
-        this.reqTrnsTypeCode,
-        this.reqTrnsSerial,
-        this.servicesDesc,
-        this.notes,
-      });
+  PurchaseOrderDetail({
+    required this.trnsTypeCode,
+    required this.trnsSerial,
+    required this.storeCode,
+    required this.storeName,
+    this.reqDate,
+    required this.itemSerial,
+    this.groupName,
+    this.itemCode,
+    this.groupCode,
+    this.itemNameA,
+    this.itemNameE,
+    this.unitName,
+    this.quantity,
+    this.approveFlag,
+    this.vnPriceCurr,
+    this.vnPrice,
+    this.total,
+    this.reqTrnsTypeCode,
+    this.reqTrnsSerial,
+    this.servicesDesc,
+    this.notes,
+  });
 
   factory PurchaseOrderDetail.fromJson(Map<String, dynamic> json) {
     return PurchaseOrderDetail(
@@ -53,7 +53,8 @@ class PurchaseOrderDetail {
       storeCode: json['store_code'],
       storeName: json['store_name'],
       itemSerial: json['item_serial'],
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
       groupName: json['group_name'],
       itemCode: json['item_code'],
       groupCode: json['group_code'],

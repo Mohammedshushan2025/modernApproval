@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 import 'package:modernapproval/curved_background_painter.dart';
 import 'package:flutter/material.dart';
@@ -45,26 +44,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final user = await _authService.login(
-       _userCodeController.text,
+        _userCodeController.text,
         _passwordController.text,
       );
 
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      Navigator.of(
+        context,
+        rootNavigator: true,
+      ).popUntil((route) => route.isFirst);
 
       await _showCustomDialog(
-        message: localizations.translate('loginSuccess') ?? 'تم تسجيل الدخول بنجاح',
+        message:
+            localizations.translate('loginSuccess') ?? 'تم تسجيل الدخول بنجاح',
         isSuccess: true,
       );
 
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
-
     } catch (e) {
       print("Login failed with error: $e");
       if (!mounted) return;
@@ -74,17 +76,21 @@ class _LoginScreenState extends State<LoginScreen> {
       final errorString = e.toString();
 
       if (errorString.contains('invalid_credentials')) {
-        errorMessage = localizations.translate('invalid_credentials') ?? 'كود المستخدم أو كلمة المرور غير صحيحة.';
+        errorMessage =
+            localizations.translate('invalid_credentials') ??
+            'كود المستخدم أو كلمة المرور غير صحيحة.';
       } else if (errorString.contains('no_internet')) {
-        errorMessage = localizations.translate('no_internet_connection') ?? 'لا يوجد اتصال بالإنترنت.';
-      } else { // يغطي network_error وأي خطأ آخر غير متوقع
-        errorMessage = localizations.translate('login_failed_network') ?? 'فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى.';
+        errorMessage =
+            localizations.translate('no_internet_connection') ??
+            'لا يوجد اتصال بالإنترنت.';
+      } else {
+        // يغطي network_error وأي خطأ آخر غير متوقع
+        errorMessage =
+            localizations.translate('login_failed_network') ??
+            'فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى.';
       }
 
-      await _showCustomDialog(
-        message: errorMessage,
-        isSuccess: false,
-      );
+      await _showCustomDialog(message: errorMessage, isSuccess: false);
     }
   }
 
@@ -95,7 +101,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     final localizations = AppLocalizations.of(context)!;
 
-    while (Navigator.of(context).canPop() && ModalRoute.of(context)?.isActive != true) {
+    while (Navigator.of(context).canPop() &&
+        ModalRoute.of(context)?.isActive != true) {
       Navigator.of(context).pop();
     }
 
@@ -110,7 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
               backgroundColor: Colors.white,
               elevation: 10,
               child: Container(
@@ -122,14 +131,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isSuccess
-                            ? Colors.green.withOpacity(0.1)
-                            : Colors.red.withOpacity(0.1),
+                        color:
+                            isSuccess
+                                ? Colors.green.withOpacity(0.1)
+                                : Colors.red.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         isSuccess ? Icons.check_circle : Icons.error,
-                        color: isSuccess ? Colors.green.shade600 : Colors.red.shade600,
+                        color:
+                            isSuccess
+                                ? Colors.green.shade600
+                                : Colors.red.shade600,
                         size: 50,
                       ),
                     ),
@@ -149,13 +162,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isSuccess ? Colors.green.shade600 : Colors.red.shade600,
+                          backgroundColor:
+                              isSuccess
+                                  ? Colors.green.shade600
+                                  : Colors.red.shade600,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           elevation: 2,
                         ),
                         onPressed: () {
-                          Navigator.of(dialogContext, rootNavigator: true).pop();
+                          Navigator.of(
+                            dialogContext,
+                            rootNavigator: true,
+                          ).pop();
                         },
                         child: Text(
                           localizations.translate('continueButton') ?? 'متابعة',
@@ -176,7 +197,6 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
   }
-
 
   @override
   void initState() {
@@ -255,25 +275,31 @@ class _LoginScreenState extends State<LoginScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _performLogin,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(95, 96, 185,1),
-          disabledBackgroundColor: const Color.fromRGBO(95, 96, 185,1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          backgroundColor: const Color.fromRGBO(95, 96, 185, 1),
+          disabledBackgroundColor: const Color.fromRGBO(95, 96, 185, 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
           elevation: _isLoading ? 0 : 2,
         ),
-        child: _isLoading
-            ? const SizedBox(
-          height: 20,
-          width: 20,
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-        )
-            : Text(
-          localizations.translate('login') ?? 'تسجيل الدخول',
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        child:
+            _isLoading
+                ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                : Text(
+                  localizations.translate('login') ?? 'تسجيل الدخول',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
       ),
     );
   }
@@ -317,11 +343,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
                 color: _isLoading ? Colors.grey.shade300 : Colors.grey,
               ),
-              onPressed: _isLoading ? null : () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
+              onPressed:
+                  _isLoading
+                      ? null
+                      : () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
             ),
           ),
           validator: (value) {
@@ -341,12 +370,16 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Padding(
         padding: const EdgeInsets.only(top: 10.0),
         child: GestureDetector(
-          onTap: _isLoading ? null : () {
-            final newLocale = currentLocale.languageCode == 'en'
-                ? const Locale('ar', '')
-                : const Locale('en', '');
-            widget.onLanguageChanged(newLocale);
-          },
+          onTap:
+              _isLoading
+                  ? null
+                  : () {
+                    final newLocale =
+                        currentLocale.languageCode == 'en'
+                            ? const Locale('ar', '')
+                            : const Locale('en', '');
+                    widget.onLanguageChanged(newLocale);
+                  },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
@@ -360,7 +393,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               borderRadius: BorderRadius.circular(25),
               border: Border.all(
-                color: const Color(0xFFFFFFFF).withOpacity(_isLoading ? 0.1 : 0.3),
+                color: const Color(
+                  0xFFFFFFFF,
+                ).withOpacity(_isLoading ? 0.1 : 0.3),
                 width: 1,
               ),
             ),
@@ -376,7 +411,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   currentLocale.languageCode == 'en' ? 'AR' : 'EN',
                   style: TextStyle(
-                    color: Color(0xFFE7E6E8).withOpacity(_isLoading ? 0.5 : 1.0),
+                    color: Color(
+                      0xFFE7E6E8,
+                    ).withOpacity(_isLoading ? 0.5 : 1.0),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -398,7 +435,12 @@ class _LoginScreenState extends State<LoginScreen> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Color.fromRGBO(95, 96, 185,1).withOpacity(_isLoading ? 0.3 : 1.0),
+            color: Color.fromRGBO(
+              95,
+              96,
+              185,
+              1,
+            ).withOpacity(_isLoading ? 0.3 : 1.0),
             spreadRadius: 2,
             blurRadius: 15,
           ),
@@ -533,13 +575,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  InputDecoration _inputDecoration({required String hint, required IconData icon}) {
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+  }) {
     return InputDecoration(
       hintText: hint,
 
-      hintStyle: TextStyle(
-        color: _isLoading ? Colors.black26 : Colors.black38,
-      ),
+      hintStyle: TextStyle(color: _isLoading ? Colors.black26 : Colors.black38),
       prefixIcon: Icon(
         icon,
         color: _isLoading ? Colors.grey.shade300 : Colors.grey,

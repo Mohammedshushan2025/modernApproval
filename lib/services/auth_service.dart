@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:intl/intl.dart';
@@ -25,12 +24,11 @@ class AuthService {
       UserModel? user;
       try {
         print("🔍 Searching for userCode: $userCode");
-        print("🔍 Available users: ${allUsers.map((u) => u.usersCode).toList()}");
-        user = allUsers.firstWhere(
-              (u) => u.usersCode.toString() == userCode,
+        print(
+          "🔍 Available users: ${allUsers.map((u) => u.usersCode).toList()}",
         );
+        user = allUsers.firstWhere((u) => u.usersCode.toString() == userCode);
       } catch (e) {
-
         throw Exception('invalid_credentials');
       }
 
@@ -40,12 +38,10 @@ class AuthService {
 
       await _saveUser(user);
 
-
       _postActivity(user.usersCode);
 
       return user;
     } catch (e) {
-
       if (e.toString().contains('invalid_credentials')) {
         rethrow;
       }
@@ -60,7 +56,9 @@ class AuthService {
       final ip = await _deviceInfoProvider.getIpAddress();
       final deviceId = await _deviceInfoProvider.getDeviceUniqueId();
       final osUser = await _deviceInfoProvider.getOsUser();
-      final String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(DateTime.now().toUtc().add(Duration(hours: 1)));
+      final String formattedDate = DateFormat(
+        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+      ).format(DateTime.now().toUtc().add(Duration(hours: 1)));
 
       Position? position;
       try {
@@ -81,7 +79,6 @@ class AuthService {
 
       print('data loginData $loginData');
       await _apiService.postLoginData(loginData);
-
     } catch (e) {
       print("Could not post activity data: $e");
     }

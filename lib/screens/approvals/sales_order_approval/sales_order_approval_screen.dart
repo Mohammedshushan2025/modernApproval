@@ -12,12 +12,15 @@ class SalesOrderApprovalScreen extends StatefulWidget {
   final UserModel user;
   final int selectedPasswordNumber;
 
-  const SalesOrderApprovalScreen({super.key,
+  const SalesOrderApprovalScreen({
+    super.key,
     required this.user,
-    required this.selectedPasswordNumber,});
+    required this.selectedPasswordNumber,
+  });
 
   @override
-  State<SalesOrderApprovalScreen> createState() => _SalesOrderApprovalScreenState();
+  State<SalesOrderApprovalScreen> createState() =>
+      _SalesOrderApprovalScreenState();
 }
 
 class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
@@ -58,12 +61,12 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
 
   void _extractStoreNames(List<SalesOrder> requests) {
     final storeNames =
-    requests
-        .map((request) => request.storeName ?? '')
-        .where((storeName) => storeName.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+        requests
+            .map((request) => request.storeName ?? '')
+            .where((storeName) => storeName.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
     _availableStoreNames = [''] + storeNames;
   }
@@ -89,7 +92,7 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
             if (_selectedDate != null) {
               matchesDate =
                   request.reqDate != null &&
-                      _isSameDate(request.reqDate!, _selectedDate!);
+                  _isSameDate(request.reqDate!, _selectedDate!);
             }
 
             return matchesStoreName && matchesDate;
@@ -181,22 +184,22 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                   items:
-                  _availableStoreNames.map((String storeName) {
-                    return DropdownMenuItem<String>(
-                      value: storeName.isEmpty ? null : storeName,
-                      child: Text(
-                        storeName.isEmpty
-                            ? l.translate('all_stores')
-                            : storeName,
-                        style: TextStyle(
-                          color:
-                          storeName.isEmpty
-                              ? Colors.grey.shade500
-                              : Colors.black87,
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                      _availableStoreNames.map((String storeName) {
+                        return DropdownMenuItem<String>(
+                          value: storeName.isEmpty ? null : storeName,
+                          child: Text(
+                            storeName.isEmpty
+                                ? l.translate('all_stores')
+                                : storeName,
+                            style: TextStyle(
+                              color:
+                                  storeName.isEmpty
+                                      ? Colors.grey.shade500
+                                      : Colors.black87,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                   onChanged: (String? newValue) {
                     setState(() {
                       _storeNameFilter = newValue ?? '';
@@ -316,9 +319,9 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
                 if (snapshot.hasError) {
                   return ErrorDisplay(
                     errorMessageKey:
-                    snapshot.error.toString().contains('noInternet')
-                        ? 'noInternet'
-                        : 'serverError',
+                        snapshot.error.toString().contains('noInternet')
+                            ? 'noInternet'
+                            : 'serverError',
                     onRetry: _fetchData,
                   );
                 }
@@ -388,11 +391,11 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
                   });
                 }
                 final displayRequests =
-                _showFilters &&
-                    (_storeNameFilter.isNotEmpty ||
-                        _selectedDate != null)
-                    ? _filteredRequests
-                    : allRequests;
+                    _showFilters &&
+                            (_storeNameFilter.isNotEmpty ||
+                                _selectedDate != null)
+                        ? _filteredRequests
+                        : allRequests;
 
                 // Show filter results info
                 if (_showFilters &&
@@ -467,10 +470,10 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
   }
 
   Widget _buildSalesOrderCard(
-      BuildContext context,
-      SalesOrder request,
-      int index,
-      ) {
+    BuildContext context,
+    SalesOrder request,
+    int index,
+  ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final cardColor = _cardColors[index % _cardColors.length];
 
@@ -497,9 +500,9 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
               MaterialPageRoute(
                 builder:
                     (context) => SalesOrderDetailScreen(
-                  user: widget.user,
-                  request: request,
-                ),
+                      user: widget.user,
+                      request: request,
+                    ),
               ),
             );
 
@@ -592,7 +595,9 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
                           Row(
                             children: [
                               Text(
-                                request.authPk1.toString() + " / " + request.authPk2.toString(),
+                                request.authPk1.toString() +
+                                    " / " +
+                                    request.authPk2.toString(),
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 12.5,
@@ -620,4 +625,3 @@ class _SalesOrderApprovalScreenState extends State<SalesOrderApprovalScreen> {
     );
   }
 }
-

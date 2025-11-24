@@ -5,11 +5,7 @@ class ProfileAvatar extends StatefulWidget {
   final String imageUrl;
   final double radius;
 
-  const ProfileAvatar({
-    super.key,
-    required this.imageUrl,
-    this.radius = 28,
-  });
+  const ProfileAvatar({super.key, required this.imageUrl, this.radius = 28});
 
   @override
   State<ProfileAvatar> createState() => _ProfileAvatarState();
@@ -35,15 +31,12 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
     }
   }
 
-
   Future<bool> _checkIfImageExists() async {
     try {
-
       final response = await http.head(Uri.parse(widget.imageUrl));
 
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (e) {
-
       print("Image check failed: $e");
       return false;
     }
@@ -54,7 +47,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
     return FutureBuilder<bool>(
       future: _imageCheckFuture,
       builder: (context, snapshot) {
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircleAvatar(
             radius: widget.radius,
@@ -63,7 +55,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
           );
         }
 
-
         if (snapshot.hasData && snapshot.data == true) {
           return CircleAvatar(
             radius: widget.radius,
@@ -71,7 +62,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
             backgroundImage: NetworkImage(widget.imageUrl),
           );
         }
-
 
         return CircleAvatar(
           radius: widget.radius,

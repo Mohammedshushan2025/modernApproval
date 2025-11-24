@@ -17,7 +17,10 @@ class InfoDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lottieAsset = isSuccess ? 'assets/animations/success.json' : 'assets/animations/error.json';
+    final lottieAsset =
+        isSuccess
+            ? 'assets/animations/success.json'
+            : 'assets/animations/error.json';
 
     return PopScope(
       canPop: true,
@@ -27,7 +30,9 @@ class InfoDialog extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.all(20),
             child: AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
               backgroundColor: Colors.white,
               contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
               content: Column(
@@ -88,7 +93,9 @@ class InfoDialog extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                      onPressed:
+                          () =>
+                              Navigator.of(context, rootNavigator: true).pop(),
                     ),
                   ),
                 ],

@@ -1,35 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:modernapproval/models/approvals/purchase_pay/purchase_pay_model.dart';
-import 'package:modernapproval/screens/approvals/purchase_pay_approval/purchase_pay_detail_screen.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
+import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
+import 'package:modernapproval/screens/approvals/production_inbound_approval/production_inbound_detail_screen.dart';
+import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_detail_screen.dart';
 import '../../../app_localizations.dart';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/error_display.dart';
 
-class PurchasePayApprovalScreen extends StatefulWidget {
+class ProductionInboundApprovalScreen extends StatefulWidget {
   final UserModel user;
   final int selectedPasswordNumber;
 
-  const PurchasePayApprovalScreen({
+  const ProductionInboundApprovalScreen({
     super.key,
     required this.user,
     required this.selectedPasswordNumber,
   });
 
   @override
-  State<PurchasePayApprovalScreen> createState() =>
-      _PurchasePayApprovalScreenState();
+  State<ProductionInboundApprovalScreen> createState() =>
+      _ProductionInboundApprovalScreenState();
 }
 
-class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
+class _ProductionInboundApprovalScreenState
+    extends State<ProductionInboundApprovalScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<PurchasePay>> _requestsFuture;
+  late Future<List<Item>> _requestsFuture;
 
   String _storeNameFilter = '';
   DateTime? _selectedDate;
-  List<PurchasePay> _filteredRequests = [];
+  List<Item> _filteredRequests = [];
   bool _showFilters = false;
   List<String> _availableStoreNames = [];
 
@@ -51,7 +54,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
 
   void _fetchData() {
     setState(() {
-      _requestsFuture = _apiService.getPurchasePay(
+      _requestsFuture = _apiService.getProductionInbound(
         userId: widget.user.usersCode,
         roleId: widget.user.roleCode!,
         passwordNumber: widget.selectedPasswordNumber,
@@ -59,7 +62,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
     });
   }
 
-  void _extractStoreNames(List<PurchasePay> requests) {
+  void _extractStoreNames(List<Item> requests) {
     final storeNames =
         requests
             .map((request) => request.storeName ?? '')
@@ -71,7 +74,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
     _availableStoreNames = [''] + storeNames;
   }
 
-  void _applyFilters(List<PurchasePay> allRequests) {
+  void _applyFilters(List<Item> allRequests) {
     setState(() {
       _filteredRequests =
           allRequests.where((request) {
@@ -280,7 +283,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        title: l.translate('PurchasePayApproval'),
+        title: l.translate('productionOutboundApproval'),
         filterWidget: _buildFilterWidget(),
       ),
       backgroundColor: const Color(0xFFF5F7FA),
@@ -291,7 +294,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
 
           // List content
           Expanded(
-            child: FutureBuilder<List<PurchasePay>>(
+            child: FutureBuilder<List<Item>>(
               future: _requestsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -435,7 +438,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                           ),
                           itemCount: displayRequests.length,
                           itemBuilder: (context, index) {
-                            return _buildSalesOrderCard(
+                            return _buildProductionOutboundCard(
                               context,
                               displayRequests[index],
                               index,
@@ -454,7 +457,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                   ),
                   itemCount: displayRequests.length,
                   itemBuilder: (context, index) {
-                    return _buildSalesOrderCard(
+                    return _buildProductionOutboundCard(
                       context,
                       displayRequests[index],
                       index,
@@ -469,9 +472,9 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
     );
   }
 
-  Widget _buildSalesOrderCard(
+  Widget _buildProductionOutboundCard(
     BuildContext context,
-    PurchasePay request,
+    Item request,
     int index,
   ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -499,7 +502,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
               context,
               MaterialPageRoute(
                 builder:
-                    (context) => PurchasePayDetailScreen(
+                    (context) => ProductionInboundDetailScreen(
                       user: widget.user,
                       request: request,
                     ),
@@ -613,7 +616,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                 ),
                 const SizedBox(width: 10),
                 Icon(
-                   Icons.chevron_right,
+                  isArabic ? Icons.chevron_left : Icons.chevron_right,
                   size: 25,
                   color: Colors.grey.shade500,
                 ),

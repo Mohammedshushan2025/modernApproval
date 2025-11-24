@@ -33,10 +33,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Future<List<FormReportItem>> _fetchAndProcessReports() async {
     final items = await _apiService.getFormsAndReports(widget.user.usersCode);
-    final reports = (items as List)
-        .whereType<FormReportItem>()
-        .where((item) => item.type == 'R')
-        .toList();
+    final reports =
+        (items as List)
+            .whereType<FormReportItem>()
+            .where((item) => item.type == 'R')
+            .toList();
     reports.sort((a, b) => a.ord.compareTo(b.ord));
     return reports;
   }
@@ -58,9 +59,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
           if (snapshot.hasError) {
             return ErrorDisplay(
-              errorMessageKey: snapshot.error.toString().contains('noInternet')
-                  ? 'noInternet'
-                  : 'serverError',
+              errorMessageKey:
+                  snapshot.error.toString().contains('noInternet')
+                      ? 'noInternet'
+                      : 'serverError',
               onRetry: _fetchData,
             );
           }

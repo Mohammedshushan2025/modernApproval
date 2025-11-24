@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class StatusDialog extends StatelessWidget {
@@ -18,8 +17,12 @@ class StatusDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeColor = isSuccess ? Colors.green.shade600 : Colors.red.shade600;
-    final backgroundColor = isSuccess ? Colors.green.shade50 : Colors.red.shade50;
-    final icon = isSuccess ? Icons.check_circle_outline_rounded : Icons.highlight_off_rounded;
+    final backgroundColor =
+        isSuccess ? Colors.green.shade50 : Colors.red.shade50;
+    final icon =
+        isSuccess
+            ? Icons.check_circle_outline_rounded
+            : Icons.highlight_off_rounded;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -50,7 +53,11 @@ class StatusDialog extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade700, height: 1.5),
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 32),
           SizedBox(
@@ -58,12 +65,18 @@ class StatusDialog extends StatelessWidget {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6C63FF),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: Text(
                 buttonText ?? (isSuccess ? 'موافق' : 'إغلاق'),
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),

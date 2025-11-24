@@ -903,7 +903,7 @@ class _PurchaseRequestDetailScreenState
         authPk1: authPk1,
         authPk2: authPk2,
         actualStatus: actualStatus,
-        approvalType: "pur_request"
+        approvalType: "pur_request",
       );
 
       final int trnsStatus = s1.trnsStatus;
@@ -924,7 +924,7 @@ class _PurchaseRequestDetailScreenState
           userId: userId,
           authPk1: authPk1,
           authPk2: authPk2,
-          approvalType: "pur_request"
+          approvalType: "pur_request",
         );
       } else {
         print("--- ⏩ Skipping Stage 3 (Condition Not Met) ---");
@@ -940,7 +940,7 @@ class _PurchaseRequestDetailScreenState
         "auth_pk2": authPk2,
         "trns_status": trnsStatus,
       };
-      await _apiService.stage4_updateStatus(stage4Body,"pur_request");
+      await _apiService.stage4_updateStatus(stage4Body, "pur_request");
 
       final Map<String, dynamic> stage5Body = {
         "auth_pk1": authPk1,
@@ -948,7 +948,7 @@ class _PurchaseRequestDetailScreenState
         "prev_ser": prevSerOriginal,
         "prev_level": prevLevelS1,
       };
-      await _apiService.stage5_deleteStatus(stage5Body,"pur_request");
+      await _apiService.stage5_deleteStatus(stage5Body, "pur_request");
 
       print(
         "--- ℹ️ Checking Stage 6 Condition: trnsStatus ($trnsStatus) == 0 || trnsStatus ($trnsStatus) == -1",
@@ -966,7 +966,7 @@ class _PurchaseRequestDetailScreenState
           "auth_pk4": s1.authPk4,
           "auth_pk5": s1.authPk5,
         };
-        await _apiService.stage6_postFinalStatus(stage6Body,"pur_request");
+        await _apiService.stage6_postFinalStatus(stage6Body, "pur_request");
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
       }

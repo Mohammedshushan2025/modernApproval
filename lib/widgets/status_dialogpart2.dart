@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 
 class StatusDialog {
   static void show(
-      BuildContext context,
-      String message, {
-        required bool isSuccess,
-        int duration = 3,
-      }) {
-
+    BuildContext context,
+    String message, {
+    required bool isSuccess,
+    int duration = 3,
+  }) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     final SnackBar snackBar = SnackBar(
       content: Text(
         message,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
         textAlign: TextAlign.center,
       ),
       backgroundColor: isSuccess ? Colors.green.shade600 : Colors.red.shade600,

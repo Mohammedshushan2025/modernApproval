@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -20,6 +19,5 @@ class AppColors {
     Color(0xFF625E45), // Red
     Color(0xFF4A4A4A), // Grey
     Color(0xFFC06FD0), // Pink
-
   ];
 }
