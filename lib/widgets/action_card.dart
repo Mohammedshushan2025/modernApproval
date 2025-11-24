@@ -79,9 +79,7 @@ class ActionCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        Localizations.localeOf(context).languageCode == 'ar'
-                            ? Icons.arrow_back_ios_new
-                            : Icons.arrow_forward_ios,
+                        Icons.arrow_forward_ios,
                         size: 16,
                         color: Colors.grey.shade600,
                       ),
