@@ -4,9 +4,7 @@ import 'package:modernapproval/models/approval_status_response_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/details_item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/master_item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
-import 'package:modernapproval/models/approvals/production_outbound/production_outbound_det_model.dart';
-import 'package:modernapproval/models/approvals/production_outbound/production_outbound_mast_model.dart';
-import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
+
 import 'package:modernapproval/models/user_model.dart';
 import 'package:modernapproval/services/api_service.dart';
 import 'package:modernapproval/widgets/error_display.dart';
@@ -162,10 +160,8 @@ class _ProductionInboundDetailScreenState
                 );
               }
 
-              final masterData =
-                  snapshot.data!['master'] as ProductionOutboundMaster;
-              final detailData =
-                  snapshot.data!['detail'] as List<ProductionOutboundDetail>;
+              final masterData = snapshot.data!['master'] as MasterItem;
+              final detailData = snapshot.data!['detail'] as List<DetailsItem>;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -210,7 +206,7 @@ class _ProductionInboundDetailScreenState
 
   Widget _buildCompactMasterSection(
     AppLocalizations l,
-    ProductionOutboundMaster master,
+    MasterItem master,
     bool isArabic,
   ) {
     return Card(
@@ -365,7 +361,7 @@ class _ProductionInboundDetailScreenState
 
   Widget _buildModernDetailTable(
     AppLocalizations l,
-    List<ProductionOutboundDetail> details,
+    List<DetailsItem> details,
     bool isArabic,
   ) {
     final columns = [
@@ -887,9 +883,9 @@ class _ProductionInboundDetailScreenState
   ) async {
     if (widget.request.prevSer == null || widget.request.lastLevel == null) {
       print(
-        "❌ CRITICAL ERROR: Missing 'prev_ser' or 'last_level' in the initial ProductionOutbound object.",
+        "❌ CRITICAL ERROR: Missing 'prev_ser' or 'last_level' in the initial ProductionInbound object.",
       );
-      print("❌ Make sure 'GET_pro_out_AUTH' API returns these values!");
+      print("❌ Make sure 'GET_pro_in_AUTH' API returns these values!");
       _showErrorDialog(
         "بيانات الطلب الأساسية غير مكتملة (prev_ser, last_level). لا يمكن المتابعة.",
       );
@@ -916,7 +912,7 @@ class _ProductionInboundDetailScreenState
         authPk1: authPk1,
         authPk2: authPk2,
         actualStatus: actualStatus,
-        approvalType: "pro_out",
+        approvalType: "pro_in",
       );
 
       final int trnsStatus = s1.trnsStatus;
@@ -937,7 +933,7 @@ class _ProductionInboundDetailScreenState
           userId: userId,
           authPk1: authPk1,
           authPk2: authPk2,
-          approvalType: "pro_out",
+          approvalType: "pro_in",
         );
       } else {
         print("--- ⏩ Skipping Stage 3 (Condition Not Met) ---");
@@ -953,7 +949,7 @@ class _ProductionInboundDetailScreenState
         "auth_pk2": authPk2,
         "trns_status": trnsStatus,
       };
-      await _apiService.stage4_updateStatus(stage4Body, "pro_out");
+      await _apiService.stage4_updateStatus(stage4Body, "pro_in");
 
       final Map<String, dynamic> stage5Body = {
         "auth_pk1": authPk1,
@@ -961,7 +957,7 @@ class _ProductionInboundDetailScreenState
         "prev_ser": prevSerOriginal,
         "prev_level": prevLevelS1,
       };
-      await _apiService.stage5_deleteStatus(stage5Body, "pro_out");
+      await _apiService.stage5_deleteStatus(stage5Body, "pro_in");
 
       print(
         "--- ℹ️ Checking Stage 6 Condition: trnsStatus ($trnsStatus) == 0 || trnsStatus ($trnsStatus) == -1",
@@ -979,7 +975,7 @@ class _ProductionInboundDetailScreenState
           "auth_pk4": s1.authPk4,
           "auth_pk5": s1.authPk5,
         };
-        await _apiService.stage6_postFinalStatus(stage6Body, "pro_out");
+        await _apiService.stage6_postFinalStatus(stage6Body, "pro_in");
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
       }
@@ -1055,10 +1051,6 @@ class _ProductionInboundDetailScreenState
         "الوحدة",
         "الكمية",
         "التكلفة",
-        "رقم المشروع",
-        "رقم البند الرئيسي",
-        "رقم البند الفرعي",
-        "رقم بند الصنف",
         "الاجمالي",
       ];
 
@@ -1074,10 +1066,6 @@ class _ProductionInboundDetailScreenState
               item.unitName ?? '',
               item.quantity?.toStringAsFixed(2) ?? '0',
               item.unitCost?.toStringAsFixed(2) ?? '0',
-              item.projectId?.toString() ?? '',
-              item.mastBandCode?.toString() ?? '',
-              item.bandCode?.toString() ?? '',
-              item.consumableItemCode?.toString() ?? '',
               item.total?.toStringAsFixed(2) ?? '',
             ];
           }).toList();
@@ -1143,7 +1131,7 @@ class _ProductionInboundDetailScreenState
                   border: pw.Border.all(color: PdfColors.black, width: 1),
                 ),
                 child: pw.Text(
-                  "تسوية صادر رقم     ${master.trnsSerial}/${master.trnsTypeCode}",
+                  "تسوية وارد رقم     ${master.trnsSerial}/${master.trnsTypeCode}",
                   style: pw.TextStyle(
                     font: ttf,
                     fontSize: 18,

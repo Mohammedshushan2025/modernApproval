@@ -4,7 +4,9 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/details_item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/production_inbound_details_model.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/master_item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/production_inbound_master_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/production_inbound_model.dart';
@@ -1086,7 +1088,7 @@ class ApiService {
     }
   }
 
-  Future<Item> getProductionInboundMaster({
+  Future<MasterItem> getProductionInboundMaster({
     required int trnsTypeCode,
     required int trnsSerial,
   }) async {
@@ -1108,7 +1110,7 @@ class ApiService {
           throw Exception('noData');
         }
         log(items.toString());
-        return Item.fromJson(items.first);
+        return MasterItem.fromJson(items.first);
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
@@ -1125,7 +1127,7 @@ class ApiService {
     }
   }
 
-  Future<List<Item>> getProductionInboundDetail({
+  Future<List<DetailsItem>> getProductionInboundDetail({
     required int trnsTypeCode,
     required int trnsSerial,
   }) async {
@@ -1144,7 +1146,7 @@ class ApiService {
         final List<dynamic> items = data['items'];
         log(items.toString());
         if (items.isEmpty) return [];
-        return items.map((item) => Item.fromJson(item)).toList();
+        return items.map((item) => DetailsItem.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
