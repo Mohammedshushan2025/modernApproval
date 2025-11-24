@@ -608,7 +608,7 @@ class _ProductionOutboundApprovalScreenState extends State<ProductionOutboundApp
                 ),
                 const SizedBox(width: 10),
                 Icon(
-                  isArabic ? Icons.chevron_left : Icons.chevron_right,
+                  Icons.chevron_right,
                   size: 25,
                   color: Colors.grey.shade500,
                 ),
