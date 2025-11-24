@@ -871,7 +871,8 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
       BuildContext dialogContext,
       String notes,
       int actualStatus,
-      ) async {
+      ) async
+  {
     if (widget.request.prevSer == null || widget.request.lastLevel == null) {
       print(
         "❌ CRITICAL ERROR: Missing 'prev_ser' or 'last_level' in the initial ProductionOutbound object.",
@@ -1036,13 +1037,17 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
       }
 
       final headers = [
-        "م\nNO",
-        "البيان\nDescription",
-        "رقم الصنف\nPart No",
-        "الكمية\nQty",
-        "الوحدة\nUnit",
-        "رصيد\nالصنف",
-        "اخر سعر شراء\nLast Purch",
+        "م",
+        "رقم الصنف",
+        "اسم الصنف",
+        "الوحدة",
+        "الكمية",
+        "التكلفة",
+        "رقم المشروع",
+        "رقم البند الرئيسي",
+        "رقم البند الفرعي",
+        "رقم بند الصنف",
+        "الاجمالي"
       ];
 
       ///table items data
@@ -1052,12 +1057,16 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
         rowNumber++;
         return [
           rowNumber.toString(),
-          isArabic ? (item.itemName ?? '') : (item.itemName ?? ''),
           item.itemCode?.toString() ?? '',
-          item.quantity?.toString() ?? '0',
+          isArabic ? (item.itemName ?? '') : (item.itemName ?? ''),
           item.unitName ?? '',
-          '0',
-          // item.last_pur?.toString() ?? '0',
+          item.quantity?.toStringAsFixed(2) ?? '0',
+          item.unitCost?.toStringAsFixed(2) ?? '0',
+          item.projectId?.toString() ?? '',
+          item.mastBandCode?.toString() ?? '',
+          item.bandCode?.toString() ?? '',
+          item.consumableItemCode?.toString() ?? '',
+          item.total?.toStringAsFixed(2) ?? '',
         ];
       }).toList();
 
@@ -1070,11 +1079,11 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
           theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
           build:
               (context) => [
-            _buildFixedPdfHeader(ttf, logoImage),
+            _buildFixedPdfHeader(ttf, logoImage,_masterData!,_detailData!),
             pw.SizedBox(height: 10),
             _buildPdfTable(headers, data, ttf),
             pw.SizedBox(height: 10),
-            _buildFixedPdfFooter(ttf),
+            _buildFixedPdfFooter(ttf,_detailData!),
           ],
         ),
       );
@@ -1088,193 +1097,205 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
     }
   }
 
-  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo) {
-    return pw.Column(
-      children: [
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                pw.Text(
-                  "وقت الإدخال: 12:27",
-                  style: pw.TextStyle(font: ttf, fontSize: 9),
-                ),
-                pw.Text(
-                  "تاريخ الإدخال: 15-04-2025",
-                  style: pw.TextStyle(font: ttf, fontSize: 9),
-                ),
-                pw.Text(
-                  "مدخل الحركة: ${widget.user.empName ?? 'اسم المستخدم'}",
-                  style: pw.TextStyle(font: ttf, fontSize: 9),
-                ),
-              ],
+  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,ProductionOutboundMaster master , List<ProductionOutboundDetail> details,) {
+    return pw.Column(children: [
+      pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        children: [
+          pw.Container(
+            padding: pw.EdgeInsets.all(2),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.white, // Outer container background
+              border: pw.Border.all(
+                color: PdfColors.black,
+                width: 1,
+              ),
             ),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "Requisition طلب شراء",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+            child: pw.Container(
+              padding: pw.EdgeInsets.symmetric(horizontal: 4, vertical: 8), // Inner padding
+              decoration: pw.BoxDecoration(
+                color: PdfColor.fromInt(0x80D3D3D3), // Grey with 50% opacity (D3D3D3 is light grey)
+                border: pw.Border.all(
+                  color: PdfColors.black,
+                  width: 1,
                 ),
-              ],
-            ),
-            if (logo != null)
-              pw.Image(logo, width: 60, height: 60)
-            else
-              pw.SizedBox(width: 60, height: 60),
-          ],
-        ),
-        pw.SizedBox(height: 5),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(
-              "S / N NO :",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-              textDirection: pw.TextDirection.ltr,
-            ),
-            pw.Row(
-              children: [
-                pw.Text(
-                  "7",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 10,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+              ),
+              child: pw.Text(
+                "تسوية صادر رقم     ${master.trnsSerial}/${master.trnsTypeCode}",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 18,
+                  color: PdfColors.blue900,
+                  fontWeight: pw.FontWeight.bold,
                 ),
-                pw.SizedBox(width: 5),
-                pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
-                pw.SizedBox(width: 5),
-                pw.Text(
-                  "1011004",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 10,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(width: 5),
-                pw.Text(
-                  ": رقم طلب الشراء",
-                  style: pw.TextStyle(font: ttf, fontSize: 10),
-                ),
-              ],
+              ),
             ),
-            pw.Text(
-              "تاريخه: 2025/04/15",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 8),
-        pw.Container(
-          padding: const pw.EdgeInsets.all(6),
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.black, width: 0.5),
           ),
-          child: pw.Column(
+
+          pw.SizedBox(width: 20),
+          if (logo != null)
+            pw.Image(logo, width: 60, height: 60)
+          else
+            pw.SizedBox(width: 60, height: 60),
+
+        ],
+      ),
+      pw.SizedBox(height: 8),
+      pw.Divider(
+        color: PdfColors.black,
+        height: 1, // Line thickness
+        thickness: 1, // Alternative way to set thickness
+      ),
+      pw.SizedBox(height: 8),
+      pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Table(
+              border: pw.TableBorder.all(),
+              tableWidth: pw.TableWidth.min,
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Container(
+                        alignment: pw.Alignment.center,
+                        padding: pw.EdgeInsets.all(4),
+
+                        child: pw.Text("${master.docNo??""}",
+                          style: pw.TextStyle(
+                            font: ttf,
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                          ),)),
+                    pw.Container(
+                        padding: pw.EdgeInsets.all(4),
+                        color: PdfColors.grey300,
+                        child: pw.Text("رقم المستند")),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Container(
+                        padding: pw.EdgeInsets.all(4),
+                        alignment: pw.Alignment.center,
+                        child: pw.Text("${master.formattedTrnsDate??""}",
+                          style: pw.TextStyle(
+                            font: ttf,
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                          ),)),
+                    pw.Container(
+                        padding: pw.EdgeInsets.all(4),
+                        color: PdfColors.grey300,
+                        child: pw.Text("التاريخ")),
+                  ],
+                ),
+              ]),
+          pw.Align(
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text("معد الحركة : ${master.insertUser.toString()}",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),),
+                    pw.Text("تاريخ الادخال : ${master.formattedInsertDate.toString()}",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),),
+                    pw.Text("المعتمد 1 : ${master.auth1Name??""}",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),),
+                    pw.Text("المعتمد 2 : ${master.auth2Name??""}",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),),
+                  ])),
+
+        ]
+      ),
+
+      pw.Table(
+        border: pw.TableBorder.all(),
+        children: [
+          pw.TableRow(
             children: [
-              pw.Text(
-                "This form is to be used as requisition, but if signed and a P O number assigned, it may be used in Lieu of formal purchase order for filling confirmation of verbal orders for minor material items and general supplies.",
-                style: pw.TextStyle(font: ttf, fontSize: 7),
-                textDirection: pw.TextDirection.ltr,
-                textAlign: pw.TextAlign.center,
-              ),
-              pw.SizedBox(height: 3),
-              pw.Text(
-                "يمكن استخدام هذا النموذج كطلب شراء ولكن إذا تم التوقيع وتعيين رقم أمر توريد فيمكن استخدامه بدلاً من أمر الشراء الرسمي لملء تأكيد الطلبات اللفظية لبنود المواد الثانوية واللوازم العامة.",
-                style: pw.TextStyle(font: ttf, fontSize: 8),
-                textAlign: pw.TextAlign.center,
-              ),
+              pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text("${master.storeName??""}",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),)),
+              pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("اسم المخزن")),
             ],
           ),
-        ),
+          pw.TableRow(
+            children: [
+              pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text("${master.storeCode??""}",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),)),
+              pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("رقم المخزن")),
+            ],
+          ),
+          pw.TableRow(
+            children: [
+              pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text("${master.costCode2??""} / ${master.costCode2Name??""}",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),)),
+              pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("مركز التكلفة 2 ")),
+            ],
+          ),
+          pw.TableRow(
+            children: [
+              pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text("${master.descA??master.descE??""}",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),)),
+              pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("البيان")),
+            ],
+          ),
+        ],
+      )
+    ]);
 
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(""),
 
-            pw.Text(
-              "MSE-FO-PD-001",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text("DOC NO :", style: pw.TextStyle(font: ttf, fontSize: 9)),
-          ],
-        ),
-
-        pw.SizedBox(height: 1),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(""),
-            pw.Text(
-              "من طلب شراء آلي من طلب نواقص رقم 1011001/5 مكتب التوكيلات م/ حسين",
-              style: pw.TextStyle(font: ttf, fontSize: 8),
-            ),
-            pw.Text(
-              "Required By Date :  15-04-2025",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Text(
-              ":تاريخ الطلب",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.start,
-          children: [
-            pw.Text(
-              ": المستودع / القطاع الطالب   1010101011001 مخزن مشتريات محلي - توكيلات - مخزن الشركة",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Text(
-              "تاريخ الوصول المتوقع:",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 3),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.end,
-          children: [
-            pw.Text(
-              "طلب نواقص: 1011001\\5",
-              style: pw.TextStyle(font: ttf, fontSize: 9),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 3),
-      ],
-    );
   }
 
   pw.Widget _buildPdfTable(
@@ -1282,9 +1303,9 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
       List<List<String>> data,
       pw.Font ttf,
       ) {
-    return pw.Table.fromTextArray(
-      headers: headers,
-      data: data,
+    return pw.TableHelper.fromTextArray(
+      headers: headers.reversed.toList(),
+      data: data.map((row)=>row.reversed.toList()).toList(),
       border: pw.TableBorder.all(color: PdfColors.black, width: 1),
       headerStyle: pw.TextStyle(
         fontWeight: pw.FontWeight.bold,
@@ -1307,34 +1328,74 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
       },
       cellPadding: const pw.EdgeInsets.all(4),
       columnWidths: {
-        0: const pw.FlexColumnWidth(0.6),
-        1: const pw.FlexColumnWidth(2.5),
-        2: const pw.FlexColumnWidth(1.5),
+        0: const pw.FlexColumnWidth(1.2),
+        1: const pw.FlexColumnWidth(0.8),
+        2: const pw.FlexColumnWidth(0.8),
         3: const pw.FlexColumnWidth(0.8),
         4: const pw.FlexColumnWidth(0.8),
         5: const pw.FlexColumnWidth(0.8),
         6: const pw.FlexColumnWidth(1),
+        7: const pw.FlexColumnWidth(0.8),
+        8: const pw.FlexColumnWidth(2.3),
+        9: const pw.FlexColumnWidth(1.8),
+        10: const pw.FlexColumnWidth(0.8),
+
       },
       oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
     );
   }
 
-  pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
+  pw.Widget _buildFixedPdfFooter(pw.Font ttf,List<ProductionOutboundDetail> productionOutboundList) {
+    double finalTotalCost = productionOutboundList.fold(0.0, (sum, item) => sum + ((item.total!))); // الاجمالي قبل الحسابات
     return pw.Column(
       children: [
         pw.SizedBox(height: 10),
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.start,
+          mainAxisAlignment: pw.MainAxisAlignment.end,
           children: [
-            pw.Text(
-              "P O No. :",
-              style: pw.TextStyle(
-                font: ttf,
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
-              textDirection: pw.TextDirection.ltr,
-            ),
+            pw.Table(
+                border: pw.TableBorder.all(),
+
+                children: [
+                  pw.TableRow(
+                      children:
+                      [
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            padding: pw.EdgeInsets.symmetric(vertical: 4,horizontal: 22),
+
+                            child: pw.Text("${finalTotalCost.toStringAsFixed(2)}",
+                              style: pw.TextStyle(
+                                font: ttf,
+                                fontSize: 9,
+                                fontWeight: pw.FontWeight.bold,
+                              ),)),
+
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            padding: pw.EdgeInsets.symmetric(vertical: 4,horizontal: 18),
+
+                            child: pw.Text("",
+                              style: pw.TextStyle(
+                                font: ttf,
+                                fontSize: 9,
+                                fontWeight: pw.FontWeight.bold,
+                              ),)),
+
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            padding: pw.EdgeInsets.symmetric(vertical: 4,horizontal: 18),
+
+                            child: pw.Text("123",
+                              style: pw.TextStyle(
+                                font: ttf,
+                                fontSize: 9,
+                                fontWeight: pw.FontWeight.bold,
+                              ),)),
+                ]
+                  )
+                ]
+            )
           ],
         ),
         pw.SizedBox(height: 15),
@@ -1345,76 +1406,32 @@ class _ProductionOutboundDetailScreenState extends State<ProductionOutboundDetai
             pw.Column(
               children: [
                 pw.Text(
-                  "Dept. manager",
+                  "امين المخزن",
                   style: pw.TextStyle(
                     font: ttf,
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
                   ),
-                  textDirection: pw.TextDirection.ltr,
                 ),
-                pw.SizedBox(height: 3),
-                pw.Text(
-                  "مدير الجهة الطالبة أو من ينوب عنة",
-                  style: pw.TextStyle(font: ttf, fontSize: 8),
-                ),
-                pw.SizedBox(height: 3),
-                pw.Text(
-                  widget.user.empName ?? '',
-                  style: pw.TextStyle(font: ttf, fontSize: 8),
-                ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 8),
                 pw.Container(width: 120, height: 1, color: PdfColors.black),
               ],
             ),
             pw.Column(
               children: [
                 pw.Text(
-                  "Store keeper",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                  textDirection: pw.TextDirection.ltr,
-                ),
-                pw.SizedBox(height: 3),
-                pw.Text(
-                  "من المخزن:",
-                  style: pw.TextStyle(font: ttf, fontSize: 8),
-                ),
-                pw.SizedBox(height: 25),
-                pw.Container(width: 120, height: 1, color: PdfColors.black),
-              ],
-            ),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "المعتمد الأول",
+                  "اعتماد",
                   style: pw.TextStyle(
                     font: ttf,
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
-                pw.SizedBox(height: 28),
+                pw.SizedBox(height: 8),
                 pw.Container(width: 120, height: 1, color: PdfColors.black),
               ],
             ),
-            pw.Column(
-              children: [
-                pw.Text(
-                  "المعتمد الثاني",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 28),
-                pw.Container(width: 120, height: 1, color: PdfColors.black),
-              ],
-            ),
+
           ],
         ),
       ],
