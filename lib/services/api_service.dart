@@ -328,7 +328,8 @@ class ApiService {
     required String authPk2,
     required int actualStatus,
     required String approvalType,
-  }) async {
+  }) async
+  {
     final queryParams = {
       'user_id': userId.toString(),
       'role_code': roleCode.toString(),
@@ -398,7 +399,8 @@ class ApiService {
     required String authPk1,
     required String authPk2,
     required String approvalType,
-  }) async {
+  }) async
+  {
     Uri url;
     switch (approvalType) {
       case "pur_request":
@@ -494,6 +496,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS');
       case "pro_out":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
+      case "pro_in":
+        url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
       default:
         //todo update this later on
         url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
