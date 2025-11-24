@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
+import 'package:modernapproval/screens/approvals/production_inbound_approval/production_inbound_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_pay_approval/purchase_pay_approval_screen.dart';
@@ -58,6 +59,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetSalesOrderCount();
               _fetchAndSetPurchasePayCount();
               _fetchAndSetProductionOutboundCount();
+              _fetchAndSetProductionInboundCount();
             });
           }
         })
@@ -74,6 +76,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     await _fetchAndSetSalesOrderCount();
     await _fetchAndSetPurchasePayCount();
     await _fetchAndSetProductionOutboundCount();
+    await _fetchAndSetProductionInboundCount();
   }
 
   Future<void> _fetchAndSetPurchaseRequestCount() async {
@@ -102,6 +105,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       }
     }
   }
+
   Future<void> _fetchAndSetPurchaseOrderCount() async {
     if (_selectedPasswordGroup == null) return;
     if (!mounted) return;
@@ -128,6 +132,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       }
     }
   }
+
   Future<void> _fetchAndSetSalesOrderCount() async {
     if (_selectedPasswordGroup == null) return;
     if (!mounted) return;
@@ -154,6 +159,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       }
     }
   }
+
   Future<void> _fetchAndSetPurchasePayCount() async {
     if (_selectedPasswordGroup == null) return;
     if (!mounted) return;
@@ -180,6 +186,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       }
     }
   }
+
   Future<void> _fetchAndSetProductionOutboundCount() async {
     if (_selectedPasswordGroup == null) return;
     if (!mounted) return;
@@ -198,6 +205,33 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     } catch (e) {
       print("Error fetching Production outbound count: $e");
       _approvalCounts[105] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSetProductionInboundCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getProductionInbound(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[106] = requests.length;
+    } catch (e) {
+      print("Error fetching Production inbound count: $e");
+      _approvalCounts[106] = 0;
     } finally {
       if (mounted) {
         setState(() {
@@ -232,22 +266,24 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       return;
     }
     log("FormReportItem");
-    log(item.toJson().toString(),name: "FormReportItem");
-    log(_selectedPasswordGroup!.usersCode.toString(),name: "SG:userCode");
-    log(_selectedPasswordGroup!.passwordName.toString(),name: "SG:pwName");
-    log(_selectedPasswordGroup!.passwordNumber.toString(),name: "SG:pwNum");
-    log(_selectedPasswordGroup!.isDefault.toString(),name: "SG:isDefault");
+    log(item.toJson().toString(), name: "FormReportItem");
+    log(_selectedPasswordGroup!.usersCode.toString(), name: "SG:userCode");
+    log(_selectedPasswordGroup!.passwordName.toString(), name: "SG:pwName");
+    log(_selectedPasswordGroup!.passwordNumber.toString(), name: "SG:pwNum");
+    log(_selectedPasswordGroup!.isDefault.toString(), name: "SG:isDefault");
+
     ///Purchase Request Approval screen - 101
-    switch(item.pageId){
+    switch (item.pageId) {
       case 101:
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder:
                 (context) => PurchaseRequestApprovalScreen(
-              user: widget.user,
-              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
-            ),
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
           ),
         );
         if (mounted) {
@@ -260,9 +296,10 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           MaterialPageRoute(
             builder:
                 (context) => PurchaseOrderApprovalScreen(
-              user: widget.user,
-              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
-            ),
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
           ),
         );
         if (mounted) {
@@ -275,9 +312,26 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           MaterialPageRoute(
             builder:
                 (context) => ProductionOutboundApprovalScreen(
-              user: widget.user,
-              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
-            ),
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 106:
+        log("entering Production inbound approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => ProductionInboundApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
           ),
         );
         if (mounted) {
@@ -290,9 +344,10 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           MaterialPageRoute(
             builder:
                 (context) => SalesOrderApprovalScreen(
-              user: widget.user,
-              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
-            ),
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
           ),
         );
         if (mounted) {
@@ -305,9 +360,10 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           MaterialPageRoute(
             builder:
                 (context) => PurchasePayApprovalScreen(
-              user: widget.user,
-              selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
-            ),
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
           ),
         );
         if (mounted) {
@@ -317,7 +373,6 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Work in progress for: ${item.pageNameE}')),
         );
-
     }
   }
 
@@ -357,11 +412,15 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             itemBuilder: (context, index) {
               final item = approvals[index];
               final colors = _getColorsForItem(item.pageId);
+
               ///this map each feature the use have , the key is pageID given from backend
               ///the value is the number of available items"approvals" inside that feature
               log("_approvalCounts");
-              log(_approvalCounts.toString(),name: "approval count");
-              log(_approvalCounts[item.pageId].toString(),name: "fetching if the number of approval user have");
+              log(_approvalCounts.toString(), name: "approval count");
+              log(
+                _approvalCounts[item.pageId].toString(),
+                name: "fetching if the number of approval user have",
+              );
 
               return ActionCard(
                 title: isArabic ? item.pageName : item.pageNameE,
@@ -369,8 +428,13 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                 iconColor: colors['icon']!,
                 backgroundColor: colors['background']!,
                 onTap: () => _handleNavigation(item),
-                notificationCount: _approvalCounts[item.pageId]??null ,
-                isCountLoading: (item.pageId == 101||item.pageId == 102 || item.pageId == 108 || item.pageId == 111) && _isCountLoading,
+                notificationCount: _approvalCounts[item.pageId] ?? null,
+                isCountLoading:
+                    (item.pageId == 101 ||
+                        item.pageId == 102 ||
+                        item.pageId == 108 ||
+                        item.pageId == 111) &&
+                    _isCountLoading,
               );
             },
           );
@@ -504,6 +568,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetSalesOrderCount();
               _fetchAndSetPurchasePayCount();
               _fetchAndSetProductionOutboundCount();
+              _fetchAndSetProductionInboundCount();
             });
           },
           offset: const Offset(0, 48),

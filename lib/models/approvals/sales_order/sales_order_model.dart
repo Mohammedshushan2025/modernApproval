@@ -19,45 +19,48 @@ class SalesOrder {
   final String? trnsFlag;
   final int? trnsStatus;
 
-  SalesOrder(
-      {
-        required this.trnsTypeCode,
-        required this.trnsSerial,
-        required this.reqDate,
-        this.insertUser,
-        required this.insertDate,
-        required this.descA,
-        this.descE,
-        required this.storeName,
-        required this.fileSerial,
-        required this.prevSer,
-        this.usersCode,
-        required this.roleCode,
-        required this.authPk1,
-        required this.authPk2,
-        required this.lastLevel,
-        this.trnsFlag,
-        this.trnsStatus,
-      });
+  SalesOrder({
+    required this.trnsTypeCode,
+    required this.trnsSerial,
+    required this.reqDate,
+    this.insertUser,
+    required this.insertDate,
+    required this.descA,
+    this.descE,
+    required this.storeName,
+    required this.fileSerial,
+    required this.prevSer,
+    this.usersCode,
+    required this.roleCode,
+    required this.authPk1,
+    required this.authPk2,
+    required this.lastLevel,
+    this.trnsFlag,
+    this.trnsStatus,
+  });
 
   factory SalesOrder.fromJson(Map<String, dynamic> json) {
     return SalesOrder(
-      trnsTypeCode: json['trns_type_code'] ,
-      trnsSerial: json['trns_serial'] ,
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
-      insertUser: json['insert_user'] ,
-      insertDate: json['insert_date'] != null ? DateTime.parse(json['insert_date']) : null,
-      descA: json['desc_a'] ,
-      descE: json['desc_e'] ,
-      storeName: json['store_name'] ,
-      fileSerial: json['file_serial'] ,
-      prevSer: json['prev_ser'] ,
-      usersCode: json['users_code'] ,
-      roleCode: json['role_code'] ,
-      authPk1: json['auth_pk1'] ,
-      authPk2: json['auth_pk2'] ,
-      lastLevel: json['last_level'] ,
-      trnsFlag: json['trns_flag'] ,
+      trnsTypeCode: json['trns_type_code'],
+      trnsSerial: json['trns_serial'],
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      insertUser: json['insert_user'],
+      insertDate:
+          json['insert_date'] != null
+              ? DateTime.parse(json['insert_date'])
+              : null,
+      descA: json['desc_a'],
+      descE: json['desc_e'],
+      storeName: json['store_name'],
+      fileSerial: json['file_serial'],
+      prevSer: json['prev_ser'],
+      usersCode: json['users_code'],
+      roleCode: json['role_code'],
+      authPk1: json['auth_pk1'],
+      authPk2: json['auth_pk2'],
+      lastLevel: json['last_level'],
+      trnsFlag: json['trns_flag'],
       trnsStatus: json['trns_status'],
     );
   }
@@ -83,6 +86,7 @@ class SalesOrder {
     data['trns_status'] = this.trnsStatus;
     return data;
   }
+
   String get formattedReqDate {
     return formatDate(reqDate);
   }

@@ -13,20 +13,21 @@ class ProductionOutboundDetail {
   num? consumableItemCode;
   num? total;
 
-  ProductionOutboundDetail(
-      {this.trnsSerial,
-        this.trnsTypeCode,
-        this.itemCode,
-        this.itemName,
-        this.unitName,
-        this.quantity,
-        this.unitCost,
-        this.itemConfgId,
-        this.projectId,
-        this.mastBandCode,
-        this.bandCode,
-        this.consumableItemCode,
-        this.total});
+  ProductionOutboundDetail({
+    this.trnsSerial,
+    this.trnsTypeCode,
+    this.itemCode,
+    this.itemName,
+    this.unitName,
+    this.quantity,
+    this.unitCost,
+    this.itemConfgId,
+    this.projectId,
+    this.mastBandCode,
+    this.bandCode,
+    this.consumableItemCode,
+    this.total,
+  });
 
   factory ProductionOutboundDetail.fromJson(Map<String, dynamic> json) {
     return ProductionOutboundDetail(

@@ -116,12 +116,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
     }
   }
+
   @override
   void dispose() {
     _animationController.dispose();
     _pulseController.dispose();
     super.dispose();
   }
+
   Future<void> _refreshData() async {
     setState(() {
       _countsLoading = true;
@@ -129,13 +131,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
 
     // Use Future.wait to wait for both API calls
-    await Future.wait([
-      _formsReportsFuture,
-      _statsFuture,
-    ]);
+    await Future.wait([_formsReportsFuture, _statsFuture]);
 
     // The existing .then() callbacks in _loadData will handle the state updates
   }
+
   @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;

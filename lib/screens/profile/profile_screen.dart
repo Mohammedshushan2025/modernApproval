@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,10 +36,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _initializeProfile() {
-    _profileImageUrl = 'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}';
+    _profileImageUrl =
+        'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}';
     _loadProfileData();
   }
-
 
   Future<void> _loadProfileData() async {
     if (!mounted) return;
@@ -52,10 +51,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       print('🔄 Loading profile data for user: ${widget.user}');
 
-      final response = await http.get(
-        Uri.parse('http://195.201.241.253:7001/ords/modern/Approval/emp_info/${widget.user}'),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse(
+              'http://195.201.241.253:7001/ords/modern/Approval/emp_info/${widget.user}',
+            ),
+            headers: {'Content-Type': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 10));
 
       print('📡 Profile API Response Status: ${response.statusCode}');
       print('📡 Profile API Response Body: ${response.body}');
@@ -87,7 +90,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   Future<bool> _checkInternetConnection() async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
@@ -97,10 +99,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return false;
       }
 
-
-      final result = await http.get(
-        Uri.parse('http://195.201.241.253:7001/ords/modern/Approval/emp_info/${widget.user}'),
-      ).timeout(const Duration(seconds: 5));
+      final result = await http
+          .get(
+            Uri.parse(
+              'http://195.201.241.253:7001/ords/modern/Approval/emp_info/${widget.user}',
+            ),
+          )
+          .timeout(const Duration(seconds: 5));
 
       return result.statusCode == 200;
     } catch (e) {
@@ -110,7 +115,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   Future<void> _showImageSourceDialog() async {
     final localizations = AppLocalizations.of(context)!;
 
@@ -118,7 +122,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           title: Text(
             localizations.translate('select_image_source')!,
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -126,7 +132,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -135,7 +140,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue.shade600, size: 16),
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.blue.shade600,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -163,7 +172,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Color(0xFF6C63FF)),
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: Color(0xFF6C63FF),
+                ),
                 title: Text(localizations.translate('gallery')!),
                 subtitle: Text(
                   localizations.translate('gallery_subtitle')!,
@@ -190,11 +202,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Future<void> _pickImage(ImageSource source) async {
     try {
       print('🔄 Picking image from ${source.toString()}');
-
 
       int maxWidth = source == ImageSource.camera ? 600 : 800;
       int maxHeight = source == ImageSource.camera ? 600 : 800;
@@ -211,7 +221,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (image != null) {
         print('✅ Image selected: ${image.path}');
 
-
         final fileSize = await image.length();
         print('📏 Image file size: ${fileSize} bytes');
 
@@ -227,7 +236,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       print('❌ Error picking image: $e');
 
-
       String errorKey = 'image_pick_error';
       if (e.toString().contains('channel-error')) {
         errorKey = 'image_picker_channel_error';
@@ -237,12 +245,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         errorKey = 'gallery_permission_denied';
       } else if (e.toString().contains('camera_access_denied') ||
           e.toString().contains('Camera not available')) {
-
         final localizations = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizations.translate('camera_not_available_using_gallery') ??
-                'Camera not available, using gallery instead'),
+            content: Text(
+              localizations.translate('camera_not_available_using_gallery') ??
+                  'Camera not available, using gallery instead',
+            ),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 3),
           ),
@@ -255,10 +264,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   Future<void> _uploadImage(XFile image) async {
     if (!mounted) return;
-
 
     if (!await _checkInternetConnection()) {
       return;
@@ -271,22 +278,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       print('🔄 Starting image upload...');
 
-
       final bytes = await image.readAsBytes();
 
-
       print('📏 Image bytes length: ${bytes.length}');
-
 
       List<int> finalBytes = bytes;
       if (bytes.length > 1024 * 1024) {
         print('🗜️ Compressing large image...');
-
       }
 
       final base64Image = base64Encode(finalBytes);
-      print('📤 Image converted to base64, size: ${base64Image.length} characters');
-
+      print(
+        '📤 Image converted to base64, size: ${base64Image.length} characters',
+      );
 
       if (base64Image.length > 2 * 1024 * 1024) {
         print('⚠️ Base64 image too large: ${base64Image.length} characters');
@@ -294,33 +298,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-
-      final requestData = {
-        'emp_id': widget.user,
-        'photo': base64Image,
-      };
+      final requestData = {'emp_id': widget.user, 'photo': base64Image};
 
       print('📤 Sending POST request to upload image...');
       print('📤 Request data keys: ${requestData.keys}');
       print('📤 Employee ID: ${widget.user}');
       print('📤 Photo length: ${base64Image.length}');
 
-      final response = await http.post(
-        Uri.parse('http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        body: json.encode(requestData),
-      ).timeout(const Duration(seconds: 45));
+      final response = await http
+          .post(
+            Uri.parse(
+              'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}',
+            ),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache',
+            },
+            body: json.encode(requestData),
+          )
+          .timeout(const Duration(seconds: 45));
 
       print('📡 Upload Response Request ${requestData}');
       print('📡 Upload Response Status: ${response.statusCode}');
       print('📡 Upload Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-
         try {
           final responseData = json.decode(response.body);
           if (responseData['status'] == 'error') {
@@ -328,12 +331,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _showErrorDialog('server_error');
             return;
           }
-        } catch (e) {
-
-        }
+        } catch (e) {}
 
         print('✅ Image uploaded successfully');
-
 
         await _reloadProfileImage();
 
@@ -361,7 +361,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   Future<void> _reloadProfileImage() async {
     await Future.delayed(const Duration(seconds: 1));
 
@@ -369,11 +368,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _currentImageError = null;
 
-        _profileImageUrl = 'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}?t=${DateTime.now().millisecondsSinceEpoch}';
+        _profileImageUrl =
+            'http://195.201.241.253:7001/ords/modern/Approval/emp_photo/${widget.user}?t=${DateTime.now().millisecondsSinceEpoch}';
       });
     }
   }
-
 
   void _showErrorDialog(String messageKey) {
     if (!mounted) return;
@@ -382,15 +381,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => InfoDialog(
-        title: localizations.translate('error')!,
-        message: localizations.translate(messageKey)!,
-        isSuccess: false,
-        buttonText: localizations.translate('ok'),
-      ),
+      builder:
+          (context) => InfoDialog(
+            title: localizations.translate('error')!,
+            message: localizations.translate(messageKey)!,
+            isSuccess: false,
+            buttonText: localizations.translate('ok'),
+          ),
     );
   }
-
 
   void _showSuccessDialog(String messageKey) {
     if (!mounted) return;
@@ -399,15 +398,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => InfoDialog(
-        title: localizations.translate('success')!,
-        message: localizations.translate(messageKey)!,
-        isSuccess: true,
-        buttonText: localizations.translate('ok'),
-      ),
+      builder:
+          (context) => InfoDialog(
+            title: localizations.translate('success')!,
+            message: localizations.translate(messageKey)!,
+            isSuccess: true,
+            buttonText: localizations.translate('ok'),
+          ),
     );
   }
-
 
   String _formatDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) return '-';
@@ -419,7 +418,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return dateString;
     }
   }
-
 
   String _getSocialStatus(int? status) {
     final localizations = AppLocalizations.of(context)!;
@@ -437,14 +435,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   String _getGender(String? gender) {
     final localizations = AppLocalizations.of(context)!;
     if (gender == 'M') return localizations.translate('male')!;
     if (gender == 'F') return localizations.translate('female')!;
     return '-';
   }
-
 
   String _getReligion(int? religionType) {
     final localizations = AppLocalizations.of(context)!;
@@ -484,79 +480,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.language, color: Colors.white),
-            onPressed: () {
-
-            },
+            onPressed: () {},
           ),
         ],
       ),
-      body: _isLoadingProfile
-          ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: Color(0xFF6C63FF)),
-            SizedBox(height: 16),
-            Text(
-              'جاري تحميل البيانات...',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        ),
-      )
-          : _profileData == null
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              localizations.translate('failed_to_load_profile')!,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadProfileData,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
+      body:
+          _isLoadingProfile
+              ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Color(0xFF6C63FF)),
+                    SizedBox(height: 16),
+                    Text(
+                      'جاري تحميل البيانات...',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              )
+              : _profileData == null
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade400,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      localizations.translate('failed_to_load_profile')!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadProfileData,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C63FF),
+                      ),
+                      child: Text(
+                        localizations.translate('retry')!,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildProfileImageSection(),
+                    const SizedBox(height: 24),
+
+                    _buildPersonalInfoCard(),
+                    const SizedBox(height: 16),
+
+                    _buildWorkInfoCard(),
+                    const SizedBox(height: 16),
+
+                    _buildContactInfoCard(),
+                  ],
+                ),
               ),
-              child: Text(
-                localizations.translate('retry')!,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      )
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-
-            _buildProfileImageSection(),
-            const SizedBox(height: 24),
-
-
-            _buildPersonalInfoCard(),
-            const SizedBox(height: 16),
-
-
-            _buildWorkInfoCard(),
-            const SizedBox(height: 16),
-
-
-            _buildContactInfoCard(),
-          ],
-        ),
-      ),
     );
   }
-
 
   Widget _buildProfileImageSection() {
     final localizations = AppLocalizations.of(context)!;
@@ -593,48 +586,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 child: ClipOval(
-                  child: _isLoadingImage || _isUploadingImage
-                      ? Container(
-                    color: Colors.grey.shade200,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF6C63FF),
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  )
-                      : Image.network(
-                    _profileImageUrl!,
-                    width: 132,
-                    height: 132,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: Colors.grey.shade200,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF6C63FF),
-                            strokeWidth: 2,
+                  child:
+                      _isLoadingImage || _isUploadingImage
+                          ? Container(
+                            color: Colors.grey.shade200,
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF6C63FF),
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          )
+                          : Image.network(
+                            _profileImageUrl!,
+                            width: 132,
+                            height: 132,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                color: Colors.grey.shade200,
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF6C63FF),
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              print('❌ Error loading profile image: $error');
+                              return Container(
+                                color: Colors.grey.shade200,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.grey.shade400,
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      print('❌ Error loading profile image: $error');
-                      return Container(
-                        color: Colors.grey.shade200,
-                        child: Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.grey.shade400,
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
-
 
               Positioned(
                 bottom: 0,
@@ -657,7 +650,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     child: Icon(
-                      _isUploadingImage ? Icons.hourglass_empty : Icons.camera_alt,
+                      _isUploadingImage
+                          ? Icons.hourglass_empty
+                          : Icons.camera_alt,
                       color: Colors.white,
                       size: 20,
                     ),
@@ -667,7 +662,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           const SizedBox(height: 16),
-
 
           Text(
             _profileData!['emp_name'] ?? '-',
@@ -681,10 +675,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 4),
           Text(
             _profileData!['job_desc'] ?? '-',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
 
@@ -703,7 +694,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
 
   Widget _buildPersonalInfoCard() {
     final localizations = AppLocalizations.of(context)!;
@@ -751,7 +741,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _buildWorkInfoCard() {
     final localizations = AppLocalizations.of(context)!;
 
@@ -778,7 +767,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _buildContactInfoCard() {
     final localizations = AppLocalizations.of(context)!;
 
@@ -795,7 +783,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
   }
-
 
   Widget _buildInfoCard({
     required String title,
@@ -827,11 +814,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: const Color(0xFF6C63FF).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: const Color(0xFF6C63FF),
-                  size: 24,
-                ),
+                child: Icon(icon, color: const Color(0xFF6C63FF), size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -853,23 +836,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _buildInfoRow(
-      String label,
-      String value,
-      IconData icon, {
-        bool isLongText = false,
-      }) {
+    String label,
+    String value,
+    IconData icon, {
+    bool isLongText = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        crossAxisAlignment: isLongText ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            isLongText ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: Colors.grey.shade500,
-            size: 20,
-          ),
+          Icon(icon, color: Colors.grey.shade500, size: 20),
           const SizedBox(width: 12),
           Expanded(
             flex: 2,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class ActionCard extends StatelessWidget {
@@ -90,7 +89,6 @@ class ActionCard extends StatelessWidget {
                 ),
               ),
 
-
               if (isCountLoading)
                 Positioned(
                   top: 10,
@@ -106,12 +104,13 @@ class ActionCard extends StatelessWidget {
                       minHeight: 22,
                     ),
                     child: const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        )),
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 )
               else if (notificationCount != null && notificationCount! > 0)

@@ -4,6 +4,10 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/production_inbound_details_model.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/production_inbound_master_model.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/production_inbound_model.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_det_model.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_mast_model.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
@@ -127,13 +131,13 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   /// Purchase Request calls
   Future<List<PurchaseRequest>> getPurchaseRequests({
     required int userId,
     required int roleId,
     required int passwordNumber,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'user_id': userId.toString(),
       'password_number': passwordNumber.toString(),
@@ -169,8 +173,7 @@ class ApiService {
   Future<List<RequestItem>> getApprovedOrRejectedRequests({
     required int userId,
     required bool isApprove,
-  }) async
-  {
+  }) async {
     late final url;
     if (isApprove) {
       url = Uri.parse(
@@ -332,13 +335,13 @@ class ApiService {
       'actual_status': actualStatus.toString(),
     };
     Uri url;
-    switch(approvalType){
+    switch (approvalType) {
       case "pur_request":
         url = Uri.parse(
           '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
         ).replace(queryParameters: queryParams);
       case "pur_order":
-         url = Uri.parse(
+        url = Uri.parse(
           '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
         ).replace(queryParameters: queryParams);
       case "sale_order":
@@ -352,6 +355,10 @@ class ApiService {
       case "pro_out":
         url = Uri.parse(
           '$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS',
+        ).replace(queryParameters: queryParams);
+      case "pro_in":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS',
         ).replace(queryParameters: queryParams);
       default:
         //todo update this later on
@@ -388,35 +395,25 @@ class ApiService {
     required int userId,
     required String authPk1,
     required String authPk2,
-    required String approvalType
+    required String approvalType,
   }) async {
     Uri url;
-    switch(approvalType){
+    switch (approvalType) {
       case "pur_request":
-        url = Uri.parse(
-          '$_baseUrl/check_last_level_update',
-        );
+        url = Uri.parse('$_baseUrl/check_last_level_update');
       case "pur_order":
-        url = Uri.parse(
-          '$_baseUrl/check_last_level_update_PO_ORDER',
-        );
+        url = Uri.parse('$_baseUrl/check_last_level_update_PO_ORDER');
       case "sale_order":
-        url = Uri.parse(
-          '$_baseUrl/check_last_level_update_SAL_SALES_ORDER',
-        );
+        url = Uri.parse('$_baseUrl/check_last_level_update_SAL_SALES_ORDER');
       case "pur_pay":
-        url = Uri.parse(
-          '$_baseUrl/CHECK_LAST_LEVEL_UPDATE_PAY_REQUEST',
-        );
+        url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_UPDATE_PAY_REQUEST');
       case "pro_out":
-        url = Uri.parse(
-          '$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_OUT',
-        );
-        default:
-      //todo update this later on
-        url = Uri.parse(
-          '$_baseUrl/check_last_level_update',
-        );
+        url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_OUT');
+      case "pro_in":
+        url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_IN');
+      default:
+        //todo update this later on
+        url = Uri.parse('$_baseUrl/check_last_level_update');
     }
     final bodyMap = {
       "user_id": userId,
@@ -440,34 +437,27 @@ class ApiService {
   }
 
   // --- المرحلة الرابعة: PUT ---
-  Future<void> stage4_updateStatus(Map<String, dynamic> bodyMap, String approvalType) async {
+  Future<void> stage4_updateStatus(
+    Map<String, dynamic> bodyMap,
+    String approvalType,
+  ) async {
     Uri url;
-    switch(approvalType){
+    switch (approvalType) {
       case "pur_request":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
       case "pur_order":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS');
       case "sale_order":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS');
       case "pur_pay":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS');
       case "pro_out":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
+      case "pro_in":
+        url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
       default:
-      //todo update this later on
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-        );
+        //todo update this later on
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
     }
     final body = json.encode(bodyMap);
     log("Stage 4");
@@ -486,34 +476,25 @@ class ApiService {
   }
 
   // --- المرحلة الخامسة: DELETE ---
-  Future<void> stage5_deleteStatus(Map<String, dynamic> bodyMap,String approvalType) async {
+  Future<void> stage5_deleteStatus(
+    Map<String, dynamic> bodyMap,
+    String approvalType,
+  ) async {
     Uri url;
-    switch(approvalType){
+    switch (approvalType) {
       case "pur_request":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
       case "pur_order":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS');
       case "sale_order":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS');
       case "pur_pay":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS');
       case "pro_out":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       default:
-      //todo update this later on
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-        );
+        //todo update this later on
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
     }
     final body = json.encode(bodyMap);
     log("Stage 5");
@@ -532,34 +513,27 @@ class ApiService {
   }
 
   // --- المرحلة السادسة: POST (Conditional) ---
-  Future<void> stage6_postFinalStatus(Map<String, dynamic> bodyMap,String approvalType) async {
+  Future<void> stage6_postFinalStatus(
+    Map<String, dynamic> bodyMap,
+    String approvalType,
+  ) async {
     Uri url;
-    switch(approvalType){
+    switch (approvalType) {
       case "pur_request":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
       case "pur_order":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_PO_ORDER_STATUS');
       case "sale_order":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_sal_SALES_ORDER_STATUS');
       case "pur_pay":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_PAY_REQUEST_STATUS');
       case "pro_out":
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS',
-        );
+        url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
+      case "pro_in":
+        url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
       default:
-      //todo update this later on
-        url = Uri.parse(
-          '$_baseUrl/UPDATE_PUR_REQUEST_STATUS',
-        );
+        //todo update this later on
+        url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
     }
     final body = json.encode(bodyMap);
     log("Stage 6");
@@ -606,13 +580,13 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-/// Purchase order calls
+
+  /// Purchase order calls
   Future<List<PurchaseOrder>> getPurchaseOrders({
     required int userId,
     required int roleId,
     required int passwordNumber,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'user_id': userId.toString(),
       'password_number': passwordNumber.toString(),
@@ -649,11 +623,11 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   Future<PurchaseOrderMaster> getPurchaseOrderMaster({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -690,8 +664,7 @@ class ApiService {
   Future<List<PurchaseOrderDetail>> getPurchaseOrderDetail({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -706,9 +679,7 @@ class ApiService {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) return [];
-        return items
-            .map((item) => PurchaseOrderDetail.fromJson(item))
-            .toList();
+        return items.map((item) => PurchaseOrderDetail.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
@@ -724,13 +695,13 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-/// Sales order calls
+
+  /// Sales order calls
   Future<List<SalesOrder>> getSalesOrders({
     required int userId,
     required int roleId,
     required int passwordNumber,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'user_id': userId.toString(),
       'password_number': passwordNumber.toString(),
@@ -765,11 +736,11 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   Future<SalesOrderMaster> getSalesOrderMaster({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -806,8 +777,7 @@ class ApiService {
   Future<List<SalesOrderDetails>> getSalesOrderDetail({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -822,9 +792,7 @@ class ApiService {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) return [];
-        return items
-            .map((item) => SalesOrderDetails.fromJson(item))
-            .toList();
+        return items.map((item) => SalesOrderDetails.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
@@ -840,13 +808,13 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   /// Purchase Pay
   Future<List<PurchasePay>> getPurchasePay({
     required int userId,
     required int roleId,
     required int passwordNumber,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'user_id': userId.toString(),
       'password_number': passwordNumber.toString(),
@@ -882,11 +850,11 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   Future<PurchasePayMaster> getPurchasePayMaster({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -921,11 +889,11 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   Future<List<PurchasePayDetail>> getPurchasePayDetail({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -940,9 +908,7 @@ class ApiService {
         final data = json.decode(response.body);
         final List<dynamic> items = data['items'];
         if (items.isEmpty) return [];
-        return items
-            .map((item) => PurchasePayDetail.fromJson(item))
-            .toList();
+        return items.map((item) => PurchasePayDetail.fromJson(item)).toList();
       } else {
         print('Server Error: ${response.statusCode}, Body: ${response.body}');
         throw Exception('serverError');
@@ -958,13 +924,13 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   /// Production Outbound
   Future<List<ProductionOutbound>> getProductionOutbound({
     required int userId,
     required int roleId,
     required int passwordNumber,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'user_id': userId.toString(),
       'password_number': passwordNumber.toString(),
@@ -1000,11 +966,11 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   Future<ProductionOutboundMaster> getProductionOutboundMaster({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -1039,11 +1005,11 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   Future<List<ProductionOutboundDetail>> getProductionOutboundDetail({
     required int trnsTypeCode,
     required int trnsSerial,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'trns_type_code': trnsTypeCode.toString(),
       'trns_serial': trnsSerial.toString(),
@@ -1077,4 +1043,121 @@ class ApiService {
     }
   }
 
+  /// Production Inbound
+
+  Future<List<Item>> getProductionInbound({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_PD_TRNS_IN_AUTH',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Production inbound Requests from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        return items.map((item) => Item.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at Pro outbound: $e');
+      throw Exception('serverError');
+    }
+  }
+
+  Future<Item> getProductionInboundMaster({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_PD_TRNS_IN_MAST',
+    ).replace(queryParameters: queryParams);
+    print('Fetching production inbound master from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        log("status code = 200");
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          throw Exception('noData');
+        }
+        log(items.toString());
+        return Item.fromJson(items.first);
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred get production inbound master: $e');
+      throw Exception('serverError');
+    }
+  }
+
+  Future<List<Item>> getProductionInboundDetail({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_PD_TRNS_IN_DET',
+    ).replace(queryParameters: queryParams);
+    print('Fetching production inbound details from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        log(items.toString());
+        if (items.isEmpty) return [];
+        return items.map((item) => Item.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at production inbound detail: $e');
+      throw Exception('serverError');
+    }
+  }
 }

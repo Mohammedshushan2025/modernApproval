@@ -1,8 +1,5 @@
 import 'package:intl/intl.dart';
 
-
-
-
 String formatDate(DateTime? date) {
   if (date == null) {
     return 'N/A';

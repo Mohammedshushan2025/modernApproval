@@ -27,7 +27,8 @@ class PurchaseRequestMaster {
       trnsSerial: json['trns_serial'],
       storeCode: json['store_code'],
       storeName: json['store_name'],
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
       descA: json['desc_a'],
       descE: json['desc_e'],
       approveFlag: json['approve_flag'],
@@ -38,7 +39,3 @@ class PurchaseRequestMaster {
     return formatDate(reqDate);
   }
 }
-
-
-
-

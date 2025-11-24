@@ -1,15 +1,15 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import 'package:modernapproval/models/approval_status_response_model.dart';
-import 'package:modernapproval/models/approvals/sales_order/sales_order_det_model.dart';
-import 'package:modernapproval/models/approvals/sales_order/sales_order_mast_model.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/details_item.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/master_item.dart';
+import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
+import 'package:modernapproval/models/approvals/production_outbound/production_outbound_det_model.dart';
+import 'package:modernapproval/models/approvals/production_outbound/production_outbound_mast_model.dart';
+import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
 import 'package:modernapproval/models/user_model.dart';
 import 'package:modernapproval/services/api_service.dart';
 import 'package:modernapproval/widgets/error_display.dart';
-import 'package:number_to_word_arabic/number_to_word_arabic.dart';
 import '../../../app_localizations.dart';
 import '../../../main.dart';
 
@@ -19,28 +19,30 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/rendering.dart' show TextDirection;
 
-import '../../../models/approvals/sales_order/sales_order_model.dart';
+// ---------------------
 
-class SalesOrderDetailScreen extends StatefulWidget {
+class ProductionInboundDetailScreen extends StatefulWidget {
   final UserModel user;
-  final SalesOrder request;
+  final Item request;
 
-  const SalesOrderDetailScreen({
+  const ProductionInboundDetailScreen({
     super.key,
     required this.user,
     required this.request,
   });
 
   @override
-  State<SalesOrderDetailScreen> createState() => _SalesOrderDetailScreenState();
+  State<ProductionInboundDetailScreen> createState() =>
+      _ProductionInboundDetailScreenState();
 }
 
-class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
+class _ProductionInboundDetailScreenState
+    extends State<ProductionInboundDetailScreen> {
   final ApiService _apiService = ApiService();
   late Future<Map<String, dynamic>> _detailsFuture;
 
-  SalesOrderMaster? _masterData;
-  List<SalesOrderDetails>? _detailData;
+  MasterItem? _masterData;
+  List<DetailsItem>? _detailData;
 
   bool _isSubmitting = false;
 
@@ -53,22 +55,19 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
   Future<Map<String, dynamic>> _loadAllDetails() async {
     try {
       final results = await Future.wait([
-        _apiService.getSalesOrderMaster(
-          trnsTypeCode: widget.request.trnsTypeCode,
-          trnsSerial: widget.request.trnsSerial,
+        _apiService.getProductionInboundMaster(
+          trnsTypeCode: widget.request.trnsTypeCode ?? 0,
+          trnsSerial: widget.request.trnsSerial ?? 0,
         ),
-        _apiService.getSalesOrderDetail(
-          trnsTypeCode: widget.request.trnsTypeCode,
-          trnsSerial: widget.request.trnsSerial,
+        _apiService.getProductionInboundDetail(
+          trnsTypeCode: widget.request.trnsTypeCode ?? 0,
+          trnsSerial: widget.request.trnsSerial ?? 0,
         ),
       ]);
 
       setState(() {
-        _masterData = results[0] as SalesOrderMaster;
-        _detailData = results[1] as List<SalesOrderDetails>;
-        log(_masterData!.repSales!.length.toString());
-        log(_masterData!.repSales!.replaceAll(" ", '').length.toString());
-        log(_masterData!.managerSales!.length.toString());
+        _masterData = results[0] as MasterItem;
+        _detailData = results[1] as List<DetailsItem>;
       });
 
       return {'master': _masterData, 'detail': _detailData};
@@ -91,7 +90,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
-        title: Text(l.translate('salesDetails')),
+        title: Text(l.translate('requestDetails')),
         backgroundColor: const Color(0xFF6C63FF),
         actions: [
           IconButton(
@@ -111,7 +110,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
                 _masterData != null && _detailData != null
                     ? () async {
                       try {
-                        await _printDocument(l, isArabic, _masterData!);
+                        await _printDocument(l, isArabic);
                       } catch (e) {
                         print("--- ❌ PDF PRINTING FAILED ---");
                         print(e.toString());
@@ -163,9 +162,10 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
                 );
               }
 
-              final masterData = snapshot.data!['master'] as SalesOrderMaster;
+              final masterData =
+                  snapshot.data!['master'] as ProductionOutboundMaster;
               final detailData =
-                  snapshot.data!['detail'] as List<SalesOrderDetails>;
+                  snapshot.data!['detail'] as List<ProductionOutboundDetail>;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -210,7 +210,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
 
   Widget _buildCompactMasterSection(
     AppLocalizations l,
-    SalesOrderMaster master,
+    ProductionOutboundMaster master,
     bool isArabic,
   ) {
     return Card(
@@ -259,21 +259,19 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
               _buildCompactInfoRow(
                 Icons.store,
                 l.translate('store_name'),
-                isArabic
-                    ? master.storeNameA ?? 'N/A'
-                    : master.storeNameE ?? 'N/A',
+                master.storeName ?? 'N/A',
               ),
               const SizedBox(height: 8),
-              // _buildCompactInfoRow(
-              //   Icons.description,
-              //   l.translate('item_name'),
-              //   isArabic ? (master. ?? '') : (master.descE ?? ''),
-              // ),
+              _buildCompactInfoRow(
+                Icons.description,
+                l.translate('item_name'),
+                isArabic ? (master.descA ?? '') : (master.descE ?? ''),
+              ),
               const SizedBox(height: 8),
               _buildCompactInfoRow(
                 Icons.calendar_today,
-                l.translate('order_date'),
-                master.formattedOrderDate,
+                l.translate('req_date'),
+                master.formattedTrnsDate,
               ),
               const SizedBox(height: 16),
               Center(
@@ -367,7 +365,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
 
   Widget _buildModernDetailTable(
     AppLocalizations l,
-    List<SalesOrderDetails> details,
+    List<ProductionOutboundDetail> details,
     bool isArabic,
   ) {
     final columns = [
@@ -376,6 +374,10 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
       l.translate("item_number"),
       l.translate('quantity'),
       l.translate('unit_name'),
+      l.translate('unit_cost'),
+      l.translate('total'),
+      //todo 2
+      // l.translate("last_price"),
     ];
     int i = 0;
     return Column(
@@ -439,8 +441,16 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
                       ),
                     ),
                     DataCell(Text(item.itemCode?.toString() ?? 'N/A')),
-                    DataCell(Text(item.qty?.toString() ?? 'N/A')),
+                    DataCell(Text(item.quantity?.toString() ?? 'N/A')),
                     DataCell(Text(item.unitName ?? 'N/A')),
+                    DataCell(
+                      Text(
+                        item.unitCost?.toStringAsFixed(2).toString() ?? 'N/A',
+                      ),
+                    ),
+                    DataCell(
+                      Text(item.total?.toStringAsFixed(2).toString() ?? 'N/A'),
+                    ),
                   ],
                 );
               }),
@@ -877,9 +887,9 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
   ) async {
     if (widget.request.prevSer == null || widget.request.lastLevel == null) {
       print(
-        "❌ CRITICAL ERROR: Missing 'prev_ser' or 'last_level' in the initial SalesRequest object.",
+        "❌ CRITICAL ERROR: Missing 'prev_ser' or 'last_level' in the initial ProductionOutbound object.",
       );
-      print("❌ Make sure 'getSaleAuth' API returns these values!");
+      print("❌ Make sure 'GET_pro_out_AUTH' API returns these values!");
       _showErrorDialog(
         "بيانات الطلب الأساسية غير مكتملة (prev_ser, last_level). لا يمكن المتابعة.",
       );
@@ -893,21 +903,20 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
     final l = AppLocalizations.of(context)!;
     final int userId = widget.user.usersCode;
     final int roleCode = widget.user.roleCode!;
-    final String authPk1 = widget.request.authPk1;
-    final String authPk2 = widget.request.authPk2;
+    final String authPk1 = widget.request.authPk1 ?? "";
+    final String authPk2 = widget.request.authPk2 ?? "";
     final int lastLevel = widget.request.lastLevel!;
     final int prevSerOriginal = widget.request.prevSer!;
 
     try {
       print("--- 🚀 Starting Approval Process (Status: $actualStatus) ---");
-      //todo update stage 1 here for sale
       final ApprovalStatusResponse s1 = await _apiService.stage1_getStatus(
         userId: userId,
         roleCode: roleCode,
         authPk1: authPk1,
         authPk2: authPk2,
         actualStatus: actualStatus,
-        approvalType: "sale_order",
+        approvalType: "pro_out",
       );
 
       final int trnsStatus = s1.trnsStatus;
@@ -924,12 +933,11 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
       );
       if (lastLevel == 1 && trnsStatus == 1) {
         print("--- 🚀 Condition Met (Stage 3) ---");
-        //todo update this stage for sale
         await _apiService.stage3_checkLastLevel(
           userId: userId,
           authPk1: authPk1,
           authPk2: authPk2,
-          approvalType: "sale_order",
+          approvalType: "pro_out",
         );
       } else {
         print("--- ⏩ Skipping Stage 3 (Condition Not Met) ---");
@@ -945,8 +953,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
         "auth_pk2": authPk2,
         "trns_status": trnsStatus,
       };
-      //todo update stage 4 for sale
-      await _apiService.stage4_updateStatus(stage4Body, "sale_order");
+      await _apiService.stage4_updateStatus(stage4Body, "pro_out");
 
       final Map<String, dynamic> stage5Body = {
         "auth_pk1": authPk1,
@@ -954,9 +961,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
         "prev_ser": prevSerOriginal,
         "prev_level": prevLevelS1,
       };
-
-      //todo update stage 5 for order
-      await _apiService.stage5_deleteStatus(stage5Body, "sale_order");
+      await _apiService.stage5_deleteStatus(stage5Body, "pro_out");
 
       print(
         "--- ℹ️ Checking Stage 6 Condition: trnsStatus ($trnsStatus) == 0 || trnsStatus ($trnsStatus) == -1",
@@ -974,9 +979,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
           "auth_pk4": s1.authPk4,
           "auth_pk5": s1.authPk5,
         };
-
-        //todo update stage 6 for order
-        await _apiService.stage6_postFinalStatus(stage6Body, "sale_order");
+        await _apiService.stage6_postFinalStatus(stage6Body, "pro_out");
       } else {
         print("--- ⏩ Skipping Stage 6 (Condition Not Met) ---");
       }
@@ -1032,11 +1035,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
   // ========================================================
   // 🎯 دالة الطباعة - بيانات ثابتة زي الصورة الثانية
   // ========================================================
-  Future<void> _printDocument(
-    AppLocalizations l,
-    bool isArabic,
-    SalesOrderMaster salesOrderMaster,
-  ) async {
+  Future<void> _printDocument(AppLocalizations l, bool isArabic) async {
     try {
       final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
       final ttf = pw.Font.ttf(fontData);
@@ -1051,31 +1050,38 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
 
       final headers = [
         "م",
-        "كود الصنف",
-        "أسم الصنف",
+        "رقم الصنف",
+        "اسم الصنف",
         "الوحدة",
         "الكمية",
-        "السعر",
+        "التكلفة",
+        "رقم المشروع",
+        "رقم البند الرئيسي",
+        "رقم البند الفرعي",
+        "رقم بند الصنف",
         "الاجمالي",
-        "الملاحظات",
       ];
 
-      ///Master items data
-      int rowNumberMaster = 0;
-      final dataTopTable =
+      ///table items data
+      int rowNumber = 0;
+      final data =
           _detailData!.map((item) {
-            rowNumberMaster++;
+            rowNumber++;
             return [
-              rowNumberMaster.toString(),
+              rowNumber.toString(),
               item.itemCode?.toString() ?? '',
               isArabic ? (item.itemName ?? '') : (item.itemName ?? ''),
               item.unitName ?? '',
-              item.qty?.toString() ?? '0',
-              item.price?.toString() ?? '',
-              item.totPrice?.toString() ?? '',
-              item.note?.toString() ?? '',
+              item.quantity?.toStringAsFixed(2) ?? '0',
+              item.unitCost?.toStringAsFixed(2) ?? '0',
+              item.projectId?.toString() ?? '',
+              item.mastBandCode?.toString() ?? '',
+              item.bandCode?.toString() ?? '',
+              item.consumableItemCode?.toString() ?? '',
+              item.total?.toStringAsFixed(2) ?? '',
             ];
           }).toList();
+
       final pdf = pw.Document();
       pdf.addPage(
         pw.MultiPage(
@@ -1085,20 +1091,16 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
           theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
           build:
               (context) => [
-                _buildFixedPdfHeader(ttf, logoImage),
-                _buildFirstTable(_masterData!),
-                pw.SizedBox(height: 4),
-                _buildSecondTable(_masterData!, ttf),
-                pw.SizedBox(height: 4),
-                _buildPdfTable(headers, dataTopTable, ttf),
-                pw.SizedBox(height: 1),
-                _buildPdfTableTotalPriceSkeleton(_detailData!, ttf),
-                pw.SizedBox(height: 4),
-                _buildPdfLastTable(ttf),
-
+                _buildFixedPdfHeader(
+                  ttf,
+                  logoImage,
+                  _masterData!,
+                  _detailData!,
+                ),
                 pw.SizedBox(height: 10),
-
-                _buildFixedPdfFooter(ttf, _masterData!, _detailData!),
+                _buildPdfTable(headers, data, ttf),
+                pw.SizedBox(height: 10),
+                _buildFixedPdfFooter(ttf, _detailData!),
               ],
         ),
       );
@@ -1112,144 +1114,237 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
     }
   }
 
-  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+  pw.Widget _buildFixedPdfHeader(
+    pw.Font ttf,
+    pw.MemoryImage? logo,
+    MasterItem master,
+    List<DetailsItem> details,
+  ) {
+    return pw.Column(
       children: [
-        if (logo != null)
-          pw.Column(children: [pw.Image(logo, width: 60, height: 60)])
-        else
-          pw.SizedBox(width: 60, height: 60),
-      ],
-    );
-  }
-
-  pw.Widget _buildFirstTable(SalesOrderMaster master) {
-    return pw.Table(
-      columnWidths: {
-        0: const pw.FlexColumnWidth(2.2),
-        1: const pw.FlexColumnWidth(2.0),
-        2: const pw.FlexColumnWidth(1.8),
-        3: const pw.FlexColumnWidth(1.5),
-      },
-      border: pw.TableBorder.all(width: 2),
-      children: [
-        pw.TableRow(
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
           children: [
             pw.Container(
-              width: 1,
-              padding: const pw.EdgeInsets.all(8),
+              padding: pw.EdgeInsets.all(2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.white, // Outer container background
+                border: pw.Border.all(color: PdfColors.black, width: 1),
+              ),
+              child: pw.Container(
+                padding: pw.EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 8,
+                ), // Inner padding
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromInt(
+                    0x80D3D3D3,
+                  ), // Grey with 50% opacity (D3D3D3 is light grey)
+                  border: pw.Border.all(color: PdfColors.black, width: 1),
+                ),
+                child: pw.Text(
+                  "تسوية صادر رقم     ${master.trnsSerial}/${master.trnsTypeCode}",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 18,
+                    color: PdfColors.blue900,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            pw.SizedBox(width: 20),
+            if (logo != null)
+              pw.Image(logo, width: 60, height: 60)
+            else
+              pw.SizedBox(width: 60, height: 60),
+          ],
+        ),
+        pw.SizedBox(height: 8),
+        pw.Divider(
+          color: PdfColors.black,
+          height: 1, // Line thickness
+          thickness: 1, // Alternative way to set thickness
+        ),
+        pw.SizedBox(height: 8),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Table(
+              border: pw.TableBorder.all(),
+              tableWidth: pw.TableWidth.min,
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      padding: pw.EdgeInsets.all(4),
+
+                      child: pw.Text(
+                        "${master.docNo ?? ""}",
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    pw.Container(
+                      padding: pw.EdgeInsets.all(4),
+                      color: PdfColors.grey300,
+                      child: pw.Text("رقم المستند"),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Container(
+                      padding: pw.EdgeInsets.all(4),
+                      alignment: pw.Alignment.center,
+                      child: pw.Text(
+                        "${master.formattedTrnsDate ?? ""}",
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    pw.Container(
+                      padding: pw.EdgeInsets.all(4),
+                      color: PdfColors.grey300,
+                      child: pw.Text("التاريخ"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            pw.Align(
+              alignment: pw.Alignment.centerLeft,
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text(":Sales Order"),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("رقم امر البيع:"),
-                      pw.Text("${master.salesOrderNo}"),
-                    ],
+                  pw.Text(
+                    "معد الحركة : ${master.insertUser.toString()}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
                   ),
-                  pw.Text(":Date"),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("التاريخ:"),
-                      pw.Text("${master.formattedOrderDate}"),
-                      // pw.Text("${}"),
-                    ],
+                  pw.Text(
+                    "تاريخ الادخال : ${master.formattedInsertDate.toString()}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    "المعتمد 1 : ${master.auth1Name ?? ""}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    "المعتمد 2 : ${master.auth2Name ?? ""}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
                   ),
                 ],
-              ),
-            ),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(":Issue Date"),
-                  pw.Text("تاريخ الصرف:"),
-                  pw.Text(":Issue At"),
-                  pw.Text("وقت الصرف:"),
-                ],
-              ),
-            ),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
-                children: [
-                  pw.Text("Document No رقم الوثيقة"),
-                  pw.Text("012-MSE"),
-                ],
-              ),
-            ),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
-                children: [pw.Text("Sell Order"), pw.Text("أمر بيع")],
               ),
             ),
           ],
         ),
-      ],
-    );
-  }
 
-  pw.Widget _buildSecondTable(SalesOrderMaster master, pw.Font ttf) {
-    return pw.Table(
-      border: pw.TableBorder.all(width: 2),
-      columnWidths: {
-        0: const pw.FlexColumnWidth(2.0),
-        1: const pw.FlexColumnWidth(2.0),
-      },
-      children: [
-        pw.TableRow(
+        pw.Table(
+          border: pw.TableBorder.all(),
           children: [
-            pw.Container(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(":Sale Offer No"),
-                  pw.Text("رقم عرض البيع:"),
-                  pw.Text(":Store Code"),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("رقم المخزن:"),
-                      pw.Text("${master.storeCode}"),
-                    ],
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    "${master.storeName ?? ""}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
                   ),
-                ],
-              ),
+                ),
+                pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("اسم المخزن"),
+                ),
+              ],
             ),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(":Client Name"),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("اسم العميل:"),
-                      pw.Text(
-                        "${master.customerNameA ?? master.customerNameE}",
-                        style: pw.TextStyle(font: ttf, fontSize: 9),
-                      ),
-                    ],
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    "${master.storeCode ?? ""}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
                   ),
-                  pw.Text(":Store Name"),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("رقم المخزن:"),
-                      pw.Text("${master.storeNameA ?? master.storeNameE}"),
-                    ],
+                ),
+                pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("رقم المخزن"),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    "${master.costCode2 ?? ""} / ${master.costCode2Name ?? ""}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
                   ),
-                ],
-              ),
+                ),
+                pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("مركز التكلفة 2 "),
+                ),
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Container(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    "${master.descA ?? master.descE ?? ""}",
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.Container(
+                  padding: pw.EdgeInsets.symmetric(horizontal: 4),
+                  color: PdfColors.grey300,
+                  child: pw.Text("البيان"),
+                ),
+              ],
             ),
           ],
         ),
@@ -1287,427 +1382,88 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
       },
       cellPadding: const pw.EdgeInsets.all(4),
       columnWidths: {
-        0: const pw.FlexColumnWidth(1.4),
-        1: const pw.FlexColumnWidth(1.4),
-        2: const pw.FlexColumnWidth(1.4),
+        0: const pw.FlexColumnWidth(1.2),
+        1: const pw.FlexColumnWidth(0.8),
+        2: const pw.FlexColumnWidth(0.8),
         3: const pw.FlexColumnWidth(0.8),
-        4: const pw.FlexColumnWidth(1.0),
-        5: const pw.FlexColumnWidth(2.2),
-        6: const pw.FlexColumnWidth(2.3),
-        7: const pw.FlexColumnWidth(1.4),
+        4: const pw.FlexColumnWidth(0.8),
+        5: const pw.FlexColumnWidth(0.8),
+        6: const pw.FlexColumnWidth(1),
+        7: const pw.FlexColumnWidth(0.8),
+        8: const pw.FlexColumnWidth(2.3),
+        9: const pw.FlexColumnWidth(1.8),
+        10: const pw.FlexColumnWidth(0.8),
       },
       oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
     );
   }
 
-  pw.Widget _buildPdfTableTotalPriceSkeleton(
-    List<SalesOrderDetails> listSalesOrderDetail,
-    pw.Font ttf,
-  ) {
-    num total = listSalesOrderDetail.fold(
-      0.0,
-      (sum, item) => sum + item.totPrice!,
-    );
-    return pw.Table(
-      columnWidths: {
-        0: const pw.FlexColumnWidth(0.8),
-        1: const pw.FlexColumnWidth(1.4),
-        2: const pw.FlexColumnWidth(1.4),
-        3: const pw.FlexColumnWidth(0.8),
-        4: const pw.FlexColumnWidth(1.2),
-        5: const pw.FlexColumnWidth(2.3),
-        6: const pw.FlexColumnWidth(2.3),
-        7: const pw.FlexColumnWidth(1.4),
-      },
-      children: [
-        pw.TableRow(
-          children: [
-            pw.Text(""),
-            pw.Text("${total}"),
-            pw.Text("الاجمالي:"),
-            pw.Text(""),
-            pw.Text(""),
-            pw.Text(""),
-            pw.Text(""),
-          ],
-        ),
-      ],
-    );
-  }
-
-  pw.Widget _buildPdfLastTable(pw.Font ttf) {
-    return pw.Table(
-      border: pw.TableBorder.all(width: 2),
-      columnWidths: {
-        0: const pw.FlexColumnWidth(1.4),
-        1: const pw.FlexColumnWidth(1.4),
-        2: const pw.FlexColumnWidth(1.0),
-      },
-      children: [
-        pw.TableRow(
-          children: [
-            pw.Text(" مدير ادارة المبيعات :"),
-            pw.Text(" مسؤول المبيعات :"),
-            pw.Text(" قسم الحسابات :"),
-          ],
-        ),
-        pw.TableRow(
-          children: [
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text("الاسم:"),
-
-                    (_masterData!.managerSales
-                                ?.replaceAll(" ", "")
-                                .isNotEmpty ??
-                            false)
-                        ? pw.FittedBox(
-                          child: pw.Text("${_masterData!.managerSales}"),
-                        )
-                        : pw.Text(" "),
-
-                    pw.SizedBox(width: 1),
-                  ],
-                ),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [pw.Text(":التوقيع"), pw.SizedBox(width: 1)],
-                ),
-              ],
-            ),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text("الاسم:"),
-                    (_masterData!.repSales?.replaceAll(" ", "").isNotEmpty ??
-                            false)
-                        ? pw.FittedBox(
-                          child: pw.Text("${_masterData!.repSales}"),
-                        )
-                        : pw.Text(""),
-                    pw.SizedBox(width: 1),
-                  ],
-                ),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [pw.Text(":التوقيع"), pw.SizedBox(width: 1)],
-                ),
-              ],
-            ),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [pw.Text("الاسم:"), pw.SizedBox(width: 1)],
-                ),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [pw.Text(":التوقيع"), pw.SizedBox(width: 1)],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  pw.Widget _buildPdfTotalTable(
-    SalesOrderMaster salesOrderMaster,
-    List<SalesOrderDetails> listSalesOrderDetail,
-  ) {
-    double grandTotalBeforeCalc = listSalesOrderDetail.fold(
-      0.0,
-      (sum, item) => sum + item.totPrice!,
-    ); // الاجمالي قبل الحسابات
-    num taxSal = salesOrderMaster.taxSal ?? 0;
-    num taxProf = salesOrderMaster.taxSal ?? 0;
-    num otherExp = salesOrderMaster.taxSal ?? 0;
-    num discVal = salesOrderMaster.taxSal ?? 0;
-    num finalTotalCost =
-        (grandTotalBeforeCalc + taxSal) - taxProf - otherExp - discVal;
-    String finalTotalCostArabic = Tafqeet.convert('${finalTotalCost.toInt()}');
-
-    return pw.Column(
-      children: [
-        pw.Table(
-          border: pw.TableBorder.all(),
-          columnWidths: {
-            0: const pw.FlexColumnWidth(2),
-            1: const pw.FlexColumnWidth(6),
-          },
-          children: [
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('$grandTotalBeforeCalc'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('الاجمالي'),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${taxSal}'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('ضريبة القيمة المضافة'),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${taxProf}'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('ضريبة أ ت'),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${otherExp}'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('مصاريف اخري'),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${discVal}'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('خصم'),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('${finalTotalCost}'),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text('المجموع'),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // The last cell as the second element in the column
-        pw.Container(
-          width: double.infinity, // This will make it full width
-          padding: const pw.EdgeInsets.all(8),
-          decoration: pw.BoxDecoration(border: pw.TableBorder.all()),
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Text(' اجمالي المبلغ      فقط('),
-              pw.Text('${finalTotalCostArabic}'),
-              pw.Text('('),
-              pw.SizedBox(width: 1),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   pw.Widget _buildFixedPdfFooter(
     pw.Font ttf,
-    SalesOrderMaster salesOrderMaster,
-    List<SalesOrderDetails> listSalesOrderDetail,
+    List<DetailsItem> productionOutboundList,
   ) {
-    num total = listSalesOrderDetail.fold(
+    double finalTotalCost = productionOutboundList.fold(
       0.0,
-      (sum, item) => sum + item.totPrice!,
-    );
-    num tax14 = salesOrderMaster.taxSal ?? 0.00;
-    String currentDateTime = DateFormat(
-      'yyyy-MM-dd hh:mm:ss a',
-      'ar',
-    ).format(DateTime.now()).replaceAll('AM', 'ص').replaceAll('PM', 'م');
+      (sum, item) => sum + ((item.total!)),
+    ); // الاجمالي قبل الحسابات
     return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-
       children: [
         pw.SizedBox(height: 10),
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: pw.MainAxisAlignment.end,
           children: [
-            pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.start,
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  "مكان التسليم :",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.Text(
-                  "وصف مكان التسليم :",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.Text(
-                  "شروط أخري:",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.Text(
-                  "شروط الدفع :",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.Text(
-                  "تاريخ التسليم :",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.Text(
-                  "صلاحية العرض : لا شئ من تاريخه",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.start,
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      "الاجمالي :",
-                      style: pw.TextStyle(
-                        font: ttf,
-                        fontSize: 9,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.Container(
-                      height: 25,
-                      width: 100,
-                      alignment: pw.Alignment.center,
-                      margin: pw.EdgeInsets.only(right: 5),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.white.shade(0.6),
-                        border: pw.Border.all(color: PdfColors.black),
-                      ),
-                      child: pw.Text(
-                        "${total}",
-                        style: pw.TextStyle(
-                          font: ttf,
-                          fontSize: 12,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                pw.SizedBox(height: 3),
+            pw.Table(
+              border: pw.TableBorder.all(),
 
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.TableRow(
                   children: [
-                    pw.Text(
-                      ": % 14",
-                      style: pw.TextStyle(
-                        font: ttf,
-                        fontSize: 9,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
                     pw.Container(
-                      height: 25,
-                      width: 100,
                       alignment: pw.Alignment.center,
-                      margin: pw.EdgeInsets.only(right: 5),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.white.shade(0.6),
-                        border: pw.Border.all(color: PdfColors.black),
+                      padding: pw.EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 22,
                       ),
+
                       child: pw.Text(
-                        "${tax14}",
+                        "${finalTotalCost.toStringAsFixed(2)}",
                         style: pw.TextStyle(
                           font: ttf,
-                          fontSize: 12,
+                          fontSize: 9,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),
                     ),
-                  ],
-                ),
-                pw.SizedBox(height: 3),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      "الاجمالي بعد 14 % :",
-                      style: pw.TextStyle(
-                        font: ttf,
-                        fontSize: 9,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
+
                     pw.Container(
-                      height: 25,
-                      width: 100,
                       alignment: pw.Alignment.center,
-                      margin: pw.EdgeInsets.only(right: 5),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.white.shade(0.6),
-                        border: pw.Border.all(color: PdfColors.black),
+                      padding: pw.EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 18,
                       ),
+
                       child: pw.Text(
-                        "${total + tax14}",
+                        "",
                         style: pw.TextStyle(
                           font: ttf,
-                          fontSize: 12,
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      padding: pw.EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 18,
+                      ),
+
+                      child: pw.Text(
+                        "123",
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 9,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),
@@ -1718,8 +1474,41 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
             ),
           ],
         ),
-
-        pw.SizedBox(height: 10),
+        pw.SizedBox(height: 15),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Column(
+              children: [
+                pw.Text(
+                  "امين المخزن",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 8),
+                pw.Container(width: 120, height: 1, color: PdfColors.black),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text(
+                  "اعتماد",
+                  style: pw.TextStyle(
+                    font: ttf,
+                    fontSize: 9,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 8),
+                pw.Container(width: 120, height: 1, color: PdfColors.black),
+              ],
+            ),
+          ],
+        ),
       ],
     );
   }

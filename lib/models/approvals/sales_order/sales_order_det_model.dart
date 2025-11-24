@@ -11,18 +11,19 @@ class SalesOrderDetails {
   num? totPrice;
   String? note;
 
-  SalesOrderDetails(
-      {this.trnsTypeCode,
-        this.trnsSerial,
-        this.itemGroupCode,
-        this.groupName,
-        this.itemCode,
-        this.itemName,
-        this.unitName,
-        this.qty,
-        this.price,
-        this.totPrice,
-        this.note});
+  SalesOrderDetails({
+    this.trnsTypeCode,
+    this.trnsSerial,
+    this.itemGroupCode,
+    this.groupName,
+    this.itemCode,
+    this.itemName,
+    this.unitName,
+    this.qty,
+    this.price,
+    this.totPrice,
+    this.note,
+  });
 
   SalesOrderDetails.fromJson(Map<String, dynamic> json) {
     trnsTypeCode = json['trns_type_code'];

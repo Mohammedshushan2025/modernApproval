@@ -32,7 +32,7 @@ class PurchaseRequestDetail {
     this.quantity,
     this.note,
     this.approveFlag,
-    this.last_pur
+    this.last_pur,
   });
 
   factory PurchaseRequestDetail.fromJson(Map<String, dynamic> json) {
@@ -41,7 +41,8 @@ class PurchaseRequestDetail {
       trnsSerial: json['trns_serial'],
       storeCode: json['store_code'],
       storeName: json['store_name'],
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
       itemSerial: json['item_serial'],
       groupName: json['group_name'],
       itemCode: json['item_code'],
@@ -51,7 +52,7 @@ class PurchaseRequestDetail {
       quantity: json['quantity'],
       note: json['note'],
       approveFlag: json['approve_flag'],
-      last_pur: json['last_pur']
+      last_pur: json['last_pur'],
     );
   }
 

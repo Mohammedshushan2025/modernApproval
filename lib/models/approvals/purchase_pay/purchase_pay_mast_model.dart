@@ -24,29 +24,30 @@ class PurchasePayMaster {
   String? payFlag;
   int? closed;
 
-  PurchasePayMaster(
-      {required this.trnsTypeCode,
-        required this.trnsSerial,
-        required this.storeCode,
-        required this.storeName,
-        this.reqDate,
-        this.descA,
-        this.descE,
-        this.approveFlag,
-        this.orderTrnsType,
-        this.orderTrnsSerial,
-        this.vnTrnsName,
-        this.insertUser,
-        this.supplierName,
-        this.insertDate,
-        this.currencyDesc,
-        this.dueDate,
-        this.valueCurr,
-        this.value,
-        this.currencyRate,
-        this.payMethod,
-        this.payFlag,
-        this.closed});
+  PurchasePayMaster({
+    required this.trnsTypeCode,
+    required this.trnsSerial,
+    required this.storeCode,
+    required this.storeName,
+    this.reqDate,
+    this.descA,
+    this.descE,
+    this.approveFlag,
+    this.orderTrnsType,
+    this.orderTrnsSerial,
+    this.vnTrnsName,
+    this.insertUser,
+    this.supplierName,
+    this.insertDate,
+    this.currencyDesc,
+    this.dueDate,
+    this.valueCurr,
+    this.value,
+    this.currencyRate,
+    this.payMethod,
+    this.payFlag,
+    this.closed,
+  });
 
   factory PurchasePayMaster.fromJson(Map<String, dynamic> json) {
     return PurchasePayMaster(
@@ -54,7 +55,8 @@ class PurchasePayMaster {
       trnsSerial: json['trns_serial'],
       storeCode: json['store_code'],
       storeName: json['store_name'],
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
       descA: json['desc_a'],
       descE: json['desc_e'],
       approveFlag: json['approve_flag'] ?? 0,
@@ -63,9 +65,13 @@ class PurchasePayMaster {
       vnTrnsName: json['vn_trns_name'],
       insertUser: json['insert_user'],
       supplierName: json['supplier_name'],
-      insertDate: json['insert_date'] != null ? DateTime.parse(json['insert_date']) : null,
+      insertDate:
+          json['insert_date'] != null
+              ? DateTime.parse(json['insert_date'])
+              : null,
       currencyDesc: json['currency_desc'],
-      dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
+      dueDate:
+          json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
       valueCurr: json['value_curr'],
       value: json['value'],
       currencyRate: json['currency_rate'],
@@ -101,12 +107,15 @@ class PurchasePayMaster {
     data['closed'] = this.closed;
     return data;
   }
+
   String get formattedReqDate {
     return formatDate(reqDate);
   }
+
   String get formattedInsertDate {
     return formatDate(insertDate);
   }
+
   String get formattedDueDate {
     return formatDate(dueDate);
   }

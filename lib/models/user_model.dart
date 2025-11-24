@@ -1,4 +1,3 @@
-
 class UserModel {
   final int usersCode;
   final String password;
@@ -22,7 +21,6 @@ class UserModel {
     required this.roleCode,
   });
 
-
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       usersCode: json['users_code'],
@@ -36,7 +34,6 @@ class UserModel {
       roleCode: json['role_code'],
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -52,5 +49,3 @@ class UserModel {
     };
   }
 }
-
-

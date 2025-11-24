@@ -12,12 +12,15 @@ class PurchasePayApprovalScreen extends StatefulWidget {
   final UserModel user;
   final int selectedPasswordNumber;
 
-  const PurchasePayApprovalScreen({super.key,
+  const PurchasePayApprovalScreen({
+    super.key,
     required this.user,
-    required this.selectedPasswordNumber,});
+    required this.selectedPasswordNumber,
+  });
 
   @override
-  State<PurchasePayApprovalScreen> createState() => _PurchasePayApprovalScreenState();
+  State<PurchasePayApprovalScreen> createState() =>
+      _PurchasePayApprovalScreenState();
 }
 
 class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
@@ -58,12 +61,12 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
 
   void _extractStoreNames(List<PurchasePay> requests) {
     final storeNames =
-    requests
-        .map((request) => request.storeName ?? '')
-        .where((storeName) => storeName.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+        requests
+            .map((request) => request.storeName ?? '')
+            .where((storeName) => storeName.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
     _availableStoreNames = [''] + storeNames;
   }
@@ -89,7 +92,7 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
             if (_selectedDate != null) {
               matchesDate =
                   request.reqDate != null &&
-                      _isSameDate(request.reqDate!, _selectedDate!);
+                  _isSameDate(request.reqDate!, _selectedDate!);
             }
 
             return matchesStoreName && matchesDate;
@@ -181,22 +184,22 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                   items:
-                  _availableStoreNames.map((String storeName) {
-                    return DropdownMenuItem<String>(
-                      value: storeName.isEmpty ? null : storeName,
-                      child: Text(
-                        storeName.isEmpty
-                            ? l.translate('all_stores')
-                            : storeName,
-                        style: TextStyle(
-                          color:
-                          storeName.isEmpty
-                              ? Colors.grey.shade500
-                              : Colors.black87,
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                      _availableStoreNames.map((String storeName) {
+                        return DropdownMenuItem<String>(
+                          value: storeName.isEmpty ? null : storeName,
+                          child: Text(
+                            storeName.isEmpty
+                                ? l.translate('all_stores')
+                                : storeName,
+                            style: TextStyle(
+                              color:
+                                  storeName.isEmpty
+                                      ? Colors.grey.shade500
+                                      : Colors.black87,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                   onChanged: (String? newValue) {
                     setState(() {
                       _storeNameFilter = newValue ?? '';
@@ -316,9 +319,9 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                 if (snapshot.hasError) {
                   return ErrorDisplay(
                     errorMessageKey:
-                    snapshot.error.toString().contains('noInternet')
-                        ? 'noInternet'
-                        : 'serverError',
+                        snapshot.error.toString().contains('noInternet')
+                            ? 'noInternet'
+                            : 'serverError',
                     onRetry: _fetchData,
                   );
                 }
@@ -388,11 +391,11 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                   });
                 }
                 final displayRequests =
-                _showFilters &&
-                    (_storeNameFilter.isNotEmpty ||
-                        _selectedDate != null)
-                    ? _filteredRequests
-                    : allRequests;
+                    _showFilters &&
+                            (_storeNameFilter.isNotEmpty ||
+                                _selectedDate != null)
+                        ? _filteredRequests
+                        : allRequests;
 
                 // Show filter results info
                 if (_showFilters &&
@@ -467,10 +470,10 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
   }
 
   Widget _buildSalesOrderCard(
-      BuildContext context,
-      PurchasePay request,
-      int index,
-      ) {
+    BuildContext context,
+    PurchasePay request,
+    int index,
+  ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final cardColor = _cardColors[index % _cardColors.length];
 
@@ -497,9 +500,9 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
               MaterialPageRoute(
                 builder:
                     (context) => PurchasePayDetailScreen(
-                  user: widget.user,
-                  request: request,
-                ),
+                      user: widget.user,
+                      request: request,
+                    ),
               ),
             );
 
@@ -592,7 +595,9 @@ class _PurchasePayApprovalScreenState extends State<PurchasePayApprovalScreen> {
                           Row(
                             children: [
                               Text(
-                                request.authPk1.toString() + " / " + request.authPk2.toString(),
+                                request.authPk1.toString() +
+                                    " / " +
+                                    request.authPk2.toString(),
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 12.5,

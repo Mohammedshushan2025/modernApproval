@@ -14,23 +14,25 @@ class SalesOrderMaster {
   String? offerExpiry;
   num? taxSal;
 
-  SalesOrderMaster(
-      {this.salesOrderNo,
-        this.orderDate,
-        this.customerCode,
-        this.customerNameA,
-        this.customerNameE,
-        this.storeCode,
-        this.storeNameA,
-        this.storeNameE,
-        this.managerSales,
-        this.repSales,
-        this.offerExpiry,
-        this.taxSal});
+  SalesOrderMaster({
+    this.salesOrderNo,
+    this.orderDate,
+    this.customerCode,
+    this.customerNameA,
+    this.customerNameE,
+    this.storeCode,
+    this.storeNameA,
+    this.storeNameE,
+    this.managerSales,
+    this.repSales,
+    this.offerExpiry,
+    this.taxSal,
+  });
 
   SalesOrderMaster.fromJson(Map<String, dynamic> json) {
     salesOrderNo = json['sales_order_no'];
-    orderDate = json['order_date']!= null ? DateTime.parse(json['order_date']) : null;
+    orderDate =
+        json['order_date'] != null ? DateTime.parse(json['order_date']) : null;
     customerCode = json['customer_code'];
     customerNameA = json['customer_name_a'];
     customerNameE = json['customer_name_e'];
@@ -59,6 +61,7 @@ class SalesOrderMaster {
     data['tax_sal'] = this.taxSal;
     return data;
   }
+
   String get formattedOrderDate {
     return formatDate(orderDate);
   }

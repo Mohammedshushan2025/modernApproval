@@ -1,6 +1,6 @@
 import '../../../utils/package_utility.dart';
 
-class PurchasePay  {
+class PurchasePay {
   final int trnsTypeCode;
   final int trnsSerial;
   final DateTime? reqDate;
@@ -19,7 +19,7 @@ class PurchasePay  {
   final String? trnsFlag;
   final int? trnsStatus;
 
-  PurchasePay ({
+  PurchasePay({
     required this.trnsTypeCode,
     required this.trnsSerial,
     required this.reqDate,
@@ -41,22 +41,26 @@ class PurchasePay  {
 
   factory PurchasePay.fromJson(Map<String, dynamic> json) {
     return PurchasePay(
-      trnsTypeCode: json['trns_type_code'] ,
-      trnsSerial: json['trns_serial'] ,
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
-      insertUser: json['insert_user'] ,
-      insertDate: json['insert_date'] != null ? DateTime.parse(json['insert_date']) : null,
-      descA: json['desc_a'] ,
-      descE: json['desc_e'] ,
-      storeName: json['store_name'] ,
-      fileSerial: json['file_serial'] ,
-      prevSer: json['prev_ser'] ,
-      usersCode: json['users_code'] ,
-      roleCode: json['role_code'] ,
-      authPk1: json['auth_pk1'] ,
-      authPk2: json['auth_pk2'] ,
-      lastLevel: json['last_level'] ,
-      trnsFlag: json['trns_flag'] ,
+      trnsTypeCode: json['trns_type_code'],
+      trnsSerial: json['trns_serial'],
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      insertUser: json['insert_user'],
+      insertDate:
+          json['insert_date'] != null
+              ? DateTime.parse(json['insert_date'])
+              : null,
+      descA: json['desc_a'],
+      descE: json['desc_e'],
+      storeName: json['store_name'],
+      fileSerial: json['file_serial'],
+      prevSer: json['prev_ser'],
+      usersCode: json['users_code'],
+      roleCode: json['role_code'],
+      authPk1: json['auth_pk1'],
+      authPk2: json['auth_pk2'],
+      lastLevel: json['last_level'],
+      trnsFlag: json['trns_flag'],
       trnsStatus: json['trns_status'],
     );
   }
@@ -82,8 +86,8 @@ class PurchasePay  {
       'trns_status': trnsStatus,
     };
   }
+
   String get formattedReqDate {
     return formatDate(reqDate);
   }
 }
-

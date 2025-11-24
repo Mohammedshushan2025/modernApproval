@@ -3,21 +3,23 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ProfileService {
-  static const String _baseUrl = 'http://49.12.83.111:7001/ords/ascon_scai/hrapi';
+  static const String _baseUrl =
+      'http://49.12.83.111:7001/ords/ascon_scai/hrapi';
   static const Duration _timeout = Duration(seconds: 30);
-
 
   Future<Map<String, dynamic>?> getProfileData(int userCode) async {
     try {
       print('🔄 ProfileService: Fetching profile data for user $userCode');
 
-      final response = await http.get(
-        Uri.parse('$_baseUrl/emp_info/$userCode'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ).timeout(_timeout);
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/emp_info/$userCode'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(_timeout);
 
       print('📡 ProfileService: Response status ${response.statusCode}');
       print('📡 ProfileService: Response body ${response.body}');
@@ -41,24 +43,22 @@ class ProfileService {
     }
   }
 
-
   Future<bool> uploadProfileImage(int userCode, String base64Image) async {
     try {
       print('🔄 ProfileService: Uploading image for user $userCode');
 
-      final requestData = {
-        'emp_id': userCode,
-        'photo': base64Image,
-      };
+      final requestData = {'emp_id': userCode, 'photo': base64Image};
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl/emp_photo'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode(requestData),
-      ).timeout(_timeout);
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/emp_photo'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: json.encode(requestData),
+          )
+          .timeout(_timeout);
 
       print('📡 ProfileService: Upload response status ${response.statusCode}');
       print('📡 ProfileService: Upload response body ${response.body}');
@@ -67,7 +67,9 @@ class ProfileService {
         print('✅ ProfileService: Image uploaded successfully');
         return true;
       } else {
-        print('❌ ProfileService: Upload failed with status ${response.statusCode}');
+        print(
+          '❌ ProfileService: Upload failed with status ${response.statusCode}',
+        );
         return false;
       }
     } catch (e) {
@@ -75,7 +77,6 @@ class ProfileService {
       return false;
     }
   }
-
 
   String getProfileImageUrl(int userCode, {bool forceRefresh = false}) {
     String url = '$_baseUrl/emp_photo/$userCode';
@@ -85,20 +86,23 @@ class ProfileService {
     return url;
   }
 
-
   Future<bool> checkServiceConnection(int userCode) async {
     try {
       print('🔄 ProfileService: Testing connection...');
 
-      final response = await http.get(
-        Uri.parse('$_baseUrl/emp_info/$userCode'),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/emp_info/$userCode'),
+            headers: {'Content-Type': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 10));
 
       bool isConnected = response.statusCode == 200;
-      print(isConnected
-          ? '✅ ProfileService: Connection test successful'
-          : '❌ ProfileService: Connection test failed');
+      print(
+        isConnected
+            ? '✅ ProfileService: Connection test successful'
+            : '❌ ProfileService: Connection test failed',
+      );
 
       return isConnected;
     } catch (e) {

@@ -22,16 +22,18 @@ class PurchaseOrderDetailScreen extends StatefulWidget {
   final UserModel user;
   final PurchaseOrder request;
 
-  const PurchaseOrderDetailScreen({super.key,
-  required this.user,
-    required this.request,});
+  const PurchaseOrderDetailScreen({
+    super.key,
+    required this.user,
+    required this.request,
+  });
 
   @override
-  State<PurchaseOrderDetailScreen> createState() => _PurchaseOrderDetailScreenState();
+  State<PurchaseOrderDetailScreen> createState() =>
+      _PurchaseOrderDetailScreenState();
 }
 
 class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
-
   final ApiService _apiService = ApiService();
   late Future<Map<String, dynamic>> _detailsFuture;
 
@@ -101,32 +103,32 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           IconButton(
             icon: const Icon(Icons.print_outlined, color: Colors.white),
             onPressed:
-            _masterData != null && _detailData != null
-                ? () async {
-              try {
-                await _printDocument(l, isArabic,_masterData!);
-              } catch (e) {
-                print("--- ❌ PDF PRINTING FAILED ---");
-                print(e.toString());
-                if (mounted) {
-                  String errorMessage =
-                      "حدث خطأ أثناء تجهيز ملف الطباعة.";
-                  if (e.toString().toLowerCase().contains(
-                    "unable to load asset",
-                  )) {
-                    errorMessage =
-                    "خطأ: ملفات الخطوط أو الصور غير موجودة.";
-                  }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(errorMessage),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            }
-                : null,
+                _masterData != null && _detailData != null
+                    ? () async {
+                      try {
+                        await _printDocument(l, isArabic, _masterData!);
+                      } catch (e) {
+                        print("--- ❌ PDF PRINTING FAILED ---");
+                        print(e.toString());
+                        if (mounted) {
+                          String errorMessage =
+                              "حدث خطأ أثناء تجهيز ملف الطباعة.";
+                          if (e.toString().toLowerCase().contains(
+                            "unable to load asset",
+                          )) {
+                            errorMessage =
+                                "خطأ: ملفات الخطوط أو الصور غير موجودة.";
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMessage),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    }
+                    : null,
           ),
         ],
       ),
@@ -142,9 +144,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               if (snapshot.hasError) {
                 return ErrorDisplay(
                   errorMessageKey:
-                  snapshot.error.toString().contains('noInternet')
-                      ? 'noInternet'
-                      : 'serverError',
+                      snapshot.error.toString().contains('noInternet')
+                          ? 'noInternet'
+                          : 'serverError',
                   onRetry: _retryLoad,
                 );
               }
@@ -157,9 +159,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               }
 
               final masterData =
-              snapshot.data!['master'] as PurchaseOrderMaster;
+                  snapshot.data!['master'] as PurchaseOrderMaster;
               final detailData =
-              snapshot.data!['detail'] as List<PurchaseOrderDetail>;
+                  snapshot.data!['detail'] as List<PurchaseOrderDetail>;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -203,10 +205,10 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
   }
 
   Widget _buildCompactMasterSection(
-      AppLocalizations l,
-      PurchaseOrderMaster master,
-      bool isArabic,
-      ) {
+    AppLocalizations l,
+    PurchaseOrderMaster master,
+    bool isArabic,
+  ) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -310,9 +312,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                       ),
                     ),
                     onPressed:
-                    _isSubmitting
-                        ? null
-                        : () => _showActionDialog(context, l),
+                        _isSubmitting
+                            ? null
+                            : () => _showActionDialog(context, l),
                   ),
                 ),
               ),
@@ -358,10 +360,10 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
   }
 
   Widget _buildModernDetailTable(
-      AppLocalizations l,
-      List<PurchaseOrderDetail> details,
-      bool isArabic,
-      ) {
+    AppLocalizations l,
+    List<PurchaseOrderDetail> details,
+    bool isArabic,
+  ) {
     final columns = [
       l.translate("serial_number"),
       l.translate('item_name'),
@@ -403,16 +405,16 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               dataRowMaxHeight: 80,
               columnSpacing: 30,
               columns:
-              columns
-                  .map(
-                    (title) => DataColumn(
-                  label: Text(
-                    title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              )
-                  .toList(),
+                  columns
+                      .map(
+                        (title) => DataColumn(
+                          label: Text(
+                            title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      )
+                      .toList(),
               rows: List<DataRow>.generate(details.length, (index) {
                 final item = details[index];
                 final color = index.isEven ? Colors.white : Colors.grey.shade50;
@@ -530,11 +532,11 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                             ),
                             onPressed:
                                 () => _showApproveConfirmation(
-                              dialogContext,
-                              notesController.text,
-                              setDialogState,
-                              isDialogLoading,
-                            ),
+                                  dialogContext,
+                                  notesController.text,
+                                  setDialogState,
+                                  isDialogLoading,
+                                ),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -573,11 +575,11 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                             ),
                             onPressed:
                                 () => _showRejectConfirmation(
-                              dialogContext,
-                              notesController.text,
-                              setDialogState,
-                              isDialogLoading,
-                            ),
+                                  dialogContext,
+                                  notesController.text,
+                                  setDialogState,
+                                  isDialogLoading,
+                                ),
                           ),
                         ),
                       ],
@@ -587,9 +589,9 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               actions: [
                 TextButton(
                   onPressed:
-                  isDialogLoading
-                      ? null
-                      : () => Navigator.pop(dialogContext),
+                      isDialogLoading
+                          ? null
+                          : () => Navigator.pop(dialogContext),
                   child: Text(l.translate('cancel')),
                 ),
               ],
@@ -601,11 +603,11 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
   }
 
   void _showApproveConfirmation(
-      BuildContext dialogContext,
-      String notes,
-      StateSetter setDialogState,
-      bool isDialogLoading,
-      ) {
+    BuildContext dialogContext,
+    String notes,
+    StateSetter setDialogState,
+    bool isDialogLoading,
+  ) {
     final l = AppLocalizations.of(context)!;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
@@ -613,130 +615,130 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       context: dialogContext,
       builder:
           (confirmContext) => Directionality(
-        textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-        // Fixed
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          icon: Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.green.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.check_circle, color: Colors.green, size: 32),
-          ),
-          title: Text(
-            l.translate('confirmApproval'),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade800,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l.translate('approveConfirmationMessage'),
+            textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+            // Fixed
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              icon: Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.check_circle, color: Colors.green, size: 32),
+              ),
+              title: Text(
+                l.translate('confirmApproval'),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade800,
+                ),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14),
               ),
-              if (notes.isNotEmpty) ...[
-                SizedBox(height: 12),
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l.translate('approveConfirmationMessage'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${l.translate('notes')}:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.grey.shade700,
-                        ),
+                  if (notes.isNotEmpty) ...[
+                    SizedBox(height: 12),
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
-                      SizedBox(height: 4),
-                      Text(notes, style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-              ],
-            ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${l.translate('notes')}:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(notes, style: TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actionsAlignment: MainAxisAlignment.start,
+              actions:
+                  isArabic
+                      ? [
+                        // Arabic: Confirm button first (right side)
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(confirmContext);
+                            setDialogState(() => isDialogLoading = true);
+                            _submitApproval(dialogContext, notes, 1);
+                          },
+                          child: Text(l.translate('confirmApprove')),
+                        ),
+                        // Arabic: Cancel button second (left side)
+                        TextButton(
+                          onPressed: () => Navigator.pop(confirmContext),
+                          child: Text(
+                            l.translate('cancel'),
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ),
+                      ]
+                      : [
+                        // English: Confirm button first (left side)
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(confirmContext);
+                            setDialogState(() => isDialogLoading = true);
+                            _submitApproval(dialogContext, notes, 1);
+                          },
+                          child: Text(l.translate('confirmApprove')),
+                        ),
+                        // English: Cancel button second (right side)
+                        TextButton(
+                          onPressed: () => Navigator.pop(confirmContext),
+                          child: Text(
+                            l.translate('cancel'),
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ),
+                      ],
+            ),
           ),
-          actionsAlignment: MainAxisAlignment.start,
-          actions:
-          isArabic
-              ? [
-            // Arabic: Confirm button first (right side)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(confirmContext);
-                setDialogState(() => isDialogLoading = true);
-                _submitApproval(dialogContext, notes, 1);
-              },
-              child: Text(l.translate('confirmApprove')),
-            ),
-            // Arabic: Cancel button second (left side)
-            TextButton(
-              onPressed: () => Navigator.pop(confirmContext),
-              child: Text(
-                l.translate('cancel'),
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ),
-          ]
-              : [
-            // English: Confirm button first (left side)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(confirmContext);
-                setDialogState(() => isDialogLoading = true);
-                _submitApproval(dialogContext, notes, 1);
-              },
-              child: Text(l.translate('confirmApprove')),
-            ),
-            // English: Cancel button second (right side)
-            TextButton(
-              onPressed: () => Navigator.pop(confirmContext),
-              child: Text(
-                l.translate('cancel'),
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   void _showRejectConfirmation(
-      BuildContext dialogContext,
-      String notes,
-      StateSetter setDialogState,
-      bool isDialogLoading,
-      ) {
+    BuildContext dialogContext,
+    String notes,
+    StateSetter setDialogState,
+    bool isDialogLoading,
+  ) {
     final l = AppLocalizations.of(context)!;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
@@ -744,129 +746,129 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       context: dialogContext,
       builder:
           (confirmContext) => Directionality(
-        textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-        // Fixed
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          icon: Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.red.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.warning, color: Colors.red, size: 32),
-          ),
-          title: Text(
-            l.translate('confirmRejection'),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.red.shade800,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l.translate('rejectConfirmationMessage'),
+            textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+            // Fixed
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              icon: Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.warning, color: Colors.red, size: 32),
+              ),
+              title: Text(
+                l.translate('confirmRejection'),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade800,
+                ),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14),
               ),
-              if (notes.isNotEmpty) ...[
-                SizedBox(height: 12),
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l.translate('rejectConfirmationMessage'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${l.translate('notes')}:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.grey.shade700,
-                        ),
+                  if (notes.isNotEmpty) ...[
+                    SizedBox(height: 12),
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
-                      SizedBox(height: 4),
-                      Text(notes, style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-              ],
-            ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${l.translate('notes')}:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(notes, style: TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actionsAlignment: MainAxisAlignment.start,
+              actions:
+                  isArabic
+                      ? [
+                        // Arabic: Confirm button first (right side)
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(confirmContext);
+                            setDialogState(() => isDialogLoading = true);
+                            _submitApproval(dialogContext, notes, -1);
+                          },
+                          child: Text(l.translate('confirmReject')),
+                        ),
+                        // Arabic: Cancel button second (left side)
+                        TextButton(
+                          onPressed: () => Navigator.pop(confirmContext),
+                          child: Text(
+                            l.translate('cancel'),
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ),
+                      ]
+                      : [
+                        // English: Confirm button first (left side)
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(confirmContext);
+                            setDialogState(() => isDialogLoading = true);
+                            _submitApproval(dialogContext, notes, -1);
+                          },
+                          child: Text(l.translate('confirmReject')),
+                        ),
+                        // English: Cancel button second (right side)
+                        TextButton(
+                          onPressed: () => Navigator.pop(confirmContext),
+                          child: Text(
+                            l.translate('cancel'),
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ),
+                      ],
+            ),
           ),
-          actionsAlignment: MainAxisAlignment.start,
-          actions:
-          isArabic
-              ? [
-            // Arabic: Confirm button first (right side)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(confirmContext);
-                setDialogState(() => isDialogLoading = true);
-                _submitApproval(dialogContext, notes, -1);
-              },
-              child: Text(l.translate('confirmReject')),
-            ),
-            // Arabic: Cancel button second (left side)
-            TextButton(
-              onPressed: () => Navigator.pop(confirmContext),
-              child: Text(
-                l.translate('cancel'),
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ),
-          ]
-              : [
-            // English: Confirm button first (left side)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(confirmContext);
-                setDialogState(() => isDialogLoading = true);
-                _submitApproval(dialogContext, notes, -1);
-              },
-              child: Text(l.translate('confirmReject')),
-            ),
-            // English: Cancel button second (right side)
-            TextButton(
-              onPressed: () => Navigator.pop(confirmContext),
-              child: Text(
-                l.translate('cancel'),
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   Future<void> _submitApproval(
-      BuildContext dialogContext,
-      String notes,
-      int actualStatus,
-      ) async {
+    BuildContext dialogContext,
+    String notes,
+    int actualStatus,
+  ) async {
     if (widget.request.prevSer == null || widget.request.lastLevel == null) {
       print(
         "❌ CRITICAL ERROR: Missing 'prev_ser' or 'last_level' in the initial PurchaseRequest object.",
@@ -899,7 +901,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         authPk1: authPk1,
         authPk2: authPk2,
         actualStatus: actualStatus,
-        approvalType: "pur_order"
+        approvalType: "pur_order",
       );
 
       final int trnsStatus = s1.trnsStatus;
@@ -921,7 +923,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           userId: userId,
           authPk1: authPk1,
           authPk2: authPk2,
-            approvalType: "pur_order"
+          approvalType: "pur_order",
         );
       } else {
         print("--- ⏩ Skipping Stage 3 (Condition Not Met) ---");
@@ -1009,22 +1011,26 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       context: context,
       builder:
           (ctx) => AlertDialog(
-        title: Text(l.translate('submissionError')),
-        content: Text(userMessage),
-        actions: [
-          TextButton(
-            child: Text(l.translate('ok')),
-            onPressed: () => Navigator.pop(ctx),
+            title: Text(l.translate('submissionError')),
+            content: Text(userMessage),
+            actions: [
+              TextButton(
+                child: Text(l.translate('ok')),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   // ========================================================
   // 🎯 دالة الطباعة - بيانات ثابتة زي الصورة الثانية
   // ========================================================
-  Future<void> _printDocument(AppLocalizations l, bool isArabic,PurchaseOrderMaster purchaseOrderMaster ) async {
+  Future<void> _printDocument(
+    AppLocalizations l,
+    bool isArabic,
+    PurchaseOrderMaster purchaseOrderMaster,
+  ) async {
     try {
       final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
       final ttf = pw.Font.ttf(fontData);
@@ -1049,46 +1055,47 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         "م",
         "ملاحظات",
         "ملاحظات الاصناف",
-
       ];
+
       ///Master items data
       int rowNumberMaster = 0;
-      final dataTopTable = _detailData!.map((item) {
-        rowNumberMaster++;
-        return [
-          rowNumberMaster.toString(),
-          item.itemCode?.toString() ?? '',
-          isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-          item.unitName??'',
-          item.quantity?.toString() ?? '0',
-          item.vnPriceCurr?.toString() ?? '',
-          item.total?.toString() ?? '',
-          item.reqTrnsTypeCode?.toString() ?? '',
-          item.reqTrnsSerial?.toString() ?? '',
-          item.servicesDesc ?? '',
-          item.notes ?? '',
+      final dataTopTable =
+          _detailData!.map((item) {
+            rowNumberMaster++;
+            return [
+              rowNumberMaster.toString(),
+              item.itemCode?.toString() ?? '',
+              isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+              item.unitName ?? '',
+              item.quantity?.toString() ?? '0',
+              item.vnPriceCurr?.toString() ?? '',
+              item.total?.toString() ?? '',
+              item.reqTrnsTypeCode?.toString() ?? '',
+              item.reqTrnsSerial?.toString() ?? '',
+              item.servicesDesc ?? '',
+              item.notes ?? '',
 
-          //todo removing last pur for now till it come back from end point
-          // item.last_pur?.toString() ?? '0',
-        ];
-      }).toList();
+              //todo removing last pur for now till it come back from end point
+              // item.last_pur?.toString() ?? '0',
+            ];
+          }).toList();
 
       ///table items data
       int rowNumber = 0;
       final data =
-      _detailData!.map((item) {
-        rowNumber++;
-        return [
-          rowNumber.toString(),
-          isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
-          item.itemCode?.toString() ?? '',
-          item.quantity?.toString() ?? '0',
-          item.unitName ?? '',
-          '0',
-          //todo removing last pur for now till it come back from end point
-          // item.last_pur?.toString() ?? '0',
-        ];
-      }).toList();
+          _detailData!.map((item) {
+            rowNumber++;
+            return [
+              rowNumber.toString(),
+              isArabic ? (item.itemNameA ?? '') : (item.itemNameE ?? ''),
+              item.itemCode?.toString() ?? '',
+              item.quantity?.toString() ?? '0',
+              item.unitName ?? '',
+              '0',
+              //todo removing last pur for now till it come back from end point
+              // item.last_pur?.toString() ?? '0',
+            ];
+          }).toList();
 
       final pdf = pw.Document();
       pdf.addPage(
@@ -1099,14 +1106,19 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           theme: pw.ThemeData.withFont(base: ttf, bold: ttf, italic: ttf),
           build:
               (context) => [
-            _buildFixedPdfHeader(ttf, logoImage,purchaseOrderMaster,_detailData!.first),
-            pw.SizedBox(height: 10),
-            _buildPdfTable(headers, dataTopTable, ttf),
-            pw.SizedBox(height: 10),
-                _buildPdfTotalTable(_masterData!,_detailData!),
+                _buildFixedPdfHeader(
+                  ttf,
+                  logoImage,
+                  purchaseOrderMaster,
+                  _detailData!.first,
+                ),
                 pw.SizedBox(height: 10),
-            _buildFixedPdfFooter(ttf),
-          ],
+                _buildPdfTable(headers, dataTopTable, ttf),
+                pw.SizedBox(height: 10),
+                _buildPdfTotalTable(_masterData!, _detailData!),
+                pw.SizedBox(height: 10),
+                _buildFixedPdfFooter(ttf),
+              ],
         ),
       );
 
@@ -1119,7 +1131,12 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
     }
   }
 
-  pw.Widget _buildFixedPdfHeader(pw.Font ttf, pw.MemoryImage? logo,PurchaseOrderMaster purchaseOrderMaster,PurchaseOrderDetail purchaseOrderDetail) {
+  pw.Widget _buildFixedPdfHeader(
+    pw.Font ttf,
+    pw.MemoryImage? logo,
+    PurchaseOrderMaster purchaseOrderMaster,
+    PurchaseOrderDetail purchaseOrderDetail,
+  ) {
     ///current date time
     DateTime now = DateTime.now();
     String formattedTime = DateFormat('hh:mm:a').format(now);
@@ -1132,25 +1149,20 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-
             if (logo != null)
-              pw.Column(children: [
-                pw.Image(logo, width: 60, height: 60)
-                ,
-              ])
+              pw.Column(children: [pw.Image(logo, width: 60, height: 60)])
             else
               pw.SizedBox(width: 60, height: 60),
             pw.Text(
-                  "امر توريد\n مسلسل",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 16,
-                    lineSpacing: 0,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blue900
-                  ),
-                ),
-
+              "امر توريد\n مسلسل",
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 16,
+                lineSpacing: 0,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.blue900,
+              ),
+            ),
 
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -1169,12 +1181,10 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                 ),
               ],
             ),
-
           ],
         ),
         pw.SizedBox(height: 5),
-        pw.Row
-          (
+        pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text(
@@ -1182,39 +1192,44 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               style: pw.TextStyle(font: ttf, fontSize: 12),
               textDirection: pw.TextDirection.ltr,
             ),
-            pw.Column(children: [pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.end,
+            pw.Column(
               children: [
-                pw.Text(
-                  "${purchaseOrderMaster.trnsSerial}",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 10,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  children: [
+                    pw.Text(
+                      "${purchaseOrderMaster.trnsSerial}",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.SizedBox(width: 5),
+                    pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
+                    pw.SizedBox(width: 5),
+                    pw.Text(
+                      "${purchaseOrderMaster.trnsTypeCode}",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                pw.SizedBox(width: 5),
-                pw.Text("|", style: pw.TextStyle(font: ttf, fontSize: 10)),
-                pw.SizedBox(width: 5),
                 pw.Text(
-                  "${purchaseOrderMaster.trnsTypeCode}",
-                  style: pw.TextStyle(
-                    font: ttf,
-                    fontSize: 10,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+                  "${purchaseOrderMaster.descA}",
+                  style: pw.TextStyle(font: ttf, fontSize: 10),
                 ),
               ],
             ),
-            pw.Text("${purchaseOrderMaster.descA}",style: pw.TextStyle(font: ttf,fontSize: 10))])
-            ,
             pw.Text(""),
             pw.SizedBox(width: 15),
-
-
           ],
         ),
         pw.SizedBox(height: 5),
+
         ///Date
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -1230,11 +1245,11 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               ),
             ),
             pw.Text(""),
-
           ],
         ),
 
         pw.SizedBox(height: 1),
+
         ///supplier name and code
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -1258,16 +1273,19 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                 fontWeight: pw.FontWeight.bold,
               ),
             ),
-
           ],
         ),
 
         pw.SizedBox(height: 1),
+
         ///company name  , currency , closed or not
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.start,
           children: [
-            pw.Text("اسم الشركة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
+            pw.Text(
+              "اسم الشركة : ",
+              style: pw.TextStyle(font: ttf, fontSize: 9),
+            ),
             pw.SizedBox(width: 20),
             pw.Text(
               "${purchaseOrderMaster.respName}",
@@ -1292,15 +1310,13 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
             pw.Text("الحالة : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
             pw.SizedBox(width: 20),
             pw.Text(
-              "${purchaseOrderMaster.closed==1?"مغلق":"مفتوح"}",
+              "${purchaseOrderMaster.closed == 1 ? "مغلق" : "مفتوح"}",
               style: pw.TextStyle(
                 font: ttf,
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
               ),
             ),
-
-
           ],
         ),
 
@@ -1309,23 +1325,20 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           mainAxisAlignment: pw.MainAxisAlignment.start,
           children: [
             pw.Text("البيان : ", style: pw.TextStyle(font: ttf, fontSize: 9)),
-
           ],
         ),
-
       ],
     );
   }
 
   pw.Widget _buildPdfTable(
-      List<String> headers,
-      List<List<String>> data,
-      pw.Font ttf,
-      )
-  {
+    List<String> headers,
+    List<List<String>> data,
+    pw.Font ttf,
+  ) {
     return pw.TableHelper.fromTextArray(
       headers: headers.reversed.toList(),
-      data: data.map((row)=>row.reversed.toList()).toList(),
+      data: data.map((row) => row.reversed.toList()).toList(),
       border: pw.TableBorder.all(color: PdfColors.black, width: 1),
       headerStyle: pw.TextStyle(
         fontWeight: pw.FontWeight.bold,
@@ -1361,17 +1374,24 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         10: const pw.FlexColumnWidth(0.8),
       },
       oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
-
     );
   }
-  pw.Widget _buildPdfTotalTable(PurchaseOrderMaster purchaseOrderMaster,List<PurchaseOrderDetail> listPurchaseOrderDetail){
-    double grandTotalBeforeCalc = listPurchaseOrderDetail.fold(0.0, (sum, item) => sum + item.total!); // الاجمالي قبل الحسابات
-    num taxSal=purchaseOrderMaster.taxSal??0;
-    num taxProf=purchaseOrderMaster.taxProft??0;
-    num otherExp=purchaseOrderMaster.totExp??0;
-    num discVal=purchaseOrderMaster.discVal??0;
-    num finalTotalCost =( grandTotalBeforeCalc+taxSal)-taxProf-otherExp-discVal;
-    String finalTotalCostArabic =Tafqeet.convert('${finalTotalCost.toInt()}');
+
+  pw.Widget _buildPdfTotalTable(
+    PurchaseOrderMaster purchaseOrderMaster,
+    List<PurchaseOrderDetail> listPurchaseOrderDetail,
+  ) {
+    double grandTotalBeforeCalc = listPurchaseOrderDetail.fold(
+      0.0,
+      (sum, item) => sum + item.total!,
+    ); // الاجمالي قبل الحسابات
+    num taxSal = purchaseOrderMaster.taxSal ?? 0;
+    num taxProf = purchaseOrderMaster.taxProft ?? 0;
+    num otherExp = purchaseOrderMaster.totExp ?? 0;
+    num discVal = purchaseOrderMaster.discVal ?? 0;
+    num finalTotalCost =
+        (grandTotalBeforeCalc + taxSal) - taxProf - otherExp - discVal;
+    String finalTotalCostArabic = Tafqeet.convert('${finalTotalCost.toInt()}');
 
     return pw.Column(
       children: [
@@ -1460,26 +1480,26 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
         pw.Container(
           width: double.infinity, // This will make it full width
           padding: const pw.EdgeInsets.all(8),
-          decoration: pw.BoxDecoration(
-            border: pw.TableBorder.all(),
-          ),
+          decoration: pw.BoxDecoration(border: pw.TableBorder.all()),
           child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-            pw.Text(' اجمالي المبلغ      فقط('),
-            pw.Text('${finalTotalCostArabic}'),
-            pw.Text('('),
-                pw.SizedBox(width: 1)
-          ]),
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(' اجمالي المبلغ      فقط('),
+              pw.Text('${finalTotalCostArabic}'),
+              pw.Text('('),
+              pw.SizedBox(width: 1),
+            ],
+          ),
         ),
       ],
     );
   }
+
   pw.Widget _buildFixedPdfFooter(pw.Font ttf) {
-    String currentDateTime = DateFormat('yyyy-MM-dd hh:mm:ss a', 'ar')
-        .format(DateTime.now())
-        .replaceAll('AM', 'ص')
-        .replaceAll('PM', 'م');
+    String currentDateTime = DateFormat(
+      'yyyy-MM-dd hh:mm:ss a',
+      'ar',
+    ).format(DateTime.now()).replaceAll('AM', 'ص').replaceAll('PM', 'م');
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
 
@@ -1549,7 +1569,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                 ),
                 pw.SizedBox(height: 18),
                 pw.Text(
-                  "${widget.user.empName??'____________'}",
+                  "${widget.user.empName ?? '____________'}",
                   style: pw.TextStyle(
                     font: ttf,
                     fontSize: 9,
