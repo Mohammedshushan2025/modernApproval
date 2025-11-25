@@ -9,11 +9,8 @@ import 'package:modernapproval/models/approvals/inventory_issue/inventory_issue_
 import 'package:modernapproval/models/approvals/inventory_issue/inventory_issue_model/inventory_issue.dart';
 import 'package:modernapproval/models/approvals/leave_and_absence/leave_absence_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/details_item.dart';
-import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/production_inbound_details_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/master_item.dart';
-import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/production_inbound_master_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
-import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/production_inbound_model.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_det_model.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_mast_model.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
@@ -369,6 +366,7 @@ class ApiService {
       case "inv_issue":
         url = Uri.parse(
           '$_baseUrl/UPDATE_ST_ADJUST_TRNS_OUT_STATUS',
+        ).replace(queryParameters: queryParams);
       case "lev_abs":
         url = Uri.parse(
           '$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS',
@@ -1191,7 +1189,8 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-/// Leave and Absence
+
+  /// Leave and Absence
   Future<List<LeaveAndAbsence>> getLeaveAndAbsence({
     required int userId,
     required int roleId,
@@ -1232,6 +1231,7 @@ class ApiService {
       throw Exception('serverError');
     }
   }
+
   /// Inventory Issue
 
   Future<List<InventoryIssue>> getInventoryIssue({
