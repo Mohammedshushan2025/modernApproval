@@ -300,7 +300,7 @@
   "transaction_info": "Transaction Info",
   "inventoryIssueApproval": "InventoryIssueApproval",
   "inventoryIssueDetails": "Inventory Issue Details",
-  "productionInboundApproval": "ProductionInboundApproval"
+  "productionInboundApproval": "ProductionInboundApproval",
   "leaveAndAbsenceApproval": "Leave And Absence Approval",
   "request_details": "Request Details",
   "request_info": "Approval Info",

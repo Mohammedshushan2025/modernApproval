@@ -301,7 +301,7 @@
   "transaction_info": "بيانات الحركة",
   "inventoryIssueDetails": "تفاصيل صادر انتاج",
   "inventoryIssueApproval": "اعتماد صادر مخازن",
-  "productionInboundApproval": "اعتماد وارد انتاج"
+  "productionInboundApproval": "اعتماد وارد انتاج",
   "leaveAndAbsenceApproval": "اعتماد الاجازات و الانقطاعات",
   "request_details": "تفاصيل الطلب",
   "request_info": "تفاصيل الموافقة",
