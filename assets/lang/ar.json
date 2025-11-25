@@ -260,6 +260,7 @@
   "item_number": "رقم الصنف",
   "serial_number": "الرقم",
   "filter_by_store_name": "التصفية حسب اسم المخزن",
+  "filter_by_vacation_type_name": "التصفية حسب نوع الاجازة",
   "clearFilters": "مسح التصفية",
   "resultsFound": "يوجد {{resultLength}} نتائج متاحة",
   "confirmApproval": "تأكيد الموافقة",
@@ -272,13 +273,13 @@
   "rejectedRequests": "الطلبات المرفوضة",
   "all_stores": "جميع المخازن",
   "select_store": "اختر المخزن",
-  "purchaseOrderApproval":"اعتماد امر التوريد",
+  "purchaseOrderApproval": "اعتماد امر التوريد",
   "orderDetails": "تفاصيل الطلب",
   "SalesOrderApproval": "اعتماد امر البيع",
   "salesDetails": "تفاصيل البيع",
   "order_date": "تاريخ الطلب",
   "login_failed_network": "فشل تسجيل الدخول. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
-  "purchasePayDetails":"تفاصيل صرف النقدية",
+  "purchasePayDetails": "تفاصيل صرف النقدية",
   "PurchasePayApproval": "اعتماد صرف النقدية",
   "productionOutboundApproval": "اعتماد صادر انتاج",
   "unit_cost": "سعر الوحدة",
@@ -294,11 +295,9 @@
   "payment_method": "طريقة السداد",
   "due_date": "تاريخ الاستحقاق",
   "currency": "العملة",
-  "payment_state":"حالة الدفع",
+  "payment_state": "حالة الدفع",
   "supplier_info": "بيانات المورد",
   "payment_info": "بيانات النقدية",
-  "transaction_info": "بيانات الحركة"
-
-
-
+  "transaction_info": "بيانات الحركة",
+  "leaveAndAbsenceApproval": "اعتماد الاجازات و الانقطاعات"
 }

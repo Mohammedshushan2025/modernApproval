@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
+import 'package:modernapproval/screens/approvals/leave_and_absence_approval/leave_and_absence_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/production_inbound_approval/production_inbound_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_approval_screen.dart';
@@ -60,6 +61,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetPurchasePayCount();
               _fetchAndSetProductionOutboundCount();
               _fetchAndSetProductionInboundCount();
+              _fetchAndSetLeaveAndAbsenceCount();
             });
           }
         })
@@ -77,6 +79,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     await _fetchAndSetPurchasePayCount();
     await _fetchAndSetProductionOutboundCount();
     await _fetchAndSetProductionInboundCount();
+    await _fetchAndSetLeaveAndAbsenceCount();
   }
 
   Future<void> _fetchAndSetPurchaseRequestCount() async {
@@ -241,6 +244,33 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     }
   }
 
+  Future<void> _fetchAndSetLeaveAndAbsenceCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getLeaveAndAbsence(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[109] = requests.length;
+    } catch (e) {
+      print("Error fetching Leave and Absence count: $e");
+      _approvalCounts[109] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
   Future<List<FormReportItem>> _fetchAndProcessApprovals() async {
     final items = await _apiService.getFormsAndReports(widget.user.usersCode);
     final approvals = items.where((item) => item.type == 'F').toList();
@@ -352,6 +382,22 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
         if (mounted) {
           _refreshCounts();
         }
+      case 109:
+        log("entering Leave and Absence approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => LeaveAndAbsenceApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
       case 111:
         log("entering Purchase pay approval");
         await Navigator.push(
@@ -434,6 +480,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                         item.pageId == 108 ||
                         item.pageId == 111 ||
                         item.pageId == 105 ||
+                        item.pageId == 109 ||
                         item.pageId == 106) &&
                     _isCountLoading,
               );
@@ -570,6 +617,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetPurchasePayCount();
               _fetchAndSetProductionOutboundCount();
               _fetchAndSetProductionInboundCount();
+              _fetchAndSetLeaveAndAbsenceCount();
             });
           },
           offset: const Offset(0, 48),
