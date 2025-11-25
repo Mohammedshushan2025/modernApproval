@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/approvals/leave_and_absence/leave_absence_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/details_item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/production_inbound_details_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_master_model/master_item.dart';
@@ -328,8 +329,7 @@ class ApiService {
     required String authPk2,
     required int actualStatus,
     required String approvalType,
-  }) async
-  {
+  }) async {
     final queryParams = {
       'user_id': userId.toString(),
       'role_code': roleCode.toString(),
@@ -399,8 +399,7 @@ class ApiService {
     required String authPk1,
     required String authPk2,
     required String approvalType,
-  }) async
-  {
+  }) async {
     Uri url;
     switch (approvalType) {
       case "pur_request":
@@ -1163,6 +1162,48 @@ class ApiService {
       throw Exception('noInternet');
     } catch (e) {
       print('An unexpected error occurred at production inbound detail: $e');
+      throw Exception('serverError');
+    }
+  }
+
+  /// Leave and Absence
+  Future<List<LeaveAndAbsence>> getLeaveAndAbsence({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_PY_VCNC_TRNS_AUTH',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Leave and Absence Requests from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        return items.map((item) => LeaveAndAbsence.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at Leave and Absence: $e');
       throw Exception('serverError');
     }
   }
