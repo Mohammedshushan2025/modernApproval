@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modernapproval/models/approvals/leave_and_absence/leave_absence_model.dart';
+import 'package:modernapproval/widgets/leave_and_absence/vacation_details_bottom_sheet.dart';
 import '../../../app_localizations.dart';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
@@ -511,7 +512,19 @@ class _LeaveAndAbsenceApprovalScreenState
             //   print("✅ Navigated back from Details, refreshing list...");
             //   _fetchData();
             // }
-            await _showMyBottomSheet(context);
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder:
+                  (_) => VacationDetailsBottomSheet(
+                    request: request,
+                    user: widget.user,
+                    apiService: _apiService,
+                  ),
+            );
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -625,18 +638,6 @@ class _LeaveAndAbsenceApprovalScreenState
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _showMyBottomSheet(BuildContext context) async {
-    await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200, // Example height
-          child: Center(child: Text('This is a bottom sheet!')),
-        );
-      },
     );
   }
 }

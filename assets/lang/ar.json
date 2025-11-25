@@ -299,5 +299,13 @@
   "supplier_info": "بيانات المورد",
   "payment_info": "بيانات النقدية",
   "transaction_info": "بيانات الحركة",
-  "leaveAndAbsenceApproval": "اعتماد الاجازات و الانقطاعات"
+  "leaveAndAbsenceApproval": "اعتماد الاجازات و الانقطاعات",
+  "request_details": "تفاصيل الطلب",
+  "request_info": "تفاصيل الموافقة",
+  "emp_name": "اسم الموظق",
+  "emp_code": "كود الموظف",
+  "desc_vacation": "وصف الاجازة",
+  "from": "من",
+  "to": "الي",
+  "trnsDate": "تاريخ الحركة"
 }
