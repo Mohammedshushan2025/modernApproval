@@ -496,22 +496,6 @@ class _LeaveAndAbsenceApprovalScreenState
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            //todo open bottom sheet instead
-            // final result = await Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder:
-            //         (context) => ProductionInboundDetailScreen(
-            //       user: widget.user,
-            //       request: request,
-            //     ),
-            //   ),
-            // );
-            //
-            // if (result == true) {
-            //   print("✅ Navigated back from Details, refreshing list...");
-            //   _fetchData();
-            // }
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -551,11 +535,7 @@ class _LeaveAndAbsenceApprovalScreenState
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.store_outlined,
-                            size: 15,
-                            color: cardColor,
-                          ),
+                          Icon(Icons.person, size: 15, color: cardColor),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(

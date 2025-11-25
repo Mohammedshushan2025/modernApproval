@@ -61,7 +61,7 @@ class _VacationDetailsBottomSheetState
               Expanded(
                 child: ListView(
                   controller: controller,
-                  children: [_buildDetailsCard(), const SizedBox(height: 16)],
+                  children: [_buildCompactMasterSection1()],
                 ),
               ),
               SizedBox(
@@ -98,74 +98,35 @@ class _VacationDetailsBottomSheetState
     );
   }
 
-  Widget _buildDetailsCard() {
-    final l = AppLocalizations.of(context)!;
-    bool isArabic = l.locale == "ar";
-    return Card(
-      elevation: 0,
-      color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.grey.shade200),
+  Widget _buildCompactInfoRow(IconData icon, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200, width: 0.5),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment:
-              isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            Text(
-              l.translate("request_info"),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Divider(color: Colors.black54),
-            _buildDetailRow(
-              l.translate("emp_name"),
-              isArabic
-                  ? widget.request.empName ?? ''
-                  : widget.request.empNameE ?? '',
-            ),
-            _buildDetailRow(
-              l.translate("emp_code"),
-              widget.request.empCode?.toString() ?? '',
-            ),
-            _buildDetailRow(
-              l.translate("vacation_type"),
-              widget.request.vcncDescA ?? '',
-            ),
-            widget.request.trnsAddress == null
-                ? SizedBox()
-                : _buildDetailRow(
-                  l.translate("desc_vacation"),
-                  widget.request.trnsAddress!,
-                ),
-            _buildDetailRow(
-              l.translate("period"),
-              widget.request.period.toString(),
-            ),
-            _buildDetailRow(
-              l.translate("from"),
-              widget.request.formattedStartDate,
-            ),
-            _buildDetailRow(l.translate("to"), widget.request.formattedEndDate),
-            _buildDetailRow(
-              l.translate("trnsDate"),
-              "${widget.request.formattedTrnsDate} ",
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text(value),
+          Icon(icon, color: const Color(0xFF6C63FF).withOpacity(0.7), size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                children: [
+                  TextSpan(
+                    text: '$title: ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -322,6 +283,130 @@ class _VacationDetailsBottomSheetState
           },
         );
       },
+    );
+  }
+
+  Widget _buildCompactMasterSection1() {
+    final l = AppLocalizations.of(context)!;
+    bool isArabic = l.locale == Locale('ar') ? true : false;
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [Colors.white, const Color(0xFF6C63FF).withOpacity(0.03)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6C63FF).withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.info_outline,
+                      color: Color(0xFF6C63FF),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    l.translate("request_info"),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A1F36),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 16, thickness: 1),
+              _buildCompactInfoRow(
+                Icons.person,
+                l.translate('emp_name'),
+                isArabic
+                    ? widget.request.empName ?? ''
+                    : widget.request.empNameE ?? '',
+              ),
+              const SizedBox(height: 8),
+
+              _buildCompactInfoRow(
+                Icons.qr_code_outlined,
+                l.translate('emp_code'),
+                widget.request.empCode?.toString() ?? '',
+              ),
+              const SizedBox(height: 8),
+              _buildCompactInfoRow(
+                Icons.calendar_month,
+                l.translate('trnsDate'),
+                "${widget.request.formattedTrnsDate} ",
+              ),
+              const SizedBox(height: 8),
+              _buildCompactInfoRow(
+                Icons.description,
+                l.translate('vacation_type'),
+                widget.request.vcncDescA ?? '',
+              ),
+              const SizedBox(height: 8),
+              widget.request.trnsAddress == null
+                  ? SizedBox()
+                  : _buildCompactInfoRow(
+                    Icons.description,
+                    l.translate('desc_vacation'),
+                    widget.request.trnsAddress!,
+                  ),
+              const SizedBox(height: 8),
+
+              _buildCompactInfoRow(
+                Icons.calendar_today,
+                l.translate('period'),
+                widget.request.period.toString(),
+              ),
+
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: Container(
+                      height: 55,
+                      child: _buildCompactInfoRow(
+                        Icons.calendar_month,
+                        l.translate('from'),
+                        widget.request.formattedStartDate,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Flexible(
+                    flex: 1,
+                    child: Container(
+                      height: 55,
+                      child: _buildCompactInfoRow(
+                        Icons.calendar_month,
+                        l.translate('to'),
+                        "${widget.request.formattedTrnsDate} ",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
