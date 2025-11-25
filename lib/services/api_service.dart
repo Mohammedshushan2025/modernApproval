@@ -363,6 +363,10 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS',
         ).replace(queryParameters: queryParams);
+      case "lev_abs":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS',
+        ).replace(queryParameters: queryParams);
       default:
         //todo update this later on
         url = Uri.parse(
@@ -414,6 +418,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_OUT');
       case "pro_in":
         url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_IN');
+      case "lev_abs":
+        url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_UPDATE_VCNC_TRNS');
       default:
         //todo update this later on
         url = Uri.parse('$_baseUrl/check_last_level_update');
@@ -458,6 +464,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       case "pro_in":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
+      case "lev_abs":
+        url = Uri.parse('$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS');
       default:
         //todo update this later on
         url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
@@ -497,6 +505,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       case "pro_in":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
+      case "lev_abs":
+        url = Uri.parse('$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS');
       default:
         //todo update this later on
         url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');
@@ -536,6 +546,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       case "pro_in":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
+      case "lev_abs":
+        url = Uri.parse('$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS');
       default:
         //todo update this later on
         url = Uri.parse('$_baseUrl/UPDATE_PUR_REQUEST_STATUS');

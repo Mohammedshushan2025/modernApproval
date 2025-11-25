@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:modernapproval/services/api_service.dart';
 import '../../app_localizations.dart';
 import '../../models/approvals/leave_and_absence/leave_absence_model.dart';
 import '../../models/user_model.dart';
@@ -7,7 +8,7 @@ import 'package:modernapproval/models/approval_status_response_model.dart'; // <
 class VacationDetailsBottomSheet extends StatefulWidget {
   final LeaveAndAbsence request;
   final UserModel user;
-  final apiService;
+  final ApiService apiService;
 
   const VacationDetailsBottomSheet({
     super.key,
@@ -23,26 +24,11 @@ class VacationDetailsBottomSheet extends StatefulWidget {
 
 class _VacationDetailsBottomSheetState
     extends State<VacationDetailsBottomSheet> {
-  String _getVacationTypeName(BuildContext context, int? type) {
-    switch (type) {
-      case 1:
-        return widget.request.trnsAddress.toString();
-      case 12:
-        return widget.request.trnsAddress.toString();
-      case 2:
-        return widget.request.trnsAddress.toString();
-      default:
-        return widget.request.trnsAddress.toString();
-    }
-  }
-
   bool _isSubmitting = false;
 
   @override
   Widget build(BuildContext context) {
-    // final l10n = AppLocalizations.of(context)!;
     final l = AppLocalizations.of(context)!;
-    final vacationType = _getVacationTypeName(context, widget.request.trnsType);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -53,7 +39,7 @@ class _VacationDetailsBottomSheetState
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Color(0xFF6C63FF).withOpacity(0.1),
+            color: Color(0xFF6C63FF).withValues(alpha: 0.1),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -115,10 +101,9 @@ class _VacationDetailsBottomSheetState
   Widget _buildDetailsCard() {
     final l = AppLocalizations.of(context)!;
     bool isArabic = l.locale == "ar";
-    // final locale = Provider.of<LocaleProvider>(context, listen: false).locale.toLanguageTag();
     return Card(
       elevation: 0,
-      color: const Color(0xFF6C63FF).withOpacity(0.3),
+      color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(color: Colors.grey.shade200),
@@ -129,7 +114,6 @@ class _VacationDetailsBottomSheetState
           crossAxisAlignment:
               isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            //todo translate this to request info
             Text(
               l.translate("request_info"),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -164,28 +148,15 @@ class _VacationDetailsBottomSheetState
               widget.request.formattedStartDate,
             ),
             _buildDetailRow(l.translate("to"), widget.request.formattedEndDate),
-            _buildDetailRow("trnsDate", "${widget.request.formattedTrnsDate} "),
+            _buildDetailRow(
+              l.translate("trnsDate"),
+              "${widget.request.formattedTrnsDate} ",
+            ),
           ],
         ),
       ),
     );
   }
-
-  // Widget _buildApprovalsSection(HrProvider hrProvider) {
-  //   final l10n = AppLocalizations.of(context)!;
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(l10n.approvals, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-  //       const SizedBox(height: 8),
-  //       hrProvider.isLoading
-  //           ? const Center(child: SpinKitFadingCircle(color: AppColors.primaryColor, size: 30))
-  //           : hrProvider.myVacationAuthDetails?.items.isEmpty ?? true
-  //           ? Center(child: Text(l10n.noRegisteredApprovals))
-  //           : AuthTimeline(authItems: hrProvider.myVacationAuthDetails!.items),
-  //     ],
-  //   );
-  // }
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
@@ -343,10 +314,7 @@ class _VacationDetailsBottomSheetState
               ),
               actions: [
                 TextButton(
-                  onPressed:
-                      isDialogLoading
-                          ? null
-                          : () => Navigator.pop(dialogContext),
+                  onPressed: () => Navigator.pop(dialogContext),
                   child: Text(l.translate('cancel')),
                 ),
               ],
@@ -450,7 +418,11 @@ class _VacationDetailsBottomSheetState
                         ),
                         // Arabic: Cancel button second (left side)
                         TextButton(
-                          onPressed: () => Navigator.pop(confirmContext),
+                          onPressed:
+                              () =>
+                                  isDialogLoading
+                                      ? null
+                                      : Navigator.pop(confirmContext),
                           child: Text(
                             l.translate('cancel'),
                             style: TextStyle(color: Colors.grey.shade600),
@@ -476,7 +448,11 @@ class _VacationDetailsBottomSheetState
                         ),
                         // English: Cancel button second (right side)
                         TextButton(
-                          onPressed: () => Navigator.pop(confirmContext),
+                          onPressed:
+                              () =>
+                                  isDialogLoading
+                                      ? null
+                                      : Navigator.pop(confirmContext),
                           child: Text(
                             l.translate('cancel'),
                             style: TextStyle(color: Colors.grey.shade600),
@@ -581,7 +557,11 @@ class _VacationDetailsBottomSheetState
                         ),
                         // Arabic: Cancel button second (left side)
                         TextButton(
-                          onPressed: () => Navigator.pop(confirmContext),
+                          onPressed:
+                              () =>
+                                  isDialogLoading
+                                      ? null
+                                      : Navigator.pop(confirmContext),
                           child: Text(
                             l.translate('cancel'),
                             style: TextStyle(color: Colors.grey.shade600),
@@ -607,7 +587,11 @@ class _VacationDetailsBottomSheetState
                         ),
                         // English: Cancel button second (right side)
                         TextButton(
-                          onPressed: () => Navigator.pop(confirmContext),
+                          onPressed:
+                              () =>
+                                  isDialogLoading
+                                      ? null
+                                      : Navigator.pop(confirmContext),
                           child: Text(
                             l.translate('cancel'),
                             style: TextStyle(color: Colors.grey.shade600),
