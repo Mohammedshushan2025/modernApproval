@@ -605,7 +605,7 @@ class _ApprovedRequestsScreenState extends State<ApprovedRequestsScreen> {
                 ),
                 const SizedBox(width: 10),
                 Icon(
-                   Icons.chevron_right,
+                  Icons.chevron_right,
                   size: 25,
                   color: Colors.grey.shade500,
                 ),

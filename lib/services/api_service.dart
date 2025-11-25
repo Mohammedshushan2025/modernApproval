@@ -4,6 +4,9 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:modernapproval/models/approval_status_response_model.dart'; // <-- إضافة
+import 'package:modernapproval/models/approvals/inventory_issue/inventory_issue_details_model/inventory_issue_details_item.dart';
+import 'package:modernapproval/models/approvals/inventory_issue/inventory_issue_master_model/inventory_issue_master_item.dart';
+import 'package:modernapproval/models/approvals/inventory_issue/inventory_issue_model/inventory_issue.dart';
 import 'package:modernapproval/models/approvals/leave_and_absence/leave_absence_model.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/details_item.dart';
 import 'package:modernapproval/models/approvals/production_inbound/production_inbound_details_model/production_inbound_details_model.dart';
@@ -363,6 +366,9 @@ class ApiService {
         url = Uri.parse(
           '$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS',
         ).replace(queryParameters: queryParams);
+      case "inv_issue":
+        url = Uri.parse(
+          '$_baseUrl/UPDATE_ST_ADJUST_TRNS_OUT_STATUS',
       case "lev_abs":
         url = Uri.parse(
           '$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS',
@@ -418,6 +424,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_OUT');
       case "pro_in":
         url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_PD_TRNS_IN');
+      case "inv_issue":
+        url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_ST_ADJUST_TRNS_OUT');
       case "lev_abs":
         url = Uri.parse('$_baseUrl/CHECK_LAST_LEVEL_UPDATE_VCNC_TRNS');
       default:
@@ -464,6 +472,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       case "pro_in":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
+      case "inv_issue":
+        url = Uri.parse('$_baseUrl/UPDATE_ST_ADJUST_TRNS_OUT_STATUS');
       case "lev_abs":
         url = Uri.parse('$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS');
       default:
@@ -505,6 +515,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       case "pro_in":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
+      case "inv_issue":
+        url = Uri.parse('$_baseUrl/UPDATE_ST_ADJUST_TRNS_OUT_STATUS');
       case "lev_abs":
         url = Uri.parse('$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS');
       default:
@@ -546,6 +558,8 @@ class ApiService {
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_OUT_STATUS');
       case "pro_in":
         url = Uri.parse('$_baseUrl/UPDATE_ST_PD_TRNS_IN_STATUS');
+      case "inv_issue":
+        url = Uri.parse('$_baseUrl/UPDATE_ST_ADJUST_TRNS_OUT_STATUS');
       case "lev_abs":
         url = Uri.parse('$_baseUrl/UPDATE_PY_VCNC_TRNS_STATUS');
       default:
@@ -1177,8 +1191,7 @@ class ApiService {
       throw Exception('serverError');
     }
   }
-
-  /// Leave and Absence
+/// Leave and Absence
   Future<List<LeaveAndAbsence>> getLeaveAndAbsence({
     required int userId,
     required int roleId,
@@ -1216,6 +1229,125 @@ class ApiService {
       throw Exception('noInternet');
     } catch (e) {
       print('An unexpected error occurred at Leave and Absence: $e');
+      throw Exception('serverError');
+    }
+  }
+  /// Inventory Issue
+
+  Future<List<InventoryIssue>> getInventoryIssue({
+    required int userId,
+    required int roleId,
+    required int passwordNumber,
+  }) async {
+    final queryParams = {
+      'user_id': userId.toString(),
+      'password_number': passwordNumber.toString(),
+      'role_id': roleId.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_ADJUST_TRNS_OUT_AUTH',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Inventory issue Requests from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          log("list is empty");
+          return [];
+        }
+        return items.map((item) => InventoryIssue.fromJson(item)).toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at Inventory issue: $e');
+      throw Exception('serverError');
+    }
+  }
+
+  Future<InventoryIssueMasterItem> getInventoryIssueMaster({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_ADJUST_TRNS_OUT_MAST',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Inventory issue master from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        log("status code = 200");
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        if (items.isEmpty) {
+          throw Exception('noData');
+        }
+        log(items.toString());
+        return InventoryIssueMasterItem.fromJson(items.first);
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred get Inventory issue master: $e');
+      throw Exception('serverError');
+    }
+  }
+
+  Future<List<InventoryIssueDetailsItem>> getInventoryIssueDetail({
+    required int trnsTypeCode,
+    required int trnsSerial,
+  }) async {
+    final queryParams = {
+      'trns_type_code': trnsTypeCode.toString(),
+      'trns_serial': trnsSerial.toString(),
+    };
+    final url = Uri.parse(
+      '$_baseUrl/GET_ST_ADJUST_TRNS_OUT_DET',
+    ).replace(queryParameters: queryParams);
+    print('Fetching Inventory issue details from: $url');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> items = data['items'];
+        log(items.toString());
+        if (items.isEmpty) return [];
+        return items
+            .map((item) => InventoryIssueDetailsItem.fromJson(item))
+            .toList();
+      } else {
+        print('Server Error: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('serverError');
+      }
+    } on SocketException {
+      print('Network Error: No internet connection.');
+      throw Exception('noInternet');
+    } on TimeoutException {
+      print('Network Error: Request timed out.');
+      throw Exception('noInternet');
+    } catch (e) {
+      print('An unexpected error occurred at Inventory issue detail: $e');
       throw Exception('serverError');
     }
   }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
+import 'package:modernapproval/screens/approvals/inventory_issue_approval/inventory_issue_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/leave_and_absence_approval/leave_and_absence_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/production_inbound_approval/production_inbound_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_approval_screen.dart';
@@ -61,6 +62,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetPurchasePayCount();
               _fetchAndSetProductionOutboundCount();
               _fetchAndSetProductionInboundCount();
+              _fetchAndSetInventoryIssueCount();
               _fetchAndSetLeaveAndAbsenceCount();
             });
           }
@@ -79,6 +81,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     await _fetchAndSetPurchasePayCount();
     await _fetchAndSetProductionOutboundCount();
     await _fetchAndSetProductionInboundCount();
+    await _fetchAndSetInventoryIssueCount();
     await _fetchAndSetLeaveAndAbsenceCount();
   }
 
@@ -244,7 +247,35 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     }
   }
 
+  Future<void> _fetchAndSetInventoryIssueCount() async {
+
+  if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+final requests = await _apiService.getInventoryIssue(  userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      
+      );
+            _approvalCounts[104] = requests.length;
+    } catch (e) {
+      print("Error fetching Inventory issue count: $e");
+      _approvalCounts[104] = 0;
+ } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
   Future<void> _fetchAndSetLeaveAndAbsenceCount() async {
+
     if (_selectedPasswordGroup == null) return;
     if (!mounted) return;
 
@@ -270,6 +301,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
       }
     }
   }
+
 
   Future<List<FormReportItem>> _fetchAndProcessApprovals() async {
     final items = await _apiService.getFormsAndReports(widget.user.usersCode);
@@ -357,6 +389,22 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           MaterialPageRoute(
             builder:
                 (context) => ProductionInboundApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 104:
+        log("entering Inventory issue approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => InventoryIssueApprovalScreen(
                   user: widget.user,
                   selectedPasswordNumber:
                       _selectedPasswordGroup!.passwordNumber,
@@ -480,8 +528,9 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                         item.pageId == 108 ||
                         item.pageId == 111 ||
                         item.pageId == 105 ||
-                        item.pageId == 109 ||
-                        item.pageId == 106) &&
+                        item.pageId == 106 ||
+                     item.pageId == 109 ||
+                        item.pageId == 104) &&
                     _isCountLoading,
               );
             },
@@ -617,6 +666,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               _fetchAndSetPurchasePayCount();
               _fetchAndSetProductionOutboundCount();
               _fetchAndSetProductionInboundCount();
+              _fetchAndSetInventoryIssueCount();
               _fetchAndSetLeaveAndAbsenceCount();
             });
           },

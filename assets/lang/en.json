@@ -298,6 +298,9 @@
   "supplier_info": "Supplier Info",
   "payment_info": "Payment Info",
   "transaction_info": "Transaction Info",
+  "inventoryIssueApproval": "InventoryIssueApproval",
+  "inventoryIssueDetails": "Inventory Issue Details",
+  "productionInboundApproval": "ProductionInboundApproval"
   "leaveAndAbsenceApproval": "Leave And Absence Approval",
   "request_details": "Request Details",
   "request_info": "Approval Info",

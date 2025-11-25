@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:modernapproval/models/approvals/production_inbound/production_inbound_model/item.dart';
+import 'package:modernapproval/models/approvals/inventory_issue/inventory_issue_model/inventory_issue.dart';
 import 'package:modernapproval/models/approvals/production_outbound/production_outbound_model.dart';
-import 'package:modernapproval/screens/approvals/production_inbound_approval/production_inbound_detail_screen.dart';
+import 'package:modernapproval/screens/approvals/inventory_issue_approval/inventory_issue_detail_screen.dart';
 import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_detail_screen.dart';
 import '../../../app_localizations.dart';
 import '../../../models/user_model.dart';
@@ -10,29 +10,29 @@ import '../../../services/api_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/error_display.dart';
 
-class ProductionInboundApprovalScreen extends StatefulWidget {
+class InventoryIssueApprovalScreen extends StatefulWidget {
   final UserModel user;
   final int selectedPasswordNumber;
 
-  const ProductionInboundApprovalScreen({
+  const InventoryIssueApprovalScreen({
     super.key,
     required this.user,
     required this.selectedPasswordNumber,
   });
 
   @override
-  State<ProductionInboundApprovalScreen> createState() =>
-      _ProductionInboundApprovalScreenState();
+  State<InventoryIssueApprovalScreen> createState() =>
+      _InventoryIssueApprovalScreenState();
 }
 
-class _ProductionInboundApprovalScreenState
-    extends State<ProductionInboundApprovalScreen> {
+class _InventoryIssueApprovalScreenState
+    extends State<InventoryIssueApprovalScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<Item>> _requestsFuture;
+  late Future<List<InventoryIssue>> _requestsFuture;
 
   String _storeNameFilter = '';
   DateTime? _selectedDate;
-  List<Item> _filteredRequests = [];
+  List<InventoryIssue> _filteredRequests = [];
   bool _showFilters = false;
   List<String> _availableStoreNames = [];
 
@@ -54,7 +54,7 @@ class _ProductionInboundApprovalScreenState
 
   void _fetchData() {
     setState(() {
-      _requestsFuture = _apiService.getProductionInbound(
+      _requestsFuture = _apiService.getInventoryIssue(
         userId: widget.user.usersCode,
         roleId: widget.user.roleCode!,
         passwordNumber: widget.selectedPasswordNumber,
@@ -62,7 +62,7 @@ class _ProductionInboundApprovalScreenState
     });
   }
 
-  void _extractStoreNames(List<Item> requests) {
+  void _extractStoreNames(List<InventoryIssue> requests) {
     final storeNames =
         requests
             .map((request) => request.storeName ?? '')
@@ -74,7 +74,7 @@ class _ProductionInboundApprovalScreenState
     _availableStoreNames = [''] + storeNames;
   }
 
-  void _applyFilters(List<Item> allRequests) {
+  void _applyFilters(List<InventoryIssue> allRequests) {
     setState(() {
       _filteredRequests =
           allRequests.where((request) {
@@ -283,7 +283,7 @@ class _ProductionInboundApprovalScreenState
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        title: l.translate('productionInboundApproval'),
+        title: l.translate('inventoryIssueApproval'),
         filterWidget: _buildFilterWidget(),
       ),
       backgroundColor: const Color(0xFFF5F7FA),
@@ -294,7 +294,7 @@ class _ProductionInboundApprovalScreenState
 
           // List content
           Expanded(
-            child: FutureBuilder<List<Item>>(
+            child: FutureBuilder<List<InventoryIssue>>(
               future: _requestsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -438,7 +438,7 @@ class _ProductionInboundApprovalScreenState
                           ),
                           itemCount: displayRequests.length,
                           itemBuilder: (context, index) {
-                            return _buildProductionOutboundCard(
+                            return _buildInventoryIssueCard(
                               context,
                               displayRequests[index],
                               index,
@@ -457,7 +457,7 @@ class _ProductionInboundApprovalScreenState
                   ),
                   itemCount: displayRequests.length,
                   itemBuilder: (context, index) {
-                    return _buildProductionOutboundCard(
+                    return _buildInventoryIssueCard(
                       context,
                       displayRequests[index],
                       index,
@@ -472,9 +472,9 @@ class _ProductionInboundApprovalScreenState
     );
   }
 
-  Widget _buildProductionOutboundCard(
+  Widget _buildInventoryIssueCard(
     BuildContext context,
-    Item request,
+    InventoryIssue request,
     int index,
   ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -502,7 +502,7 @@ class _ProductionInboundApprovalScreenState
               context,
               MaterialPageRoute(
                 builder:
-                    (context) => ProductionInboundDetailScreen(
+                    (context) => InventoryIssueDetailScreen(
                       user: widget.user,
                       request: request,
                     ),
@@ -616,7 +616,7 @@ class _ProductionInboundApprovalScreenState
                 ),
                 const SizedBox(width: 10),
                 Icon(
-                  isArabic ? Icons.chevron_left : Icons.chevron_right,
+                  Icons.chevron_right,
                   size: 25,
                   color: Colors.grey.shade500,
                 ),
