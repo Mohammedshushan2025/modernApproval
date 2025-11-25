@@ -283,7 +283,7 @@ class _ProductionInboundApprovalScreenState
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        title: l.translate('productionOutboundApproval'),
+        title: l.translate('productionInboundApproval'),
         filterWidget: _buildFilterWidget(),
       ),
       backgroundColor: const Color(0xFFF5F7FA),

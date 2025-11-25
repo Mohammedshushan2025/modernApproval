@@ -271,14 +271,14 @@
   "rejectedRequests": "Rejected Requests",
   "all_stores": "All Stores",
   "select_store": "Select Store",
-  "purchaseOrderApproval":"Purchase Order Approval",
+  "purchaseOrderApproval": "Purchase Order Approval",
   "orderDetails": "Order Details",
   "SalesOrderApproval": "Sale Order Approval",
   "salesDetails": "Sale Details",
   "order_date": "Order date",
   "login_failed_network": "Login Failed, Please Try again ",
   "PurchasePayApproval": "Purchase Pay Approval",
-  "purchasePayDetails":"Purchase Pay Details",
+  "purchasePayDetails": "Purchase Pay Details",
   "productionOutboundApproval": "Production Outbound Approval",
   "unit_cost": "Unit Cost",
   "store": "Store",
@@ -293,12 +293,11 @@
   "due_date": "Due Date",
   "total": "total",
   "currency": "Currency",
-  "payment_state":"Payment State",
+  "payment_state": "Payment State",
   "supplier_info": "Supplier Info",
   "payment_info": "Payment Info",
-  "transaction_info": "Transaction Info"
-
-
-
-
+  "transaction_info": "Transaction Info",
+  "inventoryIssueApproval": "InventoryIssueApproval",
+  "inventoryIssueDetails": "Inventory Issue Details",
+  "productionInboundApproval": "ProductionInboundApproval"
 }
