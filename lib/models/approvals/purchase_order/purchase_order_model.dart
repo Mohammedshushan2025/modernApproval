@@ -16,8 +16,8 @@ class PurchaseOrder {
   final String authPk1;
   final String authPk2;
   final int? lastLevel;
-  final String? trnsFlag;
-  final int? trnsStatus;
+  final dynamic trnsFlag;
+  final dynamic trnsStatus;
 
   PurchaseOrder({
     required this.trnsTypeCode,

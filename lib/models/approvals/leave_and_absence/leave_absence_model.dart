@@ -19,8 +19,8 @@ class LeaveAndAbsence {
   String? usersCode;
   String? authPk1;
   String? authPk2;
-  String? trnsFlag;
-  String? trnsStatus;
+  dynamic trnsFlag;
+  dynamic trnsStatus;
   DateTime? trnsDateAuth;
   int? lastLevel;
 
