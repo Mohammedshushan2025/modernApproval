@@ -715,8 +715,8 @@ class _VacationDetailsBottomSheetState
     final int roleCode = widget.user.roleCode!;
     final String authPk1 = widget.request.authPk1 ?? "";
     final String authPk2 = widget.request.authPk2 ?? "";
-    final int lastLevel = widget.request.lastLevel!;
-    final int prevSerOriginal = widget.request.prevSer!;
+    final int lastLevel = widget.request.lastLevel!.toInt();
+    final int prevSerOriginal = widget.request.prevSer!.toInt();
 
     try {
       print("--- 🚀 Starting Approval Process (Status: $actualStatus) ---");

@@ -1206,7 +1206,9 @@ class ApiService {
     ).replace(queryParameters: queryParams);
     print('Fetching Leave and Absence Requests from: $url');
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(url)
+          .timeout(const Duration(seconds: 120));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 

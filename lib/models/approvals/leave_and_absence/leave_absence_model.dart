@@ -1,28 +1,28 @@
 import '../../../utils/package_utility.dart';
 
 class LeaveAndAbsence {
-  int? empCode;
-  int? serialPyv;
+  num? empCode;
+  num? serialPyv;
   String? empName;
   String? empNameE;
-  int? compEmpCode;
+  num? compEmpCode;
   DateTime? trnsDate;
-  int? trnsType;
+  num? trnsType;
   String? vcncDescA;
   DateTime? startDt;
   DateTime? endDt;
-  int? period;
+  num? period;
   DateTime? returnDate;
   String? trnsAddress;
-  int? fileSerial;
-  int? prevSer;
+  num? fileSerial;
+  num? prevSer;
   String? usersCode;
   String? authPk1;
   String? authPk2;
   dynamic trnsFlag;
   dynamic trnsStatus;
   DateTime? trnsDateAuth;
-  int? lastLevel;
+  num? lastLevel;
 
   LeaveAndAbsence({
     this.empCode,
