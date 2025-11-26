@@ -1,10 +1,15 @@
 import 'package:geocoding/geocoding.dart';
 
 class LocationService {
-  Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
+  Future<String> getAddressFromCoordinates(
+    double latitude,
+    double longitude,
+  ) async {
     try {
-
-      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude,
+        longitude,
+      );
 
       if (placemarks.isNotEmpty) {
         final Placemark place = placemarks[0];
@@ -14,7 +19,6 @@ class LocationService {
         return "الموقع غير متوفر حالياً";
       }
     } catch (e) {
-
       return "لا يمكن تحديد الموقع";
     }
   }

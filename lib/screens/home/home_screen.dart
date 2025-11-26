@@ -1,11 +1,12 @@
-
 import 'package:hexcolor/hexcolor.dart';
 import 'package:modernapproval/models/dashboard_stats_model.dart';
 import 'package:modernapproval/models/form_report_model.dart';
 import 'package:modernapproval/screens/approvals/approvals_screen.dart';
+import 'package:modernapproval/screens/approved/approved_requests_screen.dart';
 import 'package:modernapproval/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:modernapproval/screens/rejected/rejected_requests_screen.dart';
 import 'package:modernapproval/screens/reports/reports_screen.dart';
 import 'package:modernapproval/services/api_service.dart';
 import '../../models/user_model.dart';
@@ -14,6 +15,7 @@ import '../../widgets/home_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
+
   const HomeScreen({super.key, required this.user});
 
   @override
@@ -36,13 +38,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _countsLoading = true;
   DashboardStats? _dashboardStats;
   bool _statsLoading = true;
+
   // ------------------------------------
 
   @override
   void initState() {
     super.initState();
     _setupAnimations();
-
 
     _loadData();
   }
@@ -53,84 +55,67 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
 
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     _animationController.forward();
   }
 
-
-  void _loadData() {
+  Future<void> _loadData() async {
     if (!mounted) return;
     setState(() {
       _countsLoading = true;
       _statsLoading = true;
     });
 
+    try {
+      // Wait for both API calls to complete
+      final items = await _apiService.getFormsAndReports(widget.user.usersCode);
+      final stats = await _apiService.getDashboardStats(widget.user.usersCode);
 
-    _formsReportsFuture = _apiService.getFormsAndReports(widget.user.usersCode);
-    _formsReportsFuture.then((items) {
       if (!mounted) return;
       setState(() {
         _approvalsCount = items.where((item) => item.type == 'F').length;
         _reportsCount = items.where((item) => item.type == 'R').length;
-        _countsLoading = false;
-      });
-    }).catchError((e) {
-      print("Error fetching forms/reports count: $e");
-      if (!mounted) return;
-      setState(() {
-        _countsLoading = false;
-
-        _approvalsCount = 0;
-        _reportsCount = 0;
-      });
-    });
-
-
-    _statsFuture = _apiService.getDashboardStats(widget.user.usersCode);
-    _statsFuture.then((stats) {
-      if (!mounted) return;
-      setState(() {
         _dashboardStats = stats;
+        _countsLoading = false;
         _statsLoading = false;
       });
-    }).catchError((e) {
-      print("Error fetching dashboard stats: $e");
+    } catch (e) {
+      print("Error refreshing data: $e");
       if (!mounted) return;
       setState(() {
-        _statsLoading = false; // نوقف التحميل
+        _countsLoading = false;
+        _statsLoading = false;
+        _approvalsCount = 0;
+        _reportsCount = 0;
         _dashboardStats = DashboardStats(countAuth: 0, countReject: 0);
       });
-    });
+    }
   }
-
 
   @override
   void dispose() {
@@ -139,22 +124,115 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      _countsLoading = true;
+      _statsLoading = true;
+    });
+
+    // Use Future.wait to wait for both API calls
+    await Future.wait([_formsReportsFuture, _statsFuture]);
+
+    // The existing .then() callbacks in _loadData will handle the state updates
+  }
+
   @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFC),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: CustomScrollView(
-          slivers: [
-            HomeAppBar(user: widget.user),
-            SliverToBoxAdapter(
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: _buildBody(isRtl),
+      ///uncomment this to make the logo fit more with the design
+      // backgroundColor: Color(0xFF6C63FF).withOpacity(1),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: Stack(
+          children: [
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: CustomScrollView(
+                slivers: [
+                  HomeAppBar(user: widget.user),
+                  SliverToBoxAdapter(
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _buildBody(isRtl),
+                    ),
+                  ),
+                ],
               ),
+            ),
+            // Floating logo card positioned between appbar and content
+            // Positioned(
+            //   top: 160, // Adjust this to position between appbar and content
+            //   left: 20,
+            //   right: 20,
+            //   child: _buildFloatingLogoCard(isRtl),
+            // ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //new body with floating card ->
+
+  Widget _buildFloatingLogoCard(bool isRtl) {
+    return Transform.translate(
+      offset: Offset(0, -25), // Adjust to fine-tune position
+      child: Container(
+        height: 90,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.90),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 25,
+              offset: Offset(0, 10),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: AssetImage("assets/images/lo.png"),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment:
+                  isRtl ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isRtl ? 'مرحباً بعودتك!' : 'Welcome Back!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF6C63FF),
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  isRtl
+                      ? 'استمر في إدارة طلباتك'
+                      : 'Continue managing your requests',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -165,597 +243,399 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildBody(bool isRtl) {
     final localizations = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
-    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
+    final horizontalPadding = screenWidth < 360 ? 16.0 : 20.0;
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFF8B5CF6).withOpacity(0.8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.topRight,
+          colors: [Color(0xFF6C63FF), const Color(0xFF8B5CF6)],
+          stops: const [0.0, 1.0],
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          // color: Colors.red,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(25),
+            topLeft: Radius.circular(25),
+          ),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: Column(
+          children: [
+            SizedBox(height: 16),
 
-    final horizontalPadding = isSmallScreen ? 12.0 : (isMediumScreen ? 16.0 : 20.0);
-    final verticalSpacing = isSmallScreen ? 14.0 : (isMediumScreen ? 18.0 : 22.0);
+            // Main Cards - All 4 buttons in single column
+            //with stats card and profile card
+            Column(
+              children: [
+                _buildMinimalCard(
+                  title: isRtl ? 'الموافقات' : 'Approvals',
+                  icon: Icons.approval_outlined,
+                  count: _countsLoading ? '...' : _approvalsCount.toString(),
+                  color: Color(0xFF00BFA6),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ApprovalsScreen(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildMinimalCard(
+                  title: isRtl ? 'التقارير' : 'Reports',
+                  icon: Icons.analytics_outlined,
+                  count: _countsLoading ? '...' : _reportsCount.toString(),
+                  color: Color(0xFFFF6B6B),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReportsScreen(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildMinimalCard(
+                  title: isRtl ? 'المعتمدة' : 'Approved',
+                  icon: Icons.check_circle_outline,
+                  showNotification: false,
+                  count:
+                      _statsLoading
+                          ? '...'
+                          : (_dashboardStats?.countAuth.toString() ?? '0'),
+                  color: Color(0xFF10B981),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                ApprovedRequestsScreen(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildMinimalCard(
+                  title: isRtl ? 'المرفوضة' : 'Rejected',
+                  icon: Icons.highlight_off,
+                  showNotification: false,
+                  count:
+                      _statsLoading
+                          ? '...'
+                          : (_dashboardStats?.countReject.toString() ?? '0'),
+                  color: Color(0xFFFF6B6B),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                RejectedRequestsScreen(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                _buildStatsCard(isRtl),
+                SizedBox(height: 12),
+                _buildProfileMinimalCard(isRtl, localizations),
+                SizedBox(height: 16), // Add bottom padding
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-          horizontalPadding,
-          verticalSpacing,
-          horizontalPadding,
-          verticalSpacing + 10
+  Widget _buildMinimalCard({
+    required String title,
+    required IconData icon,
+    required String count,
+    required Color color,
+    required VoidCallback onTap,
+    bool showNotification = true,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity, // Ensure full width
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon with notification badge
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                // Notification badge
+                if (count != '0' && count != '...')
+                  showNotification
+                      ? Positioned(
+                        top: -6,
+                        right: -6,
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(1),
+                            shape: BoxShape.circle,
+                            // border: Border.all(
+                            //   color: Colors.white.withOpacity(0.6),
+                            //   width: 2,
+                            // ),
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 20,
+                            minHeight: 20,
+                          ),
+                          child: Text(
+                            count,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                      : SizedBox(),
+              ],
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsCard(bool isRtl) {
+    final total =
+        _statsLoading
+            ? 1
+            : ((_dashboardStats?.countAuth ?? 0) +
+                (_dashboardStats?.countReject ?? 0));
+    final approvedCount = _statsLoading ? 0 : (_dashboardStats?.countAuth ?? 0);
+    final rejectedCount =
+        _statsLoading ? 0 : (_dashboardStats?.countReject ?? 0);
+    final approvedPercentage = total > 0 ? (approvedCount / total) : 0.0;
+    final rejectedPercentage = total > 0 ? (rejectedCount / total) : 0.0;
+    return Container(
+      width: double.infinity, // Ensure full width
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          _buildModernTopCards(isRtl, _approvalsCount, _reportsCount, _countsLoading),
-          SizedBox(height: verticalSpacing),
-          _buildModernProfileCard(
-            title: localizations.translate('profile') ?? (isRtl ? 'الملف الشخصي' : 'Profile'),
-            subtitle: isRtl ? 'إدارة حسابك الشخصي' : 'Manage your account',
-            isRtl: isRtl,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-
-                  builder: (context) => ProfileScreen(user: widget.user.usersCode),
-                ),
-              );
-            },
+          Text(
+            isRtl ? 'إحصائيات الطلبات' : 'Request Statistics',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
           ),
-          SizedBox(height: verticalSpacing),
-
-          _buildModernStats(isRtl, _dashboardStats, _statsLoading),
+          SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatProgress(
+                label: isRtl ? 'المعتمدة' : 'Approved',
+                value: approvedCount,
+                percentage: approvedPercentage,
+                color: Color(0xFF10B981),
+              ),
+              _buildStatProgress(
+                label: isRtl ? 'المرفوضة' : 'Rejected',
+                value: rejectedCount,
+                percentage: rejectedPercentage,
+                color: Color(0xFFFF6B6B),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-
-  Widget _buildModernTopCards(bool isRtl, int approvalsCount, int reportsCount, bool isLoading) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
-    final spacing = isSmallScreen ? 10.0 : 14.0;
-
-    return Row(
+  Widget _buildStatProgress({
+    required String label,
+    required int value,
+    required double percentage,
+    required Color color,
+  }) {
+    return Column(
       children: [
-        Expanded(
-          child: _buildGlassCard(
-            title: isRtl ? 'الموافقات' : 'Approvals',
-            subtitle: isRtl ? 'قيد الانتظار' : 'Waiting',
-            icon: Icons.assignment_turned_in_outlined,
-            // --- استخدام العدد الفعلي أو مؤشر تحميل ---
-            count: isLoading ? '...' : approvalsCount.toString(),
-            isRtl: isRtl,
-            primaryColor: const Color(0xFF00BFA6),
-            secondaryColor: const Color(0xFF00E5CC),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ApprovalsScreen(user: widget.user),
+        Stack(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+            ),
+            Container(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(
+                value: percentage,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+                strokeWidth: 6,
+              ),
+            ),
+            Positioned.fill(
+              child: Center(
+                child: Text(
+                  '${(percentage * 100).round()}%',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
-        SizedBox(width: spacing),
-        Expanded(
-          child: _buildGlassCard(
-            title: isRtl ? 'التقارير' : 'Reports',
-            subtitle: isRtl ? 'التحليلات' : 'Analytics',
-            icon: Icons.analytics_outlined,
-
-            count: isLoading ? '...' : reportsCount.toString(),
-            isRtl: isRtl,
-            primaryColor: const Color(0xFFFF6B6B),
-            secondaryColor: const Color(0xFFFF8787),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReportsScreen(user: widget.user),
-                ),
-              );
-            },
+        SizedBox(height: 8),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        Text(
+          value.toString(),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: color,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildGlassCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required String count,
-    required bool isRtl,
-    required Color primaryColor,
-    required Color secondaryColor,
-    required VoidCallback onTap,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 360;
-    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
-    final isShortScreen = screenHeight < 700;
-
-    final cardHeight = isShortScreen ? 100.0 : (isSmallScreen ? 108.0 : (isMediumScreen ? 120.0 : 135.0));
-    final iconSize = isShortScreen ? 20.0 : (isSmallScreen ? 22.0 : (isMediumScreen ? 24.0 : 26.0));
-    final padding = isShortScreen ? 8.0 : (isSmallScreen ? 10.0 : 14.0);
-
+  Widget _buildProfileMinimalCard(bool isRtl, AppLocalizations localizations) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(user: widget.user.usersCode),
+          ),
+        );
+      },
       child: Container(
-        height: cardHeight,
+        width: double.infinity, // Ensure full width
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withOpacity(0.95),
-              Colors.white.withOpacity(0.85),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.5),
-            width: 1.5,
-          ),
+          color: Color(0xFF6C63FF).withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Color(0xFF6C63FF).withOpacity(0.2)),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.15),
-              blurRadius: 20,
-              offset: Offset(0, 10),
-              spreadRadius: 0,
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: Offset(0, 4),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: Offset(0, 2),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -30,
-                right: -30,
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        primaryColor.withOpacity(0.2),
-                        primaryColor.withOpacity(0.0),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(padding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: isShortScreen ? 36 : (isSmallScreen ? 38 : 44),
-                          height: isShortScreen ? 36 : (isSmallScreen ? 38 : 44),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [primaryColor, secondaryColor],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryColor.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            icon,
-                            color: Colors.white,
-                            size: isShortScreen ? 20 : iconSize,
-                          ),
-                        ),
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _pulseAnimation.value,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: isShortScreen ? 8 : (isSmallScreen ? 10 : 12),
-                                  vertical: isShortScreen ? 4 : (isSmallScreen ? 5 : 6),
-                                ),
-                                decoration: BoxDecoration(
-                                  color: primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: primaryColor.withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  count,
-                                  style: TextStyle(
-                                    color: primaryColor,
-                                    fontSize: isSmallScreen ? 13 : 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: isShortScreen ? 3 : 6),
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              title,
-                              style: TextStyle(
-                                color: Color(0xFF1A1F36),
-                                fontSize: isShortScreen ? 13 : (isSmallScreen ? 14 : 17),
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          SizedBox(height: 1),
-                          Flexible(
-                            child: Text(
-                              subtitle,
-                              style: TextStyle(
-                                color: Color(0xFF8E95B2),
-                                fontSize: isShortScreen ? 8 : (isSmallScreen ? 9 : 11),
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-
-
-  Widget _buildModernProfileCard({
-    required String title,
-    required String subtitle,
-    required bool isRtl,
-    required VoidCallback onTap,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 360;
-    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
-    final isShortScreen = screenHeight < 700;
-
-    final cardHeight = isShortScreen ? 100.0 : (isSmallScreen ? 120.0 : (isMediumScreen ? 125.0 : 140.0));
-    final avatarSize = isShortScreen ? 38.0 : (isSmallScreen ? 42.0 : (isMediumScreen ? 42.0 : 48.0));
-    final padding = isShortScreen ? 12.0 : (isSmallScreen ? 16.0 : 22.0);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: cardHeight,
-        decoration: BoxDecoration(
-          color: HexColor('f1eefc'),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF667EEA).withOpacity(0.3),
-              blurRadius: 25,
-              offset: const Offset(0, 15),
-              spreadRadius: -5,
-            ),
-          ],
-        ),
-        child: Stack(
+        child: Row(
           children: [
-
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: Row(
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Color(0xFF6C63FF).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.person, color: Color(0xFF6C63FF), size: 20),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: avatarSize,
-                    height: avatarSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withOpacity(0.3),
-                          Colors.white.withOpacity(0.1),
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(3),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: Icon(
-                        Icons.person,
-                        color: const Color(0xFF667EEA),
-                        size: isShortScreen ? 18 : (isSmallScreen ? 22 : 30),
-                      ),
+                  Text(
+                    localizations.translate('profile') ??
+                        (isRtl ? 'الملف الشخصي' : 'Profile'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6C63FF),
                     ),
                   ),
-                  SizedBox(width: isShortScreen ? 8 : (isSmallScreen ? 12 : 18)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: isShortScreen ? 15 : (isSmallScreen ? 17 : 20),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                        SizedBox(height: isShortScreen ? 2 : 5),
-                        Flexible(
-                          child: Text(
-                            subtitle,
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(0.9),
-                              fontSize: isShortScreen ? 10 : (isSmallScreen ? 11 : 13),
-                              fontWeight: FontWeight.w500,
-                              height: 1.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(height: isShortScreen ? 3 : 10),
-                        Flexible(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isShortScreen ? 8 : 10,
-                              vertical: isShortScreen ? 4 : 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: HexColor('97989c'),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  isRtl ? 'فتح الملف' : 'Open Profile',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 6,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    isRtl
+                        ? 'إدارة إعدادات حسابك'
+                        : 'Manage your account settings',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6C63FF).withOpacity(0.7),
                     ),
                   ),
                 ],
               ),
             ),
+            Icon(Icons.arrow_forward_ios, color: Color(0xFF6C63FF), size: 16),
           ],
         ),
       ),
     );
   }
-
-
-  Widget _buildModernStats(bool isRtl, DashboardStats? stats, bool isLoading) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
-    final l = AppLocalizations.of(context)!;
-
-
-    String approvedValue = isLoading ? '...' : (stats?.countAuth.toString() ?? '0');
-    String rejectedValue = isLoading ? '...' : (stats?.countReject.toString() ?? '0');
-
-    double total = ((stats?.countAuth ?? 0) + (stats?.countReject ?? 0)).toDouble();
-    double approvedProgress = (isLoading || total == 0.0) ? 0.0 : (stats!.countAuth / total);
-    double rejectedProgress = (isLoading || total == 0.0) ? 0.0 : (stats!.countReject / total);
-
-
-    return Container(
-      padding: EdgeInsets.all(isSmallScreen ? 18 : 22),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0F2FF),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.bar_chart_rounded,
-                  color: Color(0xFF667EEA),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                isRtl ? 'إحصائيات' : "Stats",
-                style: TextStyle(
-                  color: const Color(0xFF1A1F36),
-                  fontSize: isSmallScreen ? 16 : 17,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.check_circle_outline,
-                  value: approvedValue,
-                  label: l.translate('approved'),
-                  color: const Color(0xFF10B981),
-                  progress: approvedProgress,
-                ),
-              ),
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.highlight_off,
-                  value: rejectedValue,
-                  label: l.translate('rejected'),
-                  color: const Color(0xFFFF6B6B),
-                  progress: rejectedProgress,
-                ),
-              ),
-
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-    required double progress,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
-
-    return Container(
-      padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-
-          value == '...'
-              ? const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-              : Icon(
-            icon,
-            color: color,
-            size: isSmallScreen ? 20 : 22,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: const Color(0xFF1A1F36),
-              fontSize: isSmallScreen ? 16 : 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: const Color(0xFF8E95B2),
-              fontSize: isSmallScreen ? 10 : 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            height: 4,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(2),
-            ),
-
-            child: value == '...'
-                ? const LinearProgressIndicator()
-                : FractionallySizedBox(
-              alignment: AlignmentDirectional.centerStart,
-              widthFactor: progress.isNaN ? 0.0 : progress,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
-

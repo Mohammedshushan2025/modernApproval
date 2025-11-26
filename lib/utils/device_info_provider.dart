@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -48,15 +47,12 @@ class DeviceInfoProvider {
     }
   }
 
-
   Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-
       return Future.error('Location services are disabled.');
     }
 
@@ -64,17 +60,15 @@ class DeviceInfoProvider {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-
         return Future.error('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-
       return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+        'Location permissions are permanently denied, we cannot request permissions.',
+      );
     }
-
 
     return await Geolocator.getCurrentPosition();
   }

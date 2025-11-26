@@ -27,7 +27,7 @@ class PurchaseRequest {
 
     this.prevSer,
     this.lastLevel,
-    this.store_name
+    this.store_name,
   });
 
   factory PurchaseRequest.fromJson(Map<String, dynamic> json) {
@@ -37,7 +37,8 @@ class PurchaseRequest {
       storeCode: json['store_code'],
       descA: json['desc_a'],
       descE: json['desc_e'],
-      reqDate: json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
+      reqDate:
+          json['req_date'] != null ? DateTime.parse(json['req_date']) : null,
       authPk1: json['auth_pk1'],
       authPk2: json['auth_pk2'],
 

@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_detail_screen.dart';
 import '../../../app_localizations.dart';
 import '../../../models/purchase_request_model.dart';
@@ -28,6 +28,12 @@ class _PurchaseRequestApprovalScreenState
   final ApiService _apiService = ApiService();
   late Future<List<PurchaseRequest>> _requestsFuture;
 
+  String _storeNameFilter = '';
+  DateTime? _selectedDate;
+  List<PurchaseRequest> _filteredRequests = [];
+  bool _showFilters = false;
+  List<String> _availableStoreNames = [];
+
   // ألوان واضحة وقوية
   final List<Color> _cardColors = [
     const Color(0xFF5B9BD5), // أزرق
@@ -54,106 +60,421 @@ class _PurchaseRequestApprovalScreenState
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void _extractStoreNames(List<PurchaseRequest> requests) {
+    final storeNames =
+        requests
+            .map((request) => request.store_name ?? '')
+            .where((storeName) => storeName.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+    _availableStoreNames = [''] + storeNames;
+  }
+
+  void _applyFilters(List<PurchaseRequest> allRequests) {
+    setState(() {
+      _filteredRequests =
+          allRequests.where((request) {
+            // If both filters are empty, show all
+            if (_storeNameFilter.isEmpty && _selectedDate == null) {
+              return true;
+            }
+
+            bool matchesStoreName = true;
+            bool matchesDate = true;
+
+            // Apply store name filter only if it's not empty
+            if (_storeNameFilter.isNotEmpty) {
+              matchesStoreName = (request.store_name ?? '') == _storeNameFilter;
+            }
+
+            // Apply date filter only if a date is selected
+            if (_selectedDate != null) {
+              matchesDate =
+                  request.reqDate != null &&
+                  _isSameDate(request.reqDate!, _selectedDate!);
+            }
+
+            return matchesStoreName && matchesDate;
+          }).toList();
+    });
+  }
+
+  bool _isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _storeNameFilter = '';
+      _selectedDate = null;
+      _showFilters = false;
+    });
+    _requestsFuture.then((data) => _applyFilters(data));
+  }
+
+  Widget _buildFilterWidget() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Filter toggle button
+        IconButton(
+          icon: Icon(
+            _showFilters ? Icons.filter_alt : Icons.filter_alt_outlined,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            setState(() {
+              _showFilters = !_showFilters;
+            });
+          },
+        ),
+
+        // Clear filters button (visible when filters are active)
+        if (_storeNameFilter.isNotEmpty || _selectedDate != null)
+          IconButton(
+            icon: Icon(Icons.clear, color: Colors.white),
+            onPressed: _clearFilters,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFilterSection() {
+    if (!_showFilters) return SizedBox.shrink();
     final l = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: CustomAppBar(title: l.translate('purchaseRequestApproval')),
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: FutureBuilder<List<PurchaseRequest>>(
-        future: _requestsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    color: const Color(0xFF7CB9E8),
-                    strokeWidth: 3,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l.translate('loading') ?? 'Loading...',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Store name filter - DropdownMenu
+          SizedBox(
+            height: 46,
+            child: InputDecorator(
+              decoration: InputDecoration(
+                labelText: l.translate('filter_by_store_name'),
+                prefixIcon: Icon(Icons.store, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(28)),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
-            );
-          }
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _storeNameFilter.isEmpty ? null : _storeNameFilter,
+                  isExpanded: true,
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.grey.shade600,
+                  ),
+                  hint: Text(
+                    l.translate('select_store'),
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  items:
+                      _availableStoreNames.map((String storeName) {
+                        return DropdownMenuItem<String>(
+                          value: storeName.isEmpty ? null : storeName,
+                          child: Text(
+                            storeName.isEmpty
+                                ? l.translate('all_stores')
+                                : storeName,
+                            style: TextStyle(
+                              color:
+                                  storeName.isEmpty
+                                      ? Colors.grey.shade500
+                                      : Colors.black87,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _storeNameFilter = newValue ?? '';
+                    });
+                    _requestsFuture.then((data) => _applyFilters(data));
+                  },
+                ),
+              ),
+            ),
+          ),
 
-          if (snapshot.hasError) {
-            return ErrorDisplay(
-              errorMessageKey: snapshot.error.toString().contains('noInternet')
-                  ? 'noInternet'
-                  : 'serverError',
-              onRetry: _fetchData,
-            );
-          }
+          SizedBox(height: 8),
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(24),
+          // Date filter
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => _showDatePicker(),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF7CB9E8).withOpacity(0.2),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          _selectedDate == null
+                              ? l.translate('filter_by_date')
+                              : DateFormat('yyyy-MM-dd').format(_selectedDate!),
+                          style: TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.inventory_2_outlined,
-                      size: 64,
-                      color: const Color(0xFF7CB9E8).withOpacity(0.7),
-                    ),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l.translate('noData'),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l.translate('noRequestsAvailable') ?? 'No requests available',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            );
-          }
-
-          final requests = snapshot.data!;
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            itemCount: requests.length,
-            itemBuilder: (context, index) {
-              return _buildPurchaseRequestCard(context, requests[index], index);
-            },
-          );
-        },
+              if (_selectedDate != null) ...[
+                SizedBox(width: 8),
+                IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      _selectedDate = null;
+                    });
+                    _requestsFuture.then((data) => _applyFilters(data));
+                  },
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildPurchaseRequestCard(BuildContext context, PurchaseRequest request, int index) {
+  void _showDatePicker() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      _requestsFuture.then((data) => _applyFilters(data));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: l.translate('purchaseRequestApproval'),
+        filterWidget: _buildFilterWidget(),
+      ),
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: Column(
+        children: [
+          // Filter section
+          _buildFilterSection(),
+
+          // List content
+          Expanded(
+            child: FutureBuilder<List<PurchaseRequest>>(
+              future: _requestsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: const Color(0xFF7CB9E8),
+                          strokeWidth: 3,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l.translate('loading') ?? 'Loading...',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return ErrorDisplay(
+                    errorMessageKey:
+                        snapshot.error.toString().contains('noInternet')
+                            ? 'noInternet'
+                            : 'serverError',
+                    onRetry: _fetchData,
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF7CB9E8).withOpacity(0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.inventory_2_outlined,
+                            size: 64,
+                            color: const Color(0xFF7CB9E8).withOpacity(0.7),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          l.translate('noData'),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l.translate('noRequestsAvailable') ??
+                              'No requests available',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final allRequests = snapshot.data!;
+
+                // Extract store names when data loads
+                if (_availableStoreNames.isEmpty) {
+                  _extractStoreNames(allRequests);
+                }
+
+                // Apply filters when data loads or when filtered list is empty
+                if (_filteredRequests.isEmpty &&
+                    _storeNameFilter.isEmpty &&
+                    _selectedDate == null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    setState(() {
+                      _filteredRequests = allRequests;
+                    });
+                  });
+                }
+                final displayRequests =
+                    _showFilters &&
+                            (_storeNameFilter.isNotEmpty ||
+                                _selectedDate != null)
+                        ? _filteredRequests
+                        : allRequests;
+
+                // Show filter results info
+                if (_showFilters &&
+                    (_storeNameFilter.isNotEmpty || _selectedDate != null)) {
+                  return Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        color: Colors.blue.shade50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              l.translate(
+                                'resultsFound',
+                                params: {
+                                  "resultLength": "${displayRequests.length}",
+                                },
+                              ),
+                              style: TextStyle(
+                                color: Colors.blue.shade800,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _clearFilters,
+                              child: Text(l.translate('clearFilters')),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          itemCount: displayRequests.length,
+                          itemBuilder: (context, index) {
+                            return _buildPurchaseRequestCard(
+                              context,
+                              displayRequests[index],
+                              index,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  itemCount: displayRequests.length,
+                  itemBuilder: (context, index) {
+                    return _buildPurchaseRequestCard(
+                      context,
+                      displayRequests[index],
+                      index,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPurchaseRequestCard(
+    BuildContext context,
+    PurchaseRequest request,
+    int index,
+  ) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final cardColor = _cardColors[index % _cardColors.length];
 
@@ -174,32 +495,28 @@ class _PurchaseRequestApprovalScreenState
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-
           onTap: () async {
-
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PurchaseRequestDetailScreen(
-                  user: widget.user,
-                  request: request,
-                ),
+                builder:
+                    (context) => PurchaseRequestDetailScreen(
+                      user: widget.user,
+                      request: request,
+                    ),
               ),
             );
-
 
             if (result == true) {
               print("✅ Navigated back from Details, refreshing list...");
               _fetchData();
             }
           },
-
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
-
                 Container(
                   width: 48,
                   height: 48,
@@ -214,12 +531,10 @@ class _PurchaseRequestApprovalScreenState
                   ),
                 ),
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       Row(
                         children: [
                           Icon(
@@ -243,9 +558,10 @@ class _PurchaseRequestApprovalScreenState
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // Description
                       Text(
-                        isArabic ? (request.descA ?? '') : (request.descE ?? ''),
+                        isArabic
+                            ? (request.descA ?? '')
+                            : (request.descE ?? ''),
                         style: TextStyle(
                           fontSize: 13.5,
                           color: Colors.black87,
@@ -256,7 +572,6 @@ class _PurchaseRequestApprovalScreenState
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
-                      // التاريخ مع الأيقونة
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -281,7 +596,7 @@ class _PurchaseRequestApprovalScreenState
                           Row(
                             children: [
                               Text(
-                                request.authPk1+" / "+request.authPk2,
+                                request.authPk1 + " / " + request.authPk2,
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 12.5,
@@ -289,18 +604,15 @@ class _PurchaseRequestApprovalScreenState
                                 ),
                               ),
                             ],
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 10),
-
                 Icon(
-                  isArabic
-                      ? Icons.chevron_left
-                      : Icons.chevron_right,
+                  Icons.chevron_right,
                   size: 25,
                   color: Colors.grey.shade500,
                 ),
@@ -312,4 +624,3 @@ class _PurchaseRequestApprovalScreenState
     );
   }
 }
-

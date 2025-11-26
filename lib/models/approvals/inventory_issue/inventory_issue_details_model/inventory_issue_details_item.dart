@@ -1,0 +1,66 @@
+import 'package:modernapproval/utils/package_utility.dart';
+
+class InventoryIssueDetailsItem {
+  int? trnsSerial;
+  int? trnsTypeCode;
+  String? itemCode;
+  String? itemName;
+  String? unitName;
+  int? quantity;
+  double? unitCost;
+  int? itemConfgId;
+  dynamic projectId;
+  dynamic mastBandCode;
+  dynamic bandCode;
+  dynamic consumableItemCode;
+  int? total;
+
+  InventoryIssueDetailsItem({
+    this.trnsSerial,
+    this.trnsTypeCode,
+    this.itemCode,
+    this.itemName,
+    this.unitName,
+    this.quantity,
+    this.unitCost,
+    this.itemConfgId,
+    this.projectId,
+    this.mastBandCode,
+    this.bandCode,
+    this.consumableItemCode,
+    this.total,
+  });
+
+  factory InventoryIssueDetailsItem.fromJson(Map<String, dynamic> json) =>
+      InventoryIssueDetailsItem(
+        trnsSerial: json['trns_serial'] as int?,
+        trnsTypeCode: json['trns_type_code'] as int?,
+        itemCode: json['item_code'] as String?,
+        itemName: json['item_name'] as String?,
+        unitName: json['unit_name'] as String?,
+        quantity: json['quantity'] as int?,
+        unitCost: (json['unit_cost'] as num?)?.toDouble(),
+        itemConfgId: json['item_confg_id'] as int?,
+        projectId: json['project_id'] as dynamic,
+        mastBandCode: json['mast_band_code'] as dynamic,
+        bandCode: json['band_code'] as dynamic,
+        consumableItemCode: json['consumable_item_code'] as dynamic,
+        total: json['total'] as int?,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'trns_serial': trnsSerial,
+    'trns_type_code': trnsTypeCode,
+    'item_code': itemCode,
+    'item_name': itemName,
+    'unit_name': unitName,
+    'quantity': quantity,
+    'unit_cost': unitCost,
+    'item_confg_id': itemConfgId,
+    'project_id': projectId,
+    'mast_band_code': mastBandCode,
+    'band_code': bandCode,
+    'consumable_item_code': consumableItemCode,
+    'total': total,
+  };
+}

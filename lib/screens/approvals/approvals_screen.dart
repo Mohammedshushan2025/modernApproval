@@ -1,8 +1,17 @@
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:modernapproval/models/password_group_model.dart';
+import 'package:modernapproval/screens/approvals/inventory_issue_approval/inventory_issue_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/leave_and_absence_approval/leave_and_absence_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/production_inbound_approval/production_inbound_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/production_outbound/production_outbound_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/purchase_order_approval/purchase_order_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/purchase_pay_approval/purchase_pay_approval_screen.dart';
 import 'package:modernapproval/screens/approvals/purchase_request_approval/purchase_request_approval_screen.dart';
+import 'package:modernapproval/screens/approvals/sales_order_approval/sales_order_approval_screen.dart';
 import '../../app_localizations.dart';
+import '../../custom_icon/custom_icon_icons.dart';
 import '../../models/form_report_model.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
@@ -12,6 +21,7 @@ import '../../main.dart';
 
 class ApprovalsScreen extends StatefulWidget {
   final UserModel user;
+
   const ApprovalsScreen({super.key, required this.user});
 
   @override
@@ -34,27 +44,45 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
   }
 
   void _loadInitialData() {
-    _passwordGroupsFuture = _apiService.getUserPasswordGroups(widget.user.usersCode);
-    _passwordGroupsFuture.then((groups) {
-      if (groups.isNotEmpty) {
-        if (!mounted) return;
-        setState(() {
-          _selectedPasswordGroup = groups.firstWhere(
+    _passwordGroupsFuture = _apiService.getUserPasswordGroups(
+      widget.user.usersCode,
+    );
+    _passwordGroupsFuture
+        .then((groups) {
+          if (groups.isNotEmpty) {
+            if (!mounted) return;
+            setState(() {
+              _selectedPasswordGroup = groups.firstWhere(
                 (g) => g.isDefault,
-            orElse: () => groups.first,
-          );
-          _fetchAndSetPurchaseRequestCount();
+                orElse: () => groups.first,
+              );
+              _fetchAndSetPurchaseRequestCount();
+              _fetchAndSetPurchaseOrderCount();
+              _fetchAndSetSalesOrderCount();
+              _fetchAndSetPurchasePayCount();
+              _fetchAndSetProductionOutboundCount();
+              _fetchAndSetProductionInboundCount();
+              _fetchAndSetInventoryIssueCount();
+              _fetchAndSetLeaveAndAbsenceCount();
+            });
+          }
+        })
+        .catchError((e) {
+          print("Error fetching password groups: $e");
         });
-      }
-    }).catchError((e) {
-      print("Error fetching password groups: $e");
-    });
 
     _approvalsFuture = _fetchAndProcessApprovals();
   }
 
   Future<void> _refreshCounts() async {
     await _fetchAndSetPurchaseRequestCount();
+    await _fetchAndSetPurchaseOrderCount();
+    await _fetchAndSetSalesOrderCount();
+    await _fetchAndSetPurchasePayCount();
+    await _fetchAndSetProductionOutboundCount();
+    await _fetchAndSetProductionInboundCount();
+    await _fetchAndSetInventoryIssueCount();
+    await _fetchAndSetLeaveAndAbsenceCount();
   }
 
   Future<void> _fetchAndSetPurchaseRequestCount() async {
@@ -84,6 +112,197 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
     }
   }
 
+  Future<void> _fetchAndSetPurchaseOrderCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getPurchaseOrders(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[102] = requests.length;
+    } catch (e) {
+      print("Error fetching purchase request count: $e");
+      _approvalCounts[102] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSetSalesOrderCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getSalesOrders(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[108] = requests.length;
+    } catch (e) {
+      print("Error fetching purchase request count: $e");
+      _approvalCounts[108] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSetPurchasePayCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getPurchasePay(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[111] = requests.length;
+    } catch (e) {
+      print("Error fetching purchase pay count: $e");
+      _approvalCounts[111] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSetProductionOutboundCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getProductionOutbound(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[105] = requests.length;
+    } catch (e) {
+      print("Error fetching Production outbound count: $e");
+      _approvalCounts[105] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSetProductionInboundCount() async {
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getProductionInbound(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[106] = requests.length;
+    } catch (e) {
+      print("Error fetching Production inbound count: $e");
+      _approvalCounts[106] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSetInventoryIssueCount() async {
+
+  if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+final requests = await _apiService.getInventoryIssue(  userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      
+      );
+            _approvalCounts[104] = requests.length;
+    } catch (e) {
+      print("Error fetching Inventory issue count: $e");
+      _approvalCounts[104] = 0;
+ } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+  Future<void> _fetchAndSetLeaveAndAbsenceCount() async {
+
+    if (_selectedPasswordGroup == null) return;
+    if (!mounted) return;
+
+    setState(() {
+      _isCountLoading = true;
+    });
+
+    try {
+      final requests = await _apiService.getLeaveAndAbsence(
+        userId: widget.user.usersCode,
+        roleId: widget.user.roleCode!,
+        passwordNumber: _selectedPasswordGroup!.passwordNumber,
+      );
+      _approvalCounts[109] = requests.length;
+    } catch (e) {
+      print("Error fetching Leave and Absence count: $e");
+      _approvalCounts[109] = 0;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCountLoading = false;
+        });
+      }
+    }
+  }
+
+
   Future<List<FormReportItem>> _fetchAndProcessApprovals() async {
     final items = await _apiService.getFormsAndReports(widget.user.usersCode);
     final approvals = items.where((item) => item.type == 'F').toList();
@@ -100,27 +319,153 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
   void _handleNavigation(FormReportItem item) async {
     if (_selectedPasswordGroup == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.translate('noPasswordGroups'))),
-      );
-      return;
-    }
-    if (item.pageId == 101) {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PurchaseRequestApprovalScreen(
-            user: widget.user,
-            selectedPasswordNumber: _selectedPasswordGroup!.passwordNumber,
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.translate('noPasswordGroups'),
           ),
         ),
       );
-      if (mounted) {
-        _refreshCounts();
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Work in progress for: ${item.pageNameE}')),
-      );
+      return;
+    }
+    log("FormReportItem");
+    log(item.toJson().toString(), name: "FormReportItem");
+    log(_selectedPasswordGroup!.usersCode.toString(), name: "SG:userCode");
+    log(_selectedPasswordGroup!.passwordName.toString(), name: "SG:pwName");
+    log(_selectedPasswordGroup!.passwordNumber.toString(), name: "SG:pwNum");
+    log(_selectedPasswordGroup!.isDefault.toString(), name: "SG:isDefault");
+
+    switch (item.pageId) {
+      case 101:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => PurchaseRequestApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 102:
+        log("entering order approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => PurchaseOrderApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 105:
+        log("entering Production outbound approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => ProductionOutboundApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 106:
+        log("entering Production inbound approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => ProductionInboundApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 104:
+        log("entering Inventory issue approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => InventoryIssueApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 108:
+        log("entering Sales order approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => SalesOrderApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 109:
+        log("entering Leave and Absence approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => LeaveAndAbsenceApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      case 111:
+        log("entering Purchase pay approval");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => PurchasePayApprovalScreen(
+                  user: widget.user,
+                  selectedPasswordNumber:
+                      _selectedPasswordGroup!.passwordNumber,
+                ),
+          ),
+        );
+        if (mounted) {
+          _refreshCounts();
+        }
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Work in progress for: ${item.pageNameE}')),
+        );
     }
   }
 
@@ -141,9 +486,10 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           }
           if (snapshot.hasError) {
             return ErrorDisplay(
-              errorMessageKey: snapshot.error.toString().contains('noInternet')
-                  ? 'noInternet'
-                  : 'serverError',
+              errorMessageKey:
+                  snapshot.error.toString().contains('noInternet')
+                      ? 'noInternet'
+                      : 'serverError',
               onRetry: _fetchData,
             );
           }
@@ -151,6 +497,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             return Center(child: Text(l.translate('noData')));
           }
           final approvals = snapshot.data!;
+          // log("approvals length");
+          // log(approvals.length.toString());
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             itemCount: approvals.length,
@@ -158,14 +506,32 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               final item = approvals[index];
               final colors = _getColorsForItem(item.pageId);
 
+              ///this map each feature the use have , the key is pageID given from backend
+              ///the value is the number of available items"approvals" inside that feature
+              log("_approvalCounts");
+              log(_approvalCounts.toString(), name: "approval count");
+              log(
+                _approvalCounts[item.pageId].toString(),
+                name: "fetching if the number of approval user have",
+              );
+
               return ActionCard(
                 title: isArabic ? item.pageName : item.pageNameE,
                 icon: _getIconForItem(item.pageId),
                 iconColor: colors['icon']!,
                 backgroundColor: colors['background']!,
                 onTap: () => _handleNavigation(item),
-                notificationCount: item.pageId == 101 ? _approvalCounts[101] : null,
-                isCountLoading: item.pageId == 101 && _isCountLoading,
+                notificationCount: _approvalCounts[item.pageId] ?? null,
+                isCountLoading:
+                    (item.pageId == 101 ||
+                        item.pageId == 102 ||
+                        item.pageId == 108 ||
+                        item.pageId == 111 ||
+                        item.pageId == 105 ||
+                        item.pageId == 106 ||
+                     item.pageId == 109 ||
+                        item.pageId == 104) &&
+                    _isCountLoading,
               );
             },
           );
@@ -203,7 +569,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             final myAppState = MyApp.of(context);
             if (myAppState != null) {
               myAppState.changeLanguage(
-                  isArabic ? const Locale('en', '') : const Locale('ar', ''));
+                isArabic ? const Locale('en', '') : const Locale('ar', ''),
+              );
             }
           },
         ),
@@ -235,11 +602,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               color: const Color(0xFF6C63FF).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.store,
-              color: Color(0xFF6C63FF),
-              size: 20,
-            ),
+            child: const Icon(Icons.store, color: Color(0xFF6C63FF), size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -287,7 +650,9 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
         }
         final groups = snapshot.data!;
         if (_selectedPasswordGroup != null &&
-            !groups.any((g) => g.passwordNumber == _selectedPasswordGroup!.passwordNumber)) {
+            !groups.any(
+              (g) => g.passwordNumber == _selectedPasswordGroup!.passwordNumber,
+            )) {
           _selectedPasswordGroup = groups.first;
         }
 
@@ -296,6 +661,13 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             setState(() {
               _selectedPasswordGroup = newValue;
               _fetchAndSetPurchaseRequestCount();
+              _fetchAndSetPurchaseOrderCount();
+              _fetchAndSetSalesOrderCount();
+              _fetchAndSetPurchasePayCount();
+              _fetchAndSetProductionOutboundCount();
+              _fetchAndSetProductionInboundCount();
+              _fetchAndSetInventoryIssueCount();
+              _fetchAndSetLeaveAndAbsenceCount();
             });
           },
           offset: const Offset(0, 48),
@@ -306,28 +678,28 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           icon: Row(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              Icon(
-                Icons.store_mall_directory,
-                color: Colors.white,
-                size: 20,
-              ),
+              Icon(Icons.store_mall_directory, color: Colors.white, size: 20),
               SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.white,
-                size: 20,
-              ),
+              Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
             ],
           ),
           itemBuilder: (BuildContext context) {
             return groups.map((PasswordGroup group) {
-              final isSelected = _selectedPasswordGroup?.passwordNumber == group.passwordNumber;
+              final isSelected =
+                  _selectedPasswordGroup?.passwordNumber ==
+                  group.passwordNumber;
               return PopupMenuItem<PasswordGroup>(
                 value: group,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
+                    color:
+                        isSelected
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -336,7 +708,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.greenAccent : Colors.white54,
+                          color:
+                              isSelected ? Colors.greenAccent : Colors.white54,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -349,7 +722,10 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                             fontFamily: 'Cairo',
                             fontSize: 14,
                             color: Colors.white,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            fontWeight:
+                                isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                           ),
                         ),
                       ),
@@ -373,7 +749,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
   IconData _getIconForItem(int pageId) {
     switch (pageId) {
       case 101:
-        return Icons.shopping_cart_outlined;
+        return CustomIcon.pa1;
       case 102:
         return Icons.local_shipping_outlined;
       case 103:

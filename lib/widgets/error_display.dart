@@ -21,7 +21,9 @@ class ErrorDisplay extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              errorMessageKey == 'noInternet' ? Icons.wifi_off_rounded : Icons.error_outline_rounded,
+              errorMessageKey == 'noInternet'
+                  ? Icons.wifi_off_rounded
+                  : Icons.error_outline_rounded,
               color: Colors.red.shade400,
               size: 70,
             ),
@@ -29,7 +31,11 @@ class ErrorDisplay extends StatelessWidget {
             Text(
               l.translate(errorMessageKey),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -39,7 +45,10 @@ class ErrorDisplay extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A1F36),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],

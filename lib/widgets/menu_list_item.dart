@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -34,7 +21,8 @@ class MenuListItem extends StatefulWidget {
   State<MenuListItem> createState() => _MenuListItemState();
 }
 
-class _MenuListItemState extends State<MenuListItem> with TickerProviderStateMixin {
+class _MenuListItemState extends State<MenuListItem>
+    with TickerProviderStateMixin {
   late AnimationController _pressController;
   late AnimationController _entryController;
   late Animation<double> _scaleAnimation;
@@ -44,19 +32,31 @@ class _MenuListItemState extends State<MenuListItem> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _pressController = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
+    _pressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
       CurvedAnimation(parent: _pressController, curve: Curves.easeInOut),
     );
 
-    _entryController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
 
     final start = (widget.index * 100) / 1000;
     _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
-      CurvedAnimation(parent: _entryController, curve: Interval(start, 1.0, curve: Curves.easeOutCubic)),
+      CurvedAnimation(
+        parent: _entryController,
+        curve: Interval(start, 1.0, curve: Curves.easeOutCubic),
+      ),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _entryController, curve: Interval(start, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _entryController,
+        curve: Interval(start, 1.0, curve: Curves.easeOut),
+      ),
     );
     _entryController.forward();
   }
@@ -130,7 +130,7 @@ class _MenuListItemState extends State<MenuListItem> with TickerProviderStateMix
                         color: const Color(0xFF6C63FF).withOpacity(0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                   child: Icon(widget.icon, color: Colors.white, size: 28),
@@ -165,7 +165,11 @@ class _MenuListItemState extends State<MenuListItem> with TickerProviderStateMix
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey, size: 18),
+                  child: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.grey,
+                    size: 18,
+                  ),
                 ),
               ],
             ),

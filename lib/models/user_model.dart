@@ -1,8 +1,7 @@
-
 class UserModel {
   final int usersCode;
   final String password;
-  final String empName;
+  final String? empName;
   final String? empNameE;
   final String? role_name_a;
   final String? role_name_e;
@@ -22,7 +21,6 @@ class UserModel {
     required this.roleCode,
   });
 
-
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       usersCode: json['users_code'],
@@ -36,7 +34,6 @@ class UserModel {
       roleCode: json['role_code'],
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -52,5 +49,3 @@ class UserModel {
     };
   }
 }
-
-

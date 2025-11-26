@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/user_model.dart';
@@ -42,7 +41,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     });
   }
 
-
   static Future<int> getUnreadCount({
     required ApiService apiService,
     required int userId,
@@ -56,8 +54,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         passwordNumber: passwordNumber,
       );
       return requests
-          .where((r) => !_readNotifications
-          .contains('${r.trnsTypeCode}_${r.trnsSerial}'))
+          .where(
+            (r) =>
+                !_readNotifications.contains(
+                  '${r.trnsTypeCode}_${r.trnsSerial}',
+                ),
+          )
           .length;
     } catch (e) {
       return 0;
@@ -125,9 +127,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (snapshot.hasError) {
             return ErrorDisplay(
               errorMessageKey:
-              snapshot.error.toString().contains('noInternet')
-                  ? 'noInternet'
-                  : 'serverError',
+                  snapshot.error.toString().contains('noInternet')
+                      ? 'noInternet'
+                      : 'serverError',
               onRetry: _fetchData,
             );
           }
@@ -141,22 +143,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               requests.isEmpty
                   ? SliverFillRemaining(child: _buildEmptyState())
                   : SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildNotificationCard(
-                          requests[index],
-                          isRtl,
-                        ),
-                      );
-                    },
-                    childCount: requests.length,
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildNotificationCard(requests[index], isRtl),
+                        );
+                      }, childCount: requests.length),
+                    ),
                   ),
-                ),
-              ),
             ],
           );
         },
@@ -176,10 +172,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           const SizedBox(height: 16),
           Text(
             'جاري تحميل الإشعارات...',
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
           ),
         ],
       ),
@@ -187,7 +180,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildAppBar(
-      int unreadCount, List<PurchaseRequest> requests, bool isRtl) {
+    int unreadCount,
+    List<PurchaseRequest> requests,
+    bool isRtl,
+  ) {
     return SliverAppBar(
       expandedHeight: 120,
       pinned: true,
@@ -234,8 +230,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(15),
@@ -285,10 +283,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PurchaseRequestDetailScreen(
-              user: widget.user,
-              request: request,
-            ),
+            builder:
+                (context) => PurchaseRequestDetailScreen(
+                  user: widget.user,
+                  request: request,
+                ),
           ),
         );
 
@@ -296,14 +295,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: isRead
-              ? Colors.white
-              : const Color(0xFF6C63FF).withOpacity(0.05),
+          color:
+              isRead ? Colors.white : const Color(0xFF6C63FF).withOpacity(0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isRead
-                ? Colors.grey.withOpacity(0.15)
-                : const Color(0xFF6C63FF).withOpacity(0.3),
+            color:
+                isRead
+                    ? Colors.grey.withOpacity(0.15)
+                    : const Color(0xFF6C63FF).withOpacity(0.3),
             width: 1.5,
           ),
           boxShadow: [
@@ -322,16 +321,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: isRead
-                      ? Colors.grey.withOpacity(0.1)
-                      : const Color(0xFF6C63FF).withOpacity(0.15),
+                  color:
+                      isRead
+                          ? Colors.grey.withOpacity(0.1)
+                          : const Color(0xFF6C63FF).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   Icons.shopping_cart_outlined,
-                  color: isRead
-                      ? Colors.grey.shade600
-                      : const Color(0xFF6C63FF),
+                  color:
+                      isRead ? Colors.grey.shade600 : const Color(0xFF6C63FF),
                   size: 26,
                 ),
               ),
@@ -355,9 +354,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               request.store_name!,
                               style: TextStyle(
                                 fontSize: 15,
-                                fontWeight: isRead
-                                    ? FontWeight.w600
-                                    : FontWeight.bold,
+                                fontWeight:
+                                    isRead ? FontWeight.w600 : FontWeight.bold,
                                 color: const Color(0xFF6C63FF),
                               ),
                               maxLines: 1,
@@ -375,8 +373,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           : (request.descE ?? 'No description'),
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight:
-                        isRead ? FontWeight.w500 : FontWeight.w600,
+                        fontWeight: isRead ? FontWeight.w500 : FontWeight.w600,
                         color: Colors.black87,
                         height: 1.3,
                       ),
@@ -498,14 +495,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             isRtl
                 ? 'لا توجد طلبات شراء حالياً'
                 : 'No purchase requests available',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
         ],
       ),
     );
   }
 }
-
