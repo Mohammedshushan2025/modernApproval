@@ -507,6 +507,7 @@ class _LeaveAndAbsenceApprovalScreenState
                     request: request,
                     user: widget.user,
                     apiService: _apiService,
+                    onDataChanged: _fetchData,
                   ),
             );
           },

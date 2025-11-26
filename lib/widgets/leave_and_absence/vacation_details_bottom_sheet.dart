@@ -9,12 +9,14 @@ class VacationDetailsBottomSheet extends StatefulWidget {
   final LeaveAndAbsence request;
   final UserModel user;
   final ApiService apiService;
+  final VoidCallback? onDataChanged;
 
   const VacationDetailsBottomSheet({
     super.key,
     required this.request,
     required this.user,
     required this.apiService,
+    this.onDataChanged,
   });
 
   @override
@@ -805,6 +807,9 @@ class _VacationDetailsBottomSheetState
           backgroundColor: Colors.green,
         ),
       );
+      if (widget.onDataChanged != null) {
+        widget.onDataChanged!();
+      }
       Navigator.pop(context, true);
     } catch (e) {
       print("--- ❌ Process Failed ---");
@@ -813,6 +818,7 @@ class _VacationDetailsBottomSheetState
       setState(() {
         _isSubmitting = false;
       });
+
       Navigator.pop(dialogContext);
       _showErrorDialog(e.toString());
     }
